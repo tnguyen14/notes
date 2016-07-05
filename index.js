@@ -4,6 +4,7 @@ var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
+var deleteJson = simpleFetch.deleteJson;
 var endPoint = '/api/notes';
 
 var previewButton = document.querySelector('.preview-button');
@@ -36,6 +37,13 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), functi
 
 document.querySelector('.save').addEventListener('click', saveNote);
 document.querySelector('.add').addEventListener('click', newNote);
+document.querySelector('.remove').addEventListener('click', function () {
+	document.querySelector('dialog').showModal();
+});
+document.querySelector('dialog .confirm').addEventListener('click', removeNote);
+document.querySelector('dialog .cancel').addEventListener('click', function () {
+	document.querySelector('dialog').close();
+});
 
 getJson(endPoint).then(function (_notes) {
 	notes = _notes;
@@ -141,4 +149,23 @@ function createNoteLi (note, index) {
 	li.setAttribute('data-index', index);
 	li.addEventListener('click', showNote.bind(window, li));
 	return li;
+}
+
+function removeNote () {
+	var active = list.querySelector('.selected');
+	if (!active) {
+		return;
+	}
+	var index = active.getAttribute('data-index');
+	var note = notes[index];
+	document.querySelector('dialog').close();
+	deleteJson(endPoint + '/' + encodeURIComponent(note.path))
+		.then(function () {
+			// @TODO this should be rewritten to completely remove note
+			// and update DOM elements
+			note.deleted = true;
+			list.querySelector('li:nth-of-type(' + (Number(index) + 1) + ')').style.display = 'none';
+			textarea.value = '';
+			title.value = '';
+		});
 }

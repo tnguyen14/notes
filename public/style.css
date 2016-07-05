@@ -13,6 +13,14 @@ body {
 	width: 90%;
 }
 
+button {
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: .8rem;
+	padding: .5rem .8rem;
+}
+
 .list {
 	position: relative;
 	width: 20%;
@@ -24,13 +32,9 @@ body {
 }
 .list .add {
 	background-color: #3498db;
-	border: none;
-	border-radius: 3px;
 	color: #fff;
-	cursor: pointer;
 	float: right;
 	font-size: 1rem;
-	padding: .5rem .8rem;
 	position: absolute;
 	top: 1rem;
 	right: 0;
@@ -139,18 +143,28 @@ textarea:focus {
 
 .save {
 	background-color: #2ecc71;
-	border: none;
-	border-radius: 3px;
 	color: #fff;
-	cursor: pointer;
-	display: block;
-	font-size: .8rem;
 	float: right;
-	padding: .5rem .8rem;
 }
 .save:hover {
 	background-color: #27ae60;
 }
 .save:disabled {
 	background-color: #bdc3c7;
+}
+
+.delete-confirm .confirm,
+.remove {
+	background-color: #e74c3c;
+	color: #fff;
+	float: right;
+	margin-right: .5rem;
+}
+.delete-confirm .confirm,
+.remove:hover {
+	background-color: #c0392b;
+}
+.delete-confirm .cancel {
+	float: right;
+	margin-right: .5rem;
 }

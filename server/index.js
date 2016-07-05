@@ -60,28 +60,24 @@ app.get('/api/notes', function (req, res) {
 		});
 });
 
-app.put('/api/notes/:id', function (req, res) {
-	var name = decodeURIComponent(req.params.id);
+app.put('/api/notes/:path', function (req, res) {
+	var filePath = decodeURIComponent(req.params.path);
 	var content = req.body.content;
 	var newName;
 	if (req.body.name) {
 		newName = req.body.name;
 	}
-	fs.accessAsync(notesDir + name)
+	fs.accessAsync(notesDir + filePath)
 		.then(() => {
 			if (!newName) {
-				return fs.writeFileAsync(notesDir + name, content);
+				return fs.writeFileAsync(notesDir + filePath, content);
 			}
 			return newNote(newName, content)
 				.then(() => {
-					var dirToRemove = name;
-					if (path.dirname(name) !== '.') {
-						dirToRemove = path.dirname(name);
-					}
-					return rimraf(notesDir + dirToRemove);
+					return removeNote(filePath);
 				});
 		})
-		.then((path) => {
+		.then(() => {
 			res.status(200).json('OK!');
 		}, (err) => {
 			console.error(err);
@@ -115,6 +111,28 @@ app.post('/api/notes', function (req, res) {
 		}
 		res.json(err);
 	});
+});
+
+function removeNote (filePath) {
+	var dirToRemove = filePath;
+	if (path.dirname(filePath) !== '.') {
+		dirToRemove = path.dirname(filePath);
+	}
+	return rimraf(notesDir + dirToRemove);
+}
+
+app.delete('/api/notes/:path', function (req, res) {
+	var filePath = decodeURIComponent(req.params.path);
+	fs.accessAsync(notesDir + filePath)
+		.then(() => {
+			return removeNote(filePath);
+		})
+		.then(() => {
+			res.status(200).json('OK!');
+		}, (err) => {
+			console.error(err);
+			res.status(400).json(err);
+		});
 });
 
 app.use(express.static('dist'));
