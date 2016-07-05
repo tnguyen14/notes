@@ -5,27 +5,46 @@ var userHome = require('user-home');
 var express = require('express');
 var app = express();
 
-var notesDir = userHome + '/Dropbox/Notes';
+var notesDir = userHome + '/Dropbox/Notes/';
+
+/**
+ * @param {Object} file
+ * @param {String} file.path
+ * @returns {Promise}
+ */
+function processFile (file) {
+	return fs.accessAsync(notesDir + file.path).then(() => {
+		return fs.readFileAsync(notesDir + file.path, 'utf8')
+			.then((data) => {
+				return Object.assign({}, file, {
+					data: data
+				});
+			});
+	}, (err) => {
+		console.error(err);
+	});
+}
 
 app.get('/api/notes', function (req, res) {
 	fs.readdirAsync(notesDir)
 		.then(function (files) {
 			console.log(files);
 			return Promise.all(files.map((f) => {
-				return fs.statAsync(notesDir + '/' + f)
+				return fs.statAsync(notesDir + f)
 					.then((stat) => {
 						if (stat.isDirectory()) {
-							return {
-								path: f,
+							return processFile({
+								path: f + '/index.md',
 								name: f
-							};
-						} else if (stat.isFile()) {
+							});
+						}
+						if (stat.isFile()) {
 							var ext = path.extname(f);
 							if (ext === '.md' || ext === '.markdown') {
-								return {
+								return processFile({
 									path: f,
 									name: path.basename(f, ext)
-								};
+								});
 							}
 						}
 					});
