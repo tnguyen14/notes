@@ -30,7 +30,7 @@ body {
 }
 .list li.selected,
 .list li:hover {
-	background-color: #f7f7f7;
+	background-color: #e0e0e0;
 }
 
 form {
@@ -117,6 +117,9 @@ textarea:focus {
 	float: right;
 	padding: .5rem .8rem;
 }
+.save:hover {
+	background-color: #27ae60;
+}
 .save:disabled {
-
+	background-color: #bdc3c7;
 }

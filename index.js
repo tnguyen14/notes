@@ -1,4 +1,5 @@
-var md = require('markdown-it')();
+var md = require('markdown-it')()
+	.use(require('markdown-it-task-lists'));
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var putJson = simpleFetch.putJson;
@@ -9,6 +10,13 @@ var textarea = document.querySelector('.write-content textarea');
 var preview = document.querySelector('.preview-content .markdown-body');
 var list = document.querySelector('.list ul');
 var form = document.querySelector('form');
+
+// https://github.com/benjamingr/RegExp.escape
+if (!RegExp.escape) {
+	RegExp.escape = function (s) {
+		return String(s).replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+	};
+}
 
 var notes;
 
@@ -49,6 +57,19 @@ function previewMode () {
 	form.classList.remove('write-selected');
 	var content = textarea.value;
 	preview.innerHTML = md.render(content);
+	Array.prototype.forEach.call(preview.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
+		input.removeAttribute('disabled');
+		input.addEventListener('change', function (e) {
+			var inputText = input.parentNode.textContent.trim();
+			var noteText = textarea.value;
+			if (input.checked) {
+				noteText = noteText.replace(new RegExp('(-\\s?)\\[\\s\\](\\s?' + RegExp.escape(inputText) + ')'), '$1[x]$2');
+			} else {
+				noteText = noteText.replace(new RegExp('(-\\s?)\\[x\\](\\s?' + RegExp.escape(inputText) + ')'), '$1[ ]$2');
+			}
+			textarea.value = noteText;
+		});
+	});
 }
 
 function saveNote () {
