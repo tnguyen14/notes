@@ -28,7 +28,6 @@ function processFile (file) {
 app.get('/api/notes', function (req, res) {
 	fs.readdirAsync(notesDir)
 		.then(function (files) {
-			console.log(files);
 			return Promise.all(files.map((f) => {
 				return fs.statAsync(notesDir + f)
 					.then((stat) => {

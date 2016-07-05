@@ -3,16 +3,38 @@ var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 
 var previewButton = document.querySelector('.preview-button');
+var writeButton = document.querySelector('.write-button');
 var textarea = document.querySelector('.write-content textarea');
 var preview = document.querySelector('.preview-content .markdown-body');
 var list = document.querySelector('.list ul');
+var form = document.querySelector('form');
 
 var notes;
 
-previewButton.addEventListener('click', function () {
+Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), function (button) {
+	button.addEventListener('click', function (e) {
+		var isWriting = writeButton.classList.contains('selected');
+		if (isWriting) {
+			previewMode();
+		} else {
+			writeMode();
+		}
+	});
+});
+
+function writeMode () {
+	previewButton.classList.remove('selected');
+	writeButton.classList.add('selected');
+	form.classList.add('write-selected');
+}
+
+function previewMode () {
+	writeButton.classList.remove('selected');
+	previewButton.classList.add('selected');
+	form.classList.remove('write-selected');
 	var content = textarea.value;
 	preview.innerHTML = md.render(content);
-});
+}
 
 getJson('/api/notes').then(function (_notes) {
 	notes = _notes;
