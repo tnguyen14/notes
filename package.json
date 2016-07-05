@@ -5,14 +5,14 @@
   "main": "server/index.js",
   "scripts": {
     "server": "forever start server/index.js && forever logs -f 0",
-	"server:watch": "forever start -w server/index.js && forever logs -f 0",
+    "server:watch": "forever start -w server/index.js && forever logs -f 0",
     "js": "browserify index.js -o dist/index.js",
     "js:watch": "watchify index.js -o dist/index.js -dv",
     "clean": "rm -rf dist && mkdir dist",
     "copy": "cp node_modules/github-markdown-css/github-markdown.css dist/",
     "build": "npm run clean && npm run copy",
-	"start": "npm run build && npm run js && npm run server",
-    "dev": "npm run build && npm run js:watch & npm run server:watch"
+    "start": "npm run build && npm run js && npm run server",
+	"dev": "npm run build && npm run js:watch & npm run server:watch"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,22 @@
+* {
+	box-sizing: inherit;
+}
+
+html {
+	box-sizing: border-box;
+}
+
+form {
+	width: 70%;
+	margin: 0 auto;
+	padding: 2rem;
+}
+
+.write-content textarea {
+	width: 100%;
+	height: 30rem;
+}
+
+.preview-content {
+	margin-top: 2rem;
+}
