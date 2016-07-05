@@ -9,6 +9,7 @@ var endPoint = '/api/notes';
 var previewButton = document.querySelector('.preview-button');
 var writeButton = document.querySelector('.write-button');
 var textarea = document.querySelector('.write-content textarea');
+var title = document.querySelector('.title');
 var preview = document.querySelector('.preview-content .markdown-body');
 var list = document.querySelector('.list ul');
 var form = document.querySelector('form');
@@ -74,33 +75,41 @@ function saveNote () {
 	var active = list.querySelector('.selected');
 	var index = active.getAttribute('data-index');
 	var note = notes[index];
-	var path = note.path;
 	var content = textarea.value;
-	if (content === note.data) {
+	var name = title.value;
+	if (content === note.content && name === note.name) {
 		console.log('nothing changed');
 		return;
 	}
-	if (!note.new) {
-		putJson(endPoint + encodeURIComponent(path), {
-			data: content
-		}).then(function () {
-			note.data = content;
-		}, function (err) {
-			console.error(err);
-			// handle error
-		});
-	} else {
-		postJson(endPoint, {
-			name: note.name,
-			content: content
-		}).then(function () {
-			note.new = false;
-			note.data = content;
-		}, function (err) {
-			console.error(err);
-			// handle error
-		});
+	var updated = {};
+	var url = endPoint;
+	var method = postJson;
+	if (content !== note.content) {
+		updated.content = content;
 	}
+	if (name !== note.name) {
+		updated.name = name;
+	}
+	if (!note.new) {
+		url += '/' + encodeURIComponent(note.path);
+		method = putJson;
+	} else {
+
+	}
+	method(url, updated).then(function (resp) {
+		if (note.new) {
+			note.new = false;
+			note.path = updated.name + '/index.md';
+		}
+		if (updated.name) {
+			note.name = updated.name;
+			note.path = updated.name + '/index.md';
+		}
+		note.content = updated.content;
+		note.path = resp.path;
+	}, function (err) {
+		console.error(err);
+	});
 }
 
 function showNote (li) {
@@ -109,15 +118,16 @@ function showNote (li) {
 	});
 	li.classList.add('selected');
 	var index = li.getAttribute('data-index');
-	var data = notes[index].data;
-	textarea.value = data;
+	var note = notes[index];
+	textarea.value = note.content || '';
+	title.value = note.name;
 }
 
 function newNote () {
 	var note = {
 		path: 'Untitled/index.md',
 		name: 'Untitled',
-		data: '',
+		content: '',
 		new: true
 	};
 	var li = createNoteLi(note, notes.push(note) - 1);

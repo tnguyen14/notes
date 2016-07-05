@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var fs = Promise.promisifyAll(require('fs'));
+var rimraf = Promise.promisify(require('rimraf'));
 var path = require('path');
 var userHome = require('user-home');
 var express = require('express');
@@ -18,7 +19,7 @@ function processFile (file) {
 		return fs.readFileAsync(notesDir + file.path, 'utf8')
 			.then((data) => {
 				return Object.assign({}, file, {
-					data: data
+					content: data
 				});
 			});
 	}, (err) => {
@@ -61,12 +62,26 @@ app.get('/api/notes', function (req, res) {
 
 app.put('/api/notes/:id', function (req, res) {
 	var name = decodeURIComponent(req.params.id);
-	var content = req.body.data;
+	var content = req.body.content;
+	var newName;
+	if (req.body.name) {
+		newName = req.body.name;
+	}
 	fs.accessAsync(notesDir + name)
 		.then(() => {
-			return fs.writeFileAsync(notesDir + name, content);
+			if (!newName) {
+				return fs.writeFileAsync(notesDir + name, content);
+			}
+			return newNote(newName, content)
+				.then(() => {
+					var dirToRemove = name;
+					if (path.dirname(name) !== '.') {
+						dirToRemove = path.dirname(name);
+					}
+					return rimraf(notesDir + dirToRemove);
+				});
 		})
-		.then(() => {
+		.then((path) => {
 			res.status(200).json('OK!');
 		}, (err) => {
 			console.error(err);
@@ -74,25 +89,32 @@ app.put('/api/notes/:id', function (req, res) {
 		});
 });
 
-app.post('/api/notes', function (req, res) {
-	var name = req.body.name;
-	var content = req.body.content;
-	Promise.any([fs.accessAsync(notesDir + name),
+function newNote (name, content) {
+	return Promise.any([fs.accessAsync(notesDir + name),
 		fs.accessAsync(notesDir + name + '.md')])
 		.then(() => {
-			res.status(409).json({
-				message: 'Note ' + name + ' already exists'
-			});
+			throw new Error('Note ' + name + ' already exists.');
 		}, () => {
 			return fs.mkdirAsync(notesDir + name);
 		}).then(() => {
 			return fs.writeFileAsync(notesDir + name + '/index.md', content);
-		}).then(() => {
-			res.status(200).json('OK!');
-		}, (err) => {
-			console.error(err);
-			res.status(400).json(err);
 		});
+}
+
+app.post('/api/notes', function (req, res) {
+	var name = req.body.name;
+	var content = req.body.content;
+	newNote(name, content).then(() => {
+		res.status(200).json('OK!');
+	}, (err) => {
+		console.error(err);
+		if (err.message.indexOf('already exists') !== -1) {
+			res.status(409);
+		} else {
+			res.status(400);
+		}
+		res.json(err);
+	});
 });
 
 app.use(express.static('dist'));

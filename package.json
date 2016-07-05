@@ -32,6 +32,7 @@
     "github-markdown-css": "^2.3.0",
     "markdown-it": "^7.0.0",
     "markdown-it-task-lists": "^1.2.2",
+    "rimraf": "^2.5.3",
     "simple-fetch": "^1.2.1",
     "user-home": "^2.0.0"
   },
