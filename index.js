@@ -87,14 +87,14 @@ function saveNote () {
 	if (content !== note.content) {
 		updated.content = content;
 	}
-	if (name !== note.name) {
-		updated.name = name;
-	}
 	if (!note.new) {
 		url += '/' + encodeURIComponent(note.path);
 		method = putJson;
+		if (name !== note.name) {
+			updated.name = name;
+		}
 	} else {
-
+		updated.name = name;
 	}
 	method(url, updated).then(function (resp) {
 		if (note.new) {
@@ -106,7 +106,6 @@ function saveNote () {
 			note.path = updated.name + '/index.md';
 		}
 		note.content = updated.content;
-		note.path = resp.path;
 	}, function (err) {
 		console.error(err);
 	});
