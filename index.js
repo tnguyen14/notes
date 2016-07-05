@@ -1,6 +1,7 @@
 var md = require('markdown-it')();
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
+var putJson = simpleFetch.putJson;
 
 var previewButton = document.querySelector('.preview-button');
 var writeButton = document.querySelector('.write-button');
@@ -22,6 +23,20 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), functi
 	});
 });
 
+document.querySelector('.save').addEventListener('click', saveNote);
+
+getJson('/api/notes').then(function (_notes) {
+	notes = _notes;
+	notes.forEach(function (note, index) {
+		var li = document.createElement('li');
+		li.innerHTML = note.name;
+		li.setAttribute('data-index', index);
+		li.setAttribute('data-path', note.path);
+		li.addEventListener('click', showNote);
+		list.appendChild(li);
+	});
+});
+
 function writeMode () {
 	previewButton.classList.remove('selected');
 	writeButton.classList.add('selected');
@@ -36,16 +51,21 @@ function previewMode () {
 	preview.innerHTML = md.render(content);
 }
 
-getJson('/api/notes').then(function (_notes) {
-	notes = _notes;
-	notes.forEach(function (note, index) {
-		var li = document.createElement('li');
-		li.innerHTML = note.name;
-		li.setAttribute('data-index', index);
-		li.addEventListener('click', showNote);
-		list.appendChild(li);
+function saveNote () {
+	var active = list.querySelector('.selected');
+	var index = active.getAttribute('data-index');
+	var path = active.getAttribute('data-path');
+	var content = textarea.value;
+	if (content === notes[index].data) {
+		console.log('nothing changed');
+		return;
+	}
+	putJson('/api/notes/' + encodeURIComponent(path), {
+		data: content
+	}).then(function () {
+		notes[index].data = content;
 	});
-});
+}
 
 function showNote (e) {
 	var li = e.target;

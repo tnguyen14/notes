@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<title>Notes</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<link rel="stylesheet" href="github-markdown.css"/>
 		<link rel="stylesheet" href="style.css"/>
 	</head>
@@ -16,11 +17,14 @@
 					<button type="button" class="preview-button">Preview</button>
 				</nav>
 			</div>
-			<div class="write-content">
-				<textarea placeholder="Write a note..."></textarea>
-			</div>
-			<div class="preview-content">
-				<div class="markdown-body"></div>
+			<div class="content-container">
+				<div class="write-content">
+					<textarea placeholder="Write a note..."></textarea>
+				</div>
+				<div class="preview-content">
+					<div class="markdown-body"></div>
+				</div>
+				<button type="button" class="save">Save</button>
 			</div>
 		</form>
 		<script src="index.js"></script>

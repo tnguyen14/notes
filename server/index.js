@@ -3,6 +3,7 @@ var fs = Promise.promisifyAll(require('fs'));
 var path = require('path');
 var userHome = require('user-home');
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 
 var notesDir = userHome + '/Dropbox/Notes/';
@@ -25,6 +26,8 @@ function processFile (file) {
 	});
 }
 
+app.use(bodyParser.json());
+
 app.get('/api/notes', function (req, res) {
 	fs.readdirAsync(notesDir)
 		.then(function (files) {
@@ -39,7 +42,7 @@ app.get('/api/notes', function (req, res) {
 						}
 						if (stat.isFile()) {
 							var ext = path.extname(f);
-							if (ext === '.md' || ext === '.markdown') {
+							if (ext === '.md') {
 								return processFile({
 									path: f,
 									name: path.basename(f, ext)
@@ -52,7 +55,22 @@ app.get('/api/notes', function (req, res) {
 			res.json(notes.filter((n) => n));
 		}, (err) => {
 			console.error(err);
-			res.status(400).send(err);
+			res.status(400).json(err);
+		});
+});
+
+app.put('/api/notes/:id', function (req, res) {
+	var name = decodeURIComponent(req.params.id);
+	var content = req.body.data;
+	fs.accessAsync(notesDir + name)
+		.then(() => {
+			return fs.writeFileAsync(notesDir + name, content);
+		})
+		.then(() => {
+			res.status(200).json('OK!');
+		}, (err) => {
+			console.error(err);
+			res.status(400).json(err);
 		});
 });
 
