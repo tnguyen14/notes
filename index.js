@@ -32,16 +32,12 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), functi
 });
 
 document.querySelector('.save').addEventListener('click', saveNote);
+document.querySelector('.add').addEventListener('click', newNote);
 
 getJson('/api/notes').then(function (_notes) {
 	notes = _notes;
 	notes.forEach(function (note, index) {
-		var li = document.createElement('li');
-		li.innerHTML = note.name;
-		li.setAttribute('data-index', index);
-		li.setAttribute('data-path', note.path);
-		li.addEventListener('click', showNote);
-		list.appendChild(li);
+		list.appendChild(createNoteLi(note, index));
 	});
 });
 
@@ -88,8 +84,7 @@ function saveNote () {
 	});
 }
 
-function showNote (e) {
-	var li = e.target;
+function showNote (li) {
 	Array.prototype.forEach.call(li.parentNode.querySelectorAll('li'), function (li) {
 		li.classList.remove('selected');
 	});
@@ -97,4 +92,25 @@ function showNote (e) {
 	var index = li.getAttribute('data-index');
 	var data = notes[index].data;
 	textarea.value = data;
+}
+
+function newNote () {
+	var note = {
+		path: 'Untitled',
+		name: 'Untitled',
+		data: ''
+	};
+	var li = createNoteLi(note, notes.push(note) - 1);
+	list.appendChild(li);
+	showNote(li);
+	textarea.focus();
+}
+
+function createNoteLi (note, index) {
+	var li = document.createElement('li');
+	li.innerHTML = note.name;
+	li.setAttribute('data-index', index);
+	li.setAttribute('data-path', note.path);
+	li.addEventListener('click', showNote.bind(window, li));
+	return li;
 }

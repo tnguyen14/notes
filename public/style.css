@@ -14,10 +14,29 @@ body {
 }
 
 .list {
+	position: relative;
 	width: 20%;
 }
 .list h3 {
 	font-size: 1rem;
+	margin-bottom: 0;
+	padding: .5rem 0;
+}
+.list .add {
+	background-color: #3498db;
+	border: none;
+	border-radius: 3px;
+	color: #fff;
+	cursor: pointer;
+	float: right;
+	font-size: 1rem;
+	padding: .5rem .8rem;
+	position: absolute;
+	top: 1rem;
+	right: 0;
+}
+.list .add:hover {
+	background-color: #2980b9;
 }
 .list ul {
 	padding-left: .5rem;
@@ -111,6 +130,7 @@ textarea:focus {
 	background-color: #2ecc71;
 	border: none;
 	border-radius: 3px;
+	color: #fff;
 	cursor: pointer;
 	display: block;
 	font-size: .8rem;
