@@ -2,7 +2,9 @@ var md = require('markdown-it')()
 	.use(require('markdown-it-task-lists'));
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
+var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
+var endPoint = '/api/notes';
 
 var previewButton = document.querySelector('.preview-button');
 var writeButton = document.querySelector('.write-button');
@@ -34,7 +36,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), functi
 document.querySelector('.save').addEventListener('click', saveNote);
 document.querySelector('.add').addEventListener('click', newNote);
 
-getJson('/api/notes').then(function (_notes) {
+getJson(endPoint).then(function (_notes) {
 	notes = _notes;
 	notes.forEach(function (note, index) {
 		list.appendChild(createNoteLi(note, index));
@@ -71,17 +73,34 @@ function previewMode () {
 function saveNote () {
 	var active = list.querySelector('.selected');
 	var index = active.getAttribute('data-index');
-	var path = active.getAttribute('data-path');
+	var note = notes[index];
+	var path = note.path;
 	var content = textarea.value;
-	if (content === notes[index].data) {
+	if (content === note.data) {
 		console.log('nothing changed');
 		return;
 	}
-	putJson('/api/notes/' + encodeURIComponent(path), {
-		data: content
-	}).then(function () {
-		notes[index].data = content;
-	});
+	if (!note.new) {
+		putJson(endPoint + encodeURIComponent(path), {
+			data: content
+		}).then(function () {
+			note.data = content;
+		}, function (err) {
+			console.error(err);
+			// handle error
+		});
+	} else {
+		postJson(endPoint, {
+			name: note.name,
+			content: content
+		}).then(function () {
+			note.new = false;
+			note.data = content;
+		}, function (err) {
+			console.error(err);
+			// handle error
+		});
+	}
 }
 
 function showNote (li) {
@@ -96,9 +115,10 @@ function showNote (li) {
 
 function newNote () {
 	var note = {
-		path: 'Untitled',
+		path: 'Untitled/index.md',
 		name: 'Untitled',
-		data: ''
+		data: '',
+		new: true
 	};
 	var li = createNoteLi(note, notes.push(note) - 1);
 	list.appendChild(li);
@@ -110,7 +130,6 @@ function createNoteLi (note, index) {
 	var li = document.createElement('li');
 	li.innerHTML = note.name;
 	li.setAttribute('data-index', index);
-	li.setAttribute('data-path', note.path);
 	li.addEventListener('click', showNote.bind(window, li));
 	return li;
 }

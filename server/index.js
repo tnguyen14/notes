@@ -74,6 +74,27 @@ app.put('/api/notes/:id', function (req, res) {
 		});
 });
 
+app.post('/api/notes', function (req, res) {
+	var name = req.body.name;
+	var content = req.body.content;
+	Promise.any([fs.accessAsync(notesDir + name),
+		fs.accessAsync(notesDir + name + '.md')])
+		.then(() => {
+			res.status(409).json({
+				message: 'Note ' + name + ' already exists'
+			});
+		}, () => {
+			return fs.mkdirAsync(notesDir + name);
+		}).then(() => {
+			return fs.writeFileAsync(notesDir + name + '/index.md', content);
+		}).then(() => {
+			res.status(200).json('OK!');
+		}, (err) => {
+			console.error(err);
+			res.status(400).json(err);
+		});
+});
+
 app.use(express.static('dist'));
 app.use(express.static('public'));
 
