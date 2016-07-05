@@ -30,6 +30,7 @@
     "forever": "^0.15.2",
     "github-markdown-css": "^2.3.0",
     "markdown-it": "^7.0.0",
+    "simple-fetch": "^1.2.1",
     "user-home": "^2.0.0"
   },
   "devDependencies": {

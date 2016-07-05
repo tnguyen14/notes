@@ -6,11 +6,21 @@ html {
 	box-sizing: border-box;
 }
 
+body {
+	display: flex;
+	width: 90%;
+}
+
+.list {
+	width: 20%;
+}
+
 form {
-	width: 70%;
+	width: 80%;
 	margin: 0 auto;
 	padding: 2rem;
 }
+
 
 .write-content textarea {
 	width: 100%;
