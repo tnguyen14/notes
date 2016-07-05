@@ -12,7 +12,7 @@
     "copy": "cp node_modules/github-markdown-css/github-markdown.css dist/",
     "build": "npm run clean && npm run copy",
     "start": "npm run build && npm run js && npm run server",
-	"dev": "npm run build && npm run js:watch & npm run server:watch"
+    "dev": "npm run build && npm run js:watch & npm run server:watch"
   },
   "repository": {
     "type": "git",
@@ -25,10 +25,12 @@
   },
   "homepage": "https://github.com/tnguyen14/notes#readme",
   "dependencies": {
+    "bluebird": "^3.4.1",
     "express": "^4.14.0",
     "forever": "^0.15.2",
     "github-markdown-css": "^2.3.0",
-    "markdown-it": "^7.0.0"
+    "markdown-it": "^7.0.0",
+    "user-home": "^2.0.0"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
