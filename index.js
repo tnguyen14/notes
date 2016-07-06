@@ -5,7 +5,7 @@ var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
-var endPoint = '/api/notes';
+var localEndPoint = '/api/local';
 
 var previewButton = document.querySelector('.preview-button');
 var writeButton = document.querySelector('.write-button');
@@ -14,6 +14,7 @@ var title = document.querySelector('.title');
 var preview = document.querySelector('.preview-content .markdown-body');
 var list = document.querySelector('.list ul');
 var form = document.querySelector('form');
+var deleteConfirm = document.querySelector('dialog.delete-confirm');
 
 // https://github.com/benjamingr/RegExp.escape
 if (!RegExp.escape) {
@@ -38,19 +39,24 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), functi
 document.querySelector('.save').addEventListener('click', saveNote);
 document.querySelector('.add').addEventListener('click', newNote);
 document.querySelector('.remove').addEventListener('click', function () {
-	document.querySelector('dialog').showModal();
+	deleteConfirm.showModal();
 });
-document.querySelector('dialog .confirm').addEventListener('click', removeNote);
-document.querySelector('dialog .cancel').addEventListener('click', function () {
-	document.querySelector('dialog').close();
+deleteConfirm.querySelector('.confirm').addEventListener('click', removeNote);
+deleteConfirm.querySelector('.cancel').addEventListener('click', function () {
+	deleteConfirm.close();
 });
 
-getJson(endPoint).then(function (_notes) {
-	notes = _notes;
-	notes.forEach(function (note, index) {
-		list.appendChild(createNoteLi(note, index));
+
+getNotes();
+
+function getNotes () {
+	getJson(localEndPoint).then(function (_notes) {
+		notes = _notes;
+		notes.forEach(function (note, index) {
+			list.appendChild(createNoteLi(note, index));
+		});
 	});
-});
+}
 
 function writeMode () {
 	previewButton.classList.remove('selected');
@@ -90,7 +96,7 @@ function saveNote () {
 		return;
 	}
 	var updated = {};
-	var url = endPoint;
+	var url = localEndPoint;
 	var method = postJson;
 	if (content !== note.content) {
 		updated.content = content;
@@ -158,8 +164,8 @@ function removeNote () {
 	}
 	var index = active.getAttribute('data-index');
 	var note = notes[index];
-	document.querySelector('dialog').close();
-	deleteJson(endPoint + '/' + encodeURIComponent(note.path))
+	deleteConfirm.close();
+	deleteJson(localEndPoint + '/' + encodeURIComponent(note.path))
 		.then(function () {
 			// @TODO this should be rewritten to completely remove note
 			// and update DOM elements
