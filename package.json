@@ -12,7 +12,8 @@
     "copy": "cp node_modules/github-markdown-css/github-markdown.css dist/",
     "build": "npm run clean && npm run copy",
     "start": "npm run build && npm run js && npm run server",
-    "dev": "npm run build && npm run js:watch & npm run server:watch"
+    "dev": "npm run build && npm run js:watch & npm run server:watch",
+    "test": "tap test/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,8 @@
   },
   "devDependencies": {
     "browserify": "^13.0.1",
+    "request": "^2.72.0",
+    "tap": "^6.1.1",
     "watchify": "^3.7.0"
   }
 }
