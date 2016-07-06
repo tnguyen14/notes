@@ -7,7 +7,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-var localDir = userHome + '/Dropbox/Notes/';
+var localDir;
 
 /**
  * @param {Object} file
@@ -15,8 +15,9 @@ var localDir = userHome + '/Dropbox/Notes/';
  * @returns {Promise}
  */
 function processFile (file) {
-	return fs.accessAsync(localDir + file.path).then(() => {
-		return fs.readFileAsync(localDir + file.path, 'utf8')
+	var filePath = path.resolve(localDir, file.path);
+	return fs.accessAsync(filePath).then(() => {
+		return fs.readFileAsync(filePath, 'utf8')
 			.then((data) => {
 				return Object.assign({}, file, {
 					content: data
@@ -33,7 +34,7 @@ app.get('/', function (req, res) {
 	fs.readdirAsync(localDir)
 		.then(function (files) {
 			return Promise.all(files.map((f) => {
-				return fs.statAsync(localDir + f)
+				return fs.statAsync(path.resolve(localDir, f))
 					.then((stat) => {
 						if (stat.isDirectory()) {
 							return processFile({
@@ -61,16 +62,16 @@ app.get('/', function (req, res) {
 });
 
 app.put('/:path', function (req, res) {
-	var filePath = decodeURIComponent(req.params.path);
+	var filePath = path.resolve(localDir, decodeURIComponent(req.params.path));
 	var content = req.body.content;
 	var newName;
 	if (req.body.name) {
 		newName = req.body.name;
 	}
-	fs.accessAsync(localDir + filePath)
+	fs.accessAsync(filePath)
 		.then(() => {
 			if (!newName) {
-				return fs.writeFileAsync(localDir + filePath, content);
+				return fs.writeFileAsync(filePath, content);
 			}
 			return newNote(newName, content)
 				.then(() => {
@@ -86,14 +87,15 @@ app.put('/:path', function (req, res) {
 });
 
 function newNote (name, content) {
-	return Promise.any([fs.accessAsync(localDir + name),
-		fs.accessAsync(localDir + name + '.md')])
+	var dirPath = path.resolve(localDir, name);
+	return Promise.any([fs.accessAsync(dirPath),
+		fs.accessAsync(dirPath + '.md')])
 		.then(() => {
 			throw new Error('Note ' + name + ' already exists.');
 		}, () => {
-			return fs.mkdirAsync(localDir + name);
+			return fs.mkdirAsync(dirPath);
 		}).then(() => {
-			return fs.writeFileAsync(localDir + name + '/index.md', content);
+			return fs.writeFileAsync(dirPath + '/index.md', content);
 		});
 }
 
@@ -115,15 +117,15 @@ app.post('/', function (req, res) {
 
 function removeNote (filePath) {
 	var dirToRemove = filePath;
-	if (path.dirname(filePath) !== '.') {
+	if (path.dirname(path.relative(localDir, filePath)) !== '.') {
 		dirToRemove = path.dirname(filePath);
 	}
-	return rimraf(localDir + dirToRemove);
+	return rimraf(dirToRemove);
 }
 
 app.delete('/:path', function (req, res) {
-	var filePath = decodeURIComponent(req.params.path);
-	fs.accessAsync(localDir + filePath)
+	var filePath = path.resolve(localDir, decodeURIComponent(req.params.path));
+	fs.accessAsync(filePath)
 		.then(() => {
 			return removeNote(filePath);
 		})
@@ -135,4 +137,7 @@ app.delete('/:path', function (req, res) {
 		});
 });
 
-module.exports = app;
+module.exports = function (opts) {
+	localDir = opts.rootDir.replace('~', userHome);
+	return app;
+};

@@ -1,0 +1,9 @@
+{
+	"endpoints": [{
+		"path": "local",
+		"type": "local",
+		"options": {
+			"rootDir": "~/Dropbox/Notes"
+		}
+	}]
+}
