@@ -20,6 +20,31 @@ button {
 	font-size: .8rem;
 	padding: .5rem .8rem;
 }
+button:disabled {
+	background-color: #bdc3c7;
+}
+button.red {
+	background-color: #e74c3c;
+	color: #fff;
+}
+button.red:hover {
+	background-color: #c0392b;
+}
+button.green {
+	background-color: #2ecc71;
+	color: #fff;
+}
+button.green:hover {
+	background-color: #27ae60;
+}
+button.blue {
+	background-color: #3498db;
+	color: #fff;
+}
+button.blue:hover {
+	background-color: #2980b9;
+}
+
 
 .list {
 	position: relative;
@@ -31,16 +56,11 @@ button {
 	padding: .5rem 0;
 }
 .list .add {
-	background-color: #3498db;
-	color: #fff;
 	float: right;
 	font-size: 1rem;
 	position: absolute;
 	top: 1rem;
 	right: 0;
-}
-.list .add:hover {
-	background-color: #2980b9;
 }
 .list ul {
 	padding-left: .5rem;
@@ -142,27 +162,11 @@ textarea:focus {
 }
 
 .save {
-	background-color: #2ecc71;
-	color: #fff;
 	float: right;
 }
-.save:hover {
-	background-color: #27ae60;
-}
-.save:disabled {
-	background-color: #bdc3c7;
-}
-
-.delete-confirm .confirm,
 .remove {
-	background-color: #e74c3c;
-	color: #fff;
 	float: right;
 	margin-right: .5rem;
-}
-.delete-confirm .confirm,
-.remove:hover {
-	background-color: #c0392b;
 }
 .delete-confirm .cancel {
 	float: right;
