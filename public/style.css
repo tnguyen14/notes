@@ -19,6 +19,7 @@ button {
 	cursor: pointer;
 	font-size: .8rem;
 	padding: .5rem .8rem;
+	text-transform: uppercase;
 }
 button:disabled {
 	background-color: #bdc3c7;
@@ -54,6 +55,7 @@ button.blue:hover {
 	font-size: 1rem;
 	margin-bottom: 0;
 	padding: .5rem 0;
+	font-variant: small-caps;
 }
 .list .add {
 	float: right;

@@ -10,7 +10,8 @@ var port = 3002;
 var baseUrl = 'http://localhost:' + port;
 
 app.use('/', local({
-	rootDir: path.resolve(__dirname, './fixtures')
+	rootDir: path.resolve(__dirname, './fixtures'),
+	label: 'Test'
 }));
 
 var server = app.listen(port);
@@ -18,15 +19,18 @@ var server = app.listen(port);
 tap.test('get all notes', function (t) {
 	request(baseUrl, function (err, resp, body) {
 		t.notOk(err);
-		t.strictSame(JSON.parse(body), [{
-			path: 'Example Note/index.md',
-			name: 'Example Note',
-			content: ''
-		}, {
-			path: 'Standalone Note.md',
-			name: 'Standalone Note',
-			content: ''
-		}]);
+		t.strictSame(JSON.parse(body), {
+			notes: [{
+				path: 'Example Note/index.md',
+				name: 'Example Note',
+				content: ''
+			}, {
+				path: 'Standalone Note.md',
+				name: 'Standalone Note',
+				content: ''
+			}],
+			label: 'Test'
+		});
 		t.end();
 	});
 });

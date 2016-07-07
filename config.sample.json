@@ -3,7 +3,8 @@
 		"path": "local",
 		"type": "local",
 		"options": {
-			"rootDir": "~/Dropbox/Notes"
+			"rootDir": "~/Dropbox/Notes",
+			"label": "Local"
 		}
 	}]
 }

@@ -12,7 +12,7 @@ var writeButton = document.querySelector('.write-button');
 var textarea = document.querySelector('.write-content textarea');
 var title = document.querySelector('.title');
 var preview = document.querySelector('.preview-content .markdown-body');
-var list = document.querySelector('.list ul');
+var localList = document.querySelector('.list .local ul');
 var form = document.querySelector('form');
 var deleteConfirm = document.querySelector('dialog.delete-confirm');
 
@@ -50,10 +50,11 @@ deleteConfirm.querySelector('.cancel').addEventListener('click', function () {
 getNotes();
 
 function getNotes () {
-	getJson(localEndPoint).then(function (_notes) {
-		notes = _notes;
+	getJson(localEndPoint).then(function (response) {
+		notes = response.notes;
 		notes.forEach(function (note, index) {
-			list.appendChild(createNoteLi(note, index));
+			localList.parentNode.querySelector('h3').innerHTML = response.label;
+			localList.appendChild(createNoteLi(note, index));
 		});
 	});
 }
@@ -86,7 +87,7 @@ function previewMode () {
 }
 
 function saveNote () {
-	var active = list.querySelector('.selected');
+	var active = localList.querySelector('.selected');
 	var index = active.getAttribute('data-index');
 	var note = notes[index];
 	var content = textarea.value;
@@ -144,7 +145,7 @@ function newNote () {
 		new: true
 	};
 	var li = createNoteLi(note, notes.push(note) - 1);
-	list.appendChild(li);
+	localList.appendChild(li);
 	showNote(li);
 	textarea.focus();
 }
@@ -158,7 +159,7 @@ function createNoteLi (note, index) {
 }
 
 function removeNote () {
-	var active = list.querySelector('.selected');
+	var active = localList.querySelector('.selected');
 	if (!active) {
 		return;
 	}
@@ -170,7 +171,7 @@ function removeNote () {
 			// @TODO this should be rewritten to completely remove note
 			// and update DOM elements
 			note.deleted = true;
-			list.querySelector('li:nth-of-type(' + (Number(index) + 1) + ')').style.display = 'none';
+			localList.querySelector('li:nth-of-type(' + (Number(index) + 1) + ')').style.display = 'none';
 			textarea.value = '';
 			title.value = '';
 		});

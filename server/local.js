@@ -7,7 +7,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-var localDir;
+var localDir, label;
 
 /**
  * @param {Object} file
@@ -54,7 +54,10 @@ app.get('/', function (req, res) {
 					});
 			}));
 		}).then((notes) => {
-			res.json(notes.filter((n) => n));
+			res.json({
+				label: label,
+				notes: notes.filter((n) => n)
+			});
 		}, (err) => {
 			console.error(err);
 			res.status(400).json(err);
@@ -137,7 +140,8 @@ app.delete('/:path', function (req, res) {
 		});
 });
 
-module.exports = function (opts) {
-	localDir = opts.rootDir.replace('~', userHome);
+module.exports = function (endpoint) {
+	localDir = endpoint.rootDir.replace('~', userHome);
+	label = endpoint.label;
 	return app;
 };

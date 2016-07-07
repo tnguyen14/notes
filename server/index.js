@@ -5,7 +5,7 @@ var local = require('./local');
 
 config.endpoints.forEach((endpoint) => {
 	if (endpoint.type === 'local') {
-		app.use('/api/' + endpoint.path, local(endpoint.options));
+		app.use('/api/' + endpoint.path, local(endpoint));
 	}
 });
 app.use('/api/local', require('./local'));
