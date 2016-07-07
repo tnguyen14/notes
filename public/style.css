@@ -109,6 +109,11 @@ button.blue:hover {
 	background-color: #c0392b;
 	color: #fff;
 }
+.notification[data-type=green] {
+	background-color: #2ecc71;
+	color: #fff;
+}
+
 .notification .message {
 	margin: 0;
 	min-height: 1rem;
@@ -122,7 +127,7 @@ button.blue:hover {
 	right: 1rem;
 	visibility: hidden;
 }
-.notification.active .close {
+.notification.active.permanent .close {
 	visibility: visible;
 }
 

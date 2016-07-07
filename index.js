@@ -57,6 +57,7 @@ function showNotification () {
 }
 function hideNotification () {
 	notification.classList.remove('active');
+	notification.classList.remove('permanent');
 	clearNotification();
 }
 function clearNotification () {
@@ -81,9 +82,11 @@ function notify (opts) {
 	}
 	showNotification();
 	// auto dismiss after 10s
-	var timeout = opts.timeout || 2000;
+	var timeout = opts.timeout || 10000;
 	if (!opts.permanent) {
 		notificationTimeoutId = setTimeout(hideNotification, timeout);
+	} else {
+		notification.classList.add('permanent');
 	}
 }
 
@@ -171,6 +174,11 @@ function saveNote () {
 		}
 		note.content = updated.content;
 		viewMode();
+		notify({
+			message: 'Saved!',
+			type: 'green',
+			timeout: 3000
+		});
 	}, function (err) {
 		notify({
 			message: err,
