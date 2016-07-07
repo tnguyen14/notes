@@ -16,7 +16,6 @@ config.endpoints.forEach((endpoint) => {
 	app.use('/api/' + endpoint.path, module(endpoint));
 });
 
-app.use(express.static('dist'));
 app.use(express.static('public'));
 
 app.listen(process.env.PORT || 4002, function () {
