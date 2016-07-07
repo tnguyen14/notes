@@ -121,6 +121,7 @@ function saveNote () {
 			note.path = updated.name + '/index.md';
 		}
 		note.content = updated.content;
+		previewMode();
 	}, function (err) {
 		console.error(err);
 	});
@@ -135,6 +136,7 @@ function showNote (li) {
 	var note = notes[index];
 	textarea.value = note.content || '';
 	title.value = note.name;
+	previewMode();
 }
 
 function newNote () {
