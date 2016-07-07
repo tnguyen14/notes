@@ -13,6 +13,12 @@ body {
 	width: 90%;
 }
 
+.clearfix:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
 button {
 	border: none;
 	border-radius: 3px;
@@ -139,6 +145,7 @@ textarea:focus {
 
 .tabnav-container {
 	border-bottom: 1px solid #ddd;
+	margin-top: -2rem; /* @TODO calc -1px for border */
 	padding: 0 .8rem;
 }
 .tabnav {
@@ -150,6 +157,7 @@ textarea:focus {
 	border-bottom: 0;
 	color: #666;
 	cursor: pointer;
+	float: right;
 	font-size: .8rem;
 	line-height: 1.4;
 	outline: none;
@@ -162,16 +170,13 @@ textarea:focus {
 	color: #333;
 }
 
-.title-container {
-	margin-bottom: 1rem;
-}
 .title-container .title {
 	border: none;
 	border-radius: 3px;
 	font-size: 1.2rem;
 	outline: none;
 	padding: .8rem 0;
-	width: 100%;
+	width: 80%;
 }
 .title-container .title:hover {
 	background-color: #fafafa;
@@ -196,7 +201,7 @@ textarea:focus {
 	background-color: #fff;
 }
 
-.write-selected .preview-content {
+.write-selected .view-content {
 	display: none;
 }
 

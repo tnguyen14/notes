@@ -7,14 +7,15 @@ var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
 var localEndPoint = '/api/local';
 
-var previewButton = document.querySelector('.preview-button');
+var viewButton = document.querySelector('.view-button');
 var writeButton = document.querySelector('.write-button');
 var textarea = document.querySelector('.write-content textarea');
 var title = document.querySelector('.title');
-var preview = document.querySelector('.preview-content .markdown-body');
+var view = document.querySelector('.view-content .markdown-body');
 var localList = document.querySelector('.list .local ul');
 var form = document.querySelector('form');
 var deleteConfirm = document.querySelector('dialog.delete-confirm');
+var notification = document.querySelector('.notification');
 
 // https://github.com/benjamingr/RegExp.escape
 if (!RegExp.escape) {
@@ -29,7 +30,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabnav button'), functi
 	button.addEventListener('click', function (e) {
 		var isWriting = writeButton.classList.contains('selected');
 		if (isWriting) {
-			previewMode();
+			viewMode();
 		} else {
 			writeMode();
 		}
@@ -105,18 +106,18 @@ function getLocalNotes () {
 }
 
 function writeMode () {
-	previewButton.classList.remove('selected');
+	viewButton.classList.remove('selected');
 	writeButton.classList.add('selected');
 	form.classList.add('write-selected');
 }
 
-function previewMode () {
+function viewMode () {
 	writeButton.classList.remove('selected');
-	previewButton.classList.add('selected');
+	viewButton.classList.add('selected');
 	form.classList.remove('write-selected');
 	var content = textarea.value;
-	preview.innerHTML = md.render(content);
-	Array.prototype.forEach.call(preview.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
+	view.innerHTML = md.render(content);
+	Array.prototype.forEach.call(view.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
 		input.removeAttribute('disabled');
 		input.addEventListener('change', function (e) {
 			var inputText = input.parentNode.textContent.trim();
@@ -169,7 +170,7 @@ function saveNote () {
 			note.path = updated.name + '/index.md';
 		}
 		note.content = updated.content;
-		previewMode();
+		viewMode();
 	}, function (err) {
 		notify({
 			message: err,
@@ -187,7 +188,7 @@ function showNote (li) {
 	var note = notes[index];
 	textarea.value = note.content || '';
 	title.value = note.name;
-	previewMode();
+	viewMode();
 }
 
 function newNote () {
