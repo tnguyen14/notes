@@ -4,6 +4,7 @@
   "description": "Notes",
   "main": "server/index.js",
   "scripts": {
+    "hooks": "cd .git/hooks && ln -sfv ../../hooks/pre-commit .",
     "server": "forever start server/index.js && forever logs -f 0",
     "server:watch": "forever start -w server/index.js && forever logs -f 0",
     "js": "browserify index.js -o dist/index.js",
