@@ -3,13 +3,18 @@ var express = require('express');
 var app = express();
 var config = require('../config.json');
 var local = require('./local');
+var googleDrive = require('./googledrive');
 
 config.endpoints.forEach((endpoint) => {
+	let module;
 	if (endpoint.type === 'local') {
-		app.use('/api/' + endpoint.path, local(endpoint));
+		module = local;
 	}
+	if (endpoint.type === 'google-drive') {
+		module = googleDrive;
+	}
+	app.use('/api/' + endpoint.path, module(endpoint));
 });
-app.use('/api/local', require('./local'));
 
 app.use(express.static('dist'));
 app.use(express.static('public'));

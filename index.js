@@ -1,11 +1,14 @@
 var md = require('markdown-it')()
 	.use(require('markdown-it-task-lists'));
+var queryString = require('query-string');
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
 var localEndPoint = '/api/local';
+var driveEndPoint = '/api/drive';
+var qs = queryString.parse(window.location.search);
 
 var viewButton = document.querySelector('.view-button');
 var writeButton = document.querySelector('.write-button');
@@ -46,7 +49,6 @@ deleteConfirm.querySelector('.confirm').addEventListener('click', removeNote);
 deleteConfirm.querySelector('.cancel').addEventListener('click', function () {
 	deleteConfirm.close();
 });
-authDialog.querySelector('.auth-submit').addEventListener('click', submitDriveAuth);
 
 // notification stuff
 var notificationTimeoutId;
@@ -91,7 +93,10 @@ function notify (opts) {
 }
 
 getLocalNotes().then(function () {
-	// return getDriveNotes();
+	if (qs.code) {
+		return submitDriveAuth(qs.code);
+	}
+	return getDriveNotes();
 });
 
 function getLocalNotes () {
@@ -106,6 +111,62 @@ function getLocalNotes () {
 			}
 		});
 	});
+}
+
+function getDriveNotes () {
+	return getJson(driveEndPoint).then(renderDriveNotes, function (err) {
+		notify({
+			type: 'blue',
+			message: 'Redirecting to Google Drive for authorization',
+			permanent: true
+		});
+		if (err.response.status === 401) {
+			err.response.json()
+			.then(function (json) {
+				window.location = json.url;
+			});
+		} else {
+			throw err;
+		}
+	});
+}
+
+function submitDriveAuth (code) {
+	notify({
+		type: 'blue',
+		message: 'Authorizing with Google Drive',
+		permanent: true
+	});
+	if (!code) {
+		// @TODO handle error
+		notify({
+			message: 'Code is missing',
+			type: 'red'
+		});
+		return;
+	}
+	return postJson(driveEndPoint + '/auth', {
+		code: code
+	}).then(function () {
+		window.history.replaceState(null, null, window.location.origin + window.location.pathname);
+		notify({
+			type: 'green',
+			message: 'Successfully authorized with Google Drive',
+			timeout: 3000
+		});
+		return getDriveNotes();
+	}, (err) => {
+		notify({
+			type: 'red',
+			message: err,
+			permanent: true
+		});
+		console.error(err);
+	});
+}
+
+function renderDriveNotes (response) {
+	console.log(response);
 }
 
 function writeMode () {
