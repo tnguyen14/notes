@@ -101,6 +101,7 @@ button.blue:hover {
 }
 .notification[data-type=red] {
 	background-color: #c0392b;
+	color: #fff;
 }
 .notification .message {
 	margin: 0;
@@ -195,9 +196,6 @@ textarea:focus {
 	background-color: #fff;
 }
 
-.preview-content {
-	margin-top: 2rem;
-}
 .write-selected .preview-content {
 	display: none;
 }

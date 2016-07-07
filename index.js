@@ -94,8 +94,12 @@ function getLocalNotes () {
 	return getJson(localEndPoint).then(function (response) {
 		notes = response.notes;
 		notes.forEach(function (note, index) {
+			var li = createNoteLi(note, index);
 			localList.parentNode.querySelector('h3').innerHTML = response.label;
-			localList.appendChild(createNoteLi(note, index));
+			localList.appendChild(li);
+			if (index === 0) {
+				showNote(li);
+			}
 		});
 	});
 }
@@ -196,6 +200,7 @@ function newNote () {
 	var li = createNoteLi(note, notes.push(note) - 1);
 	localList.appendChild(li);
 	showNote(li);
+	writeMode();
 	textarea.focus();
 }
 
