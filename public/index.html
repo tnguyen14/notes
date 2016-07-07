@@ -13,27 +13,33 @@
 				<ul></ul>
 			</section>
 		</div>
-		<form class="write-selected">
-			<div class="title-container">
-				<input type="text" class="title" placeholder="Untitled"/>
+		<div class="main-container">
+			<div class="notification">
+				<p class="message"></p>
+				<div class="close">x</div>
 			</div>
-			<div class="tabnav-container">
-				<nav class="tabnav">
-					<button type="button" class="preview-button">Preview</button>
-					<button type="button" class="write-button selected">Write</button>
-				</nav>
-			</div>
-			<div class="content-container">
-				<div class="preview-content">
-					<div class="markdown-body"></div>
+			<form class="write-selected">
+				<div class="title-container">
+					<input type="text" class="title" placeholder="Untitled"/>
 				</div>
-				<div class="write-content">
-					<textarea placeholder="Write a note..."></textarea>
+				<div class="tabnav-container">
+					<nav class="tabnav">
+						<button type="button" class="preview-button">Preview</button>
+						<button type="button" class="write-button selected">Write</button>
+					</nav>
 				</div>
-				<button type="button" class="save green">Save</button>
-				<button type="button" class="remove red">Delete</button>
-			</div>
-		</form>
+				<div class="content-container">
+					<div class="preview-content">
+						<div class="markdown-body"></div>
+					</div>
+					<div class="write-content">
+						<textarea placeholder="Write a note..."></textarea>
+					</div>
+					<button type="button" class="save green">Save</button>
+					<button type="button" class="remove red">Delete</button>
+				</div>
+			</form>
+		</div>
 		<dialog class="delete-confirm">
 			<p>Are you sure you want to delete?</p>
 			<button type="button" class="confirm red">Confirm</button>

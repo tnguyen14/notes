@@ -45,12 +45,53 @@ deleteConfirm.querySelector('.confirm').addEventListener('click', removeNote);
 deleteConfirm.querySelector('.cancel').addEventListener('click', function () {
 	deleteConfirm.close();
 });
+authDialog.querySelector('.auth-submit').addEventListener('click', submitDriveAuth);
 
+// notification stuff
+var notificationTimeoutId;
+var notificationMessage = notification.querySelector('.message');
+notification.querySelector('.close').addEventListener('click', hideNotification);
+function showNotification () {
+	notification.classList.add('active');
+}
+function hideNotification () {
+	notification.classList.remove('active');
+	clearNotification();
+}
+function clearNotification () {
+	notificationMessage.innerHTML = '';
+	notification.setAttribute('data-type', '');
+}
+function notify (opts) {
+	if (!opts || !Object.keys(opts).length) {
+		return;
+	}
 
-getNotes();
+	if (notification.classList.contains('active')) {
+		clearNotification();
+		clearTimeout(notificationTimeoutId);
+	}
 
-function getNotes () {
-	getJson(localEndPoint).then(function (response) {
+	if (opts.message) {
+		notificationMessage.innerHTML = opts.message;
+	}
+	if (opts.type) {
+		notification.setAttribute('data-type', opts.type);
+	}
+	showNotification();
+	// auto dismiss after 10s
+	var timeout = opts.timeout || 2000;
+	if (!opts.permanent) {
+		notificationTimeoutId = setTimeout(hideNotification, timeout);
+	}
+}
+
+getLocalNotes().then(function () {
+	// return getDriveNotes();
+});
+
+function getLocalNotes () {
+	return getJson(localEndPoint).then(function (response) {
 		notes = response.notes;
 		notes.forEach(function (note, index) {
 			localList.parentNode.querySelector('h3').innerHTML = response.label;
@@ -93,7 +134,10 @@ function saveNote () {
 	var content = textarea.value;
 	var name = title.value;
 	if (content === note.content && name === note.name) {
-		console.log('nothing changed');
+		notify({
+			type: 'blue',
+			message: 'No new change detected.'
+		});
 		return;
 	}
 	var updated = {};
@@ -123,7 +167,10 @@ function saveNote () {
 		note.content = updated.content;
 		previewMode();
 	}, function (err) {
-		console.error(err);
+		notify({
+			message: err,
+			type: 'red'
+		});
 	});
 }
 
