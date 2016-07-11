@@ -35,8 +35,7 @@ function saveNote () {
 	var content = editor.getContent();
 	var name = editor.getTitle();
 	if (editor.isNew()) {
-		note.content = content;
-		note.name = name;
+		note = {};
 	}
 	if (content === note.content && name === note.name) {
 		notify({

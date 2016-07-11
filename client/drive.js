@@ -6,18 +6,22 @@ var driveEndPoint = '/api/drive';
 
 function getDriveNotes () {
 	return getJson(driveEndPoint).then(renderDriveNotes, function (err) {
-		notify({
-			type: 'blue',
-			message: 'Redirecting to Google Drive for authorization',
-			permanent: true
-		});
 		if (err.response.status === 401) {
+			notify({
+				type: 'blue',
+				message: 'Redirecting to Google Drive for authorization',
+				permanent: true
+			});
 			err.response.json()
 			.then(function (json) {
 				window.location = json.url;
 			});
 		} else {
-			throw err;
+			notify({
+				type: 'red',
+				message: 'Error in getting Google Drive notes: ' + err.message,
+				permanent: true
+			});
 		}
 	});
 }
