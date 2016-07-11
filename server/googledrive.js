@@ -1,11 +1,12 @@
 var Promise = require('bluebird');
 var fs = Promise.promisifyAll(require('fs'));
 var mkdirp = Promise.promisify(require('mkdirp'));
+var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-var google = require('googleapis');
+var drive = require('googleapis').drive('v3');
 var GoogleAuth = require('google-auth-library');
 
 var SCOPES = ['https://www.googleapis.com/auth/drive'];
@@ -66,10 +67,112 @@ fs.accessAsync('private/client_secret.json')
 		process.exit(1);
 	});
 
+function getFileContent (fileId) {
+	if (!fileId) {
+		return;
+	}
+	return new Promise((resolve, reject) => {
+		drive.files.get({
+			auth: auth,
+			fileId: fileId,
+			alt: 'media'
+		}, (err, resp) => {
+			if (err) {
+				console.error(err);
+				reject(err);
+				return;
+			}
+			resolve(resp);
+		});
+	});
+}
+
+function getFolderChildren (folderId) {
+	if (!folderId) {
+		return;
+	}
+	return new Promise((resolve, reject) => {
+		drive.files.list({
+			auth: auth,
+			corpus: 'user',
+			q: '\'' + folderId + '\'' + ' in parents'
+		}, (err, resp) => {
+			if (err) {
+				console.error(err);
+				reject(err);
+				return;
+			}
+			resolve(resp.files);
+		});
+	});
+}
+/**
+ * @param {Object} file
+ * @param {String} file.id eg. '0B8Jsod-g6nz2ZWRzRjNqdzZVRE0a'
+ * @param {String} file.name
+ * @param {String} file.mimeType 'application/vnd.google-apps.folder' or
+ * 'text/x-markdown'
+ */
+function processFile (file) {
+	switch (file.mimeType) {
+	case 'text/x-markdown':
+		let ext = path.extname(file.name);
+		return getFileContent(file.id)
+			.then((content) => {
+				return {
+					id: file.id,
+					name: path.basename(file.name, ext),
+					content: content
+				};
+			});
+	case 'application/vnd.google-apps.folder':
+		let indexMd;
+		return getFolderChildren(file.id)
+			.then((files) => {
+				indexMd = files.find((f) => {
+					return f.name === 'index.md';
+				});
+				if (!indexMd) {
+					return;
+				}
+				return indexMd.id;
+			})
+			.then(getFileContent)
+			.then((content) => {
+				if (content) {
+					return {
+						name: file.name,
+						id: indexMd.id,
+						content: content
+					};
+				}
+			});
+	}
+}
+
 app.get('/', isAuthenticated, (req, res) => {
-	res.json({
-		label: label,
-		notes: []
+	drive.files.list({
+		auth: auth,
+		corpus: 'user',
+		q: '\'' + rootDir + '\'' + ' in parents'
+	}, (err, resp) => {
+		if (err) {
+			console.error(err);
+			res.status(400).json(err);
+			return;
+		}
+		Promise.all(resp.files.map(processFile))
+			.then((notes) => {
+				res.json({
+					label: label,
+					notes: notes.filter((n) => n)
+				});
+			}, (err) => {
+				if (err) {
+					console.error(err);
+					res.status(400).json(err);
+				}
+			});
 	});
 });
 
