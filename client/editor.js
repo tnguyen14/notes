@@ -1,7 +1,11 @@
-var EventEmitter = require('eventemitter3');
-var editor = Object.create(EventEmitter.prototype);
 var md = require('markdown-it')()
 	.use(require('markdown-it-task-lists'));
+
+var handlers = {
+	save: {},
+	remove: {}
+};
+
 var container = document.querySelector('.editor-container');
 var title = document.querySelector('.title');
 var textarea = document.querySelector('.write-content textarea');
@@ -37,7 +41,7 @@ function getContent () {
 }
 
 function getId () {
-	container.getAttribute('data-id');
+	return container.getAttribute('data-id');
 }
 
 function setId (id) {
@@ -45,7 +49,7 @@ function setId (id) {
 }
 
 function getType () {
-	container.getAttribute('data-type');
+	return container.getAttribute('data-type');
 }
 
 function setType (type) {
@@ -60,13 +64,25 @@ function setNote (note) {
 }
 
 function startListening () {
-	save.addEventListener('click', function () {
-		editor.emit('editor:save', {
-			id: getId(),
-			type: getType(),
-			title: getTitle(),
-			content: getContent()
+	Array.prototype.forEach.call(container.querySelectorAll('.tabnav button'), function (button) {
+		button.addEventListener('click', function () {
+			if (writeButton.classList.contains('selected')) {
+				viewMode();
+			} else {
+				writeMode();
+			}
 		});
+	});
+
+	save.addEventListener('click', function () {
+		var type = getType();
+		if (handlers.save[type]) {
+			handlers.save[type]({
+				id: getId(),
+				title: getTitle(),
+				content: getContent()
+			});
+		}
 	});
 	remove.addEventListener('click', function () {
 		deleteConfirm.showModal();
@@ -77,11 +93,18 @@ function startListening () {
 	});
 	deleteConfirm.querySelector('.confirm').addEventListener('click', function () {
 		deleteConfirm.close();
-		editor.emit('editor:remove', {
-			id: getId(),
-			type: getType()
-		});
+		var type = getType();
+		if (handlers.remove[type]) {
+			handlers.remove[type](getId());
+		}
 	});
+}
+
+function registerHandler (opts) {
+	if (!opts.event || !opts.type || typeof opts.handler !== 'function') {
+		return;
+	}
+	handlers[opts.event][opts.type] = opts.handler;
 }
 
 function writeMode () {
@@ -112,20 +135,12 @@ function viewMode () {
 	});
 }
 
-function toggleMode () {
-	if (writeButton.classList.contains('selected')) {
-		viewMode();
-	} else {
-		writeMode();
-	}
-}
-
-module.exports = Object.assign(editor, {
+module.exports = {
 	getTitle: getTitle,
 	getContent: getContent,
 	setNote: setNote,
 	startListening: startListening,
 	viewMode: viewMode,
 	writeMode: writeMode,
-	toggleMode: toggleMode
-});
+	registerHandler: registerHandler
+};

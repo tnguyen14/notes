@@ -15,7 +15,7 @@ function startListening () {
 	});
 }
 
-function addOption (opt) {
+function registerHandler (opt) {
 	var option = document.createElement('button');
 	option.innerHTML = opt.label;
 	option.setAttribute('data-type', opt.type);
@@ -26,5 +26,5 @@ function addOption (opt) {
 
 module.exports = {
 	startListening: startListening,
-	addOption: addOption
+	registerHandler: registerHandler
 };

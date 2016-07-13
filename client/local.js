@@ -25,7 +25,7 @@ function getNotes () {
 				note.showNote(li, n);
 			}
 		});
-		add.addOption({
+		add.registerHandler({
 			label: response.label,
 			type: 'local',
 			handler: newNote
@@ -102,12 +102,12 @@ function saveNote (n) {
 	});
 }
 
-function removeNote (n) {
-	if (!note.id) {
+function removeNote (id) {
+	if (!id) {
 		return;
 	}
 	var noteIndex = notes.find(function (_n) {
-		return _n.id === n.id;
+		return _n.id === id;
 	});
 	var note = notes[noteIndex];
 	deleteJson(endPoint + '/' + encodeURIComponent(note.id))
@@ -118,6 +118,17 @@ function removeNote (n) {
 			editor.setNote();
 		});
 }
+
+editor.registerHandler({
+	event: 'save',
+	type: 'local',
+	handler: saveNote
+});
+editor.registerHandler({
+	event: 'remove',
+	type: 'local',
+	handler: removeNote
+});
 
 module.exports = {
 	getNotes: getNotes,

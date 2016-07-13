@@ -29,7 +29,6 @@
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "dotenv-safe": "^2.3.1",
-    "eventemitter3": "^1.2.0",
     "express": "^4.14.0",
     "forever": "^0.15.2",
     "github-markdown-css": "^2.3.0",
