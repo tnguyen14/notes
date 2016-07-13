@@ -4,7 +4,13 @@ var postJson = simpleFetch.postJson;
 var notify = require('./notify');
 var driveEndPoint = '/api/drive';
 
-function getDriveNotes () {
+var queryString = require('query-string');
+var qs = queryString.parse(window.location.search);
+
+function getNotes () {
+	if (qs.code) {
+		return submitAuth(qs.code);
+	}
 	return getJson(driveEndPoint).then(renderDriveNotes, function (err) {
 		if (err.response.status === 401) {
 			notify({
@@ -26,7 +32,7 @@ function getDriveNotes () {
 	});
 }
 
-function submitDriveAuth (code) {
+function submitAuth (code) {
 	notify({
 		type: 'blue',
 		message: 'Authorizing with Google Drive',
@@ -49,7 +55,7 @@ function submitDriveAuth (code) {
 			message: 'Successfully authorized with Google Drive',
 			timeout: 3000
 		});
-		return getDriveNotes();
+		return getNotes();
 	}, (err) => {
 		notify({
 			type: 'red',
@@ -65,6 +71,5 @@ function renderDriveNotes (response) {
 }
 
 module.exports = {
-	getDriveNotes: getDriveNotes,
-	submitDriveAuth: submitDriveAuth
+	getNotes: getNotes
 };
