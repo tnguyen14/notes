@@ -52,23 +52,22 @@ button.blue:hover {
 	background-color: #2980b9;
 }
 
-
-.list {
-	position: relative;
+.lists {
 	width: 20%;
+	position: relative;
+}
+.lists .add {
+	float: right;
+	font-size: 1rem;
+	position: absolute;
+	top: 1rem;
+	right: 0;
 }
 .list h3 {
 	font-size: 1rem;
 	margin-bottom: 0;
 	padding: .5rem 0;
 	font-variant: small-caps;
-}
-.list .add {
-	float: right;
-	font-size: 1rem;
-	position: absolute;
-	top: 1rem;
-	right: 0;
 }
 .list ul {
 	padding-left: .5rem;
@@ -84,7 +83,7 @@ button.blue:hover {
 	background-color: #e0e0e0;
 }
 
-.main-container {
+.editor-container {
 	width: 80%;
 	margin: 0 auto;
 	padding: 1rem 2rem;

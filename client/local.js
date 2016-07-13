@@ -6,15 +6,18 @@ var deleteJson = simpleFetch.deleteJson;
 var note = require('./note');
 var editor = require('./editor');
 var notify = require('./notify');
+var add = require('./add');
 
 var endPoint = '/api/local';
-var list = document.querySelector('.list .local ul');
+var list = document.querySelector('.list.local ul');
 var notes;
 
 function getNotes () {
 	return getJson(endPoint).then(function (response) {
 		notes = response.notes;
 		notes.forEach(function (n, index) {
+			n.type = 'local';
+			n.id = n.path;
 			var li = note.createNoteLi(n);
 			list.parentNode.querySelector('h3').innerHTML = response.label;
 			list.appendChild(li);
@@ -22,22 +25,39 @@ function getNotes () {
 				note.showNote(li, n);
 			}
 		});
+		add.addOption({
+			label: response.label,
+			type: 'local',
+			handler: newNote
+		});
 		return notes;
 	});
 }
 
-function saveNote () {
-	var active = list.querySelector('.selected');
-	var path = active.getAttribute('data-path');
-	var note = notes.filter(function (n) {
-		return n.path === path;
-	})[0];
-	var content = editor.getContent();
-	var name = editor.getTitle();
-	if (editor.isNew()) {
-		note = {};
+function newNote () {
+	var n = {
+		id: 'Untitled/index.md',
+		name: 'Untitled',
+		content: '',
+		type: 'local',
+		new: true
+	};
+	notes.push(n);
+	var li = note.createNoteLi(n);
+	list.appendChild(li);
+	note.showNote(li, n);
+	editor.writeMode();
+	return n;
+}
+
+function saveNote (n) {
+	var note = notes.find(function (_n) {
+		return _n.id === n.id;
+	});
+	if (!note) {
+		return;
 	}
-	if (content === note.content && name === note.name) {
+	if (n.content === note.content && n.title === note.name) {
 		notify({
 			type: 'blue',
 			message: 'No new change detected.'
@@ -47,27 +67,25 @@ function saveNote () {
 	var updated = {};
 	var url = endPoint;
 	var method = postJson;
-	if (content !== note.content) {
-		updated.content = content;
+	if (n.content !== note.content) {
+		updated.content = n.content;
 	}
-	if (!editor.isNew()) {
-		url += '/' + encodeURIComponent(note.path);
+	if (!note.new) {
+		url += '/' + encodeURIComponent(note.id);
 		method = putJson;
-		if (name !== note.name) {
-			updated.name = name;
+		if (n.name !== note.name) {
+			updated.name = n.name;
 		}
 	} else {
-		updated.name = name;
+		updated.name = n.name;
 	}
 	method(url, updated).then(function (resp) {
-		if (editor.isNew()) {
-			editor.setNew(false);
-			note.path = updated.name + '/index.md';
-			notes.push(note);
+		if (note.new) {
+			delete note.new;
 		}
 		if (updated.name) {
 			note.name = updated.name;
-			note.path = updated.name + '/index.md';
+			note.id = updated.name + '/index.md';
 		}
 		note.content = updated.content;
 		editor.viewMode();
@@ -84,25 +102,26 @@ function saveNote () {
 	});
 }
 
-function removeNote () {
-	// @TODO update selector below by using some sort of ID from the editor
-	var active = document.querySelector('.list ul .selected');
-	if (!active) {
+function removeNote (n) {
+	if (!note.id) {
 		return;
 	}
-	var path = active.getAttribute('data-path');
-	deleteJson(endPoint + '/' + encodeURIComponent(path))
+	var noteIndex = notes.find(function (_n) {
+		return _n.id === n.id;
+	});
+	var note = notes[noteIndex];
+	deleteJson(endPoint + '/' + encodeURIComponent(note.id))
 		.then(function () {
-			// @TODO this should be rewritten to completely remove note
-			// and update DOM elements
-			list.querySelector('[data-path=' + path + ']').style.display = 'none';
-			editor.updateTitle();
-			editor.updateContent();
+			var li = list.querySelector('[data-id=' + note.id + ']');
+			li.parentNode.removeChild(li);
+			notes.splice(noteIndex, 1);
+			editor.setNote();
 		});
 }
 
 module.exports = {
 	getNotes: getNotes,
+	newNote: newNote,
 	saveNote: saveNote,
 	removeNote: removeNote
 };

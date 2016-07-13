@@ -1,11 +1,24 @@
+var EventEmitter = require('eventemitter3');
+var editor = Object.create(EventEmitter.prototype);
 var md = require('markdown-it')()
 	.use(require('markdown-it-task-lists'));
+var container = document.querySelector('.editor-container');
 var title = document.querySelector('.title');
 var textarea = document.querySelector('.write-content textarea');
 var viewButton = document.querySelector('.view-button');
 var writeButton = document.querySelector('.write-button');
 var form = document.querySelector('form');
 var view = document.querySelector('.view-content .markdown-body');
+var save = container.querySelector('.save');
+var remove = container.querySelector('.remove');
+var deleteConfirm = document.querySelector('dialog.delete-confirm');
+
+// https://github.com/benjamingr/RegExp.escape
+if (!RegExp.escape) {
+	RegExp.escape = function (s) {
+		return String(s).replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+	};
+}
 
 function updateTitle (text) {
 	title.value = text;
@@ -23,27 +36,59 @@ function getContent () {
 	return textarea.value;
 }
 
+function getId () {
+	container.getAttribute('data-id');
+}
+
+function setId (id) {
+	container.setAttribute('data-id', id || '');
+}
+
+function getType () {
+	container.getAttribute('data-type');
+}
+
+function setType (type) {
+	container.setAttribute('data-type', type);
+}
+
+function setNote (note) {
+	setId(note.id);
+	setType(note.type);
+	updateTitle(note.name);
+	updateContent(note.content);
+}
+
+function startListening () {
+	save.addEventListener('click', function () {
+		editor.emit('editor:save', {
+			id: getId(),
+			type: getType(),
+			title: getTitle(),
+			content: getContent()
+		});
+	});
+	remove.addEventListener('click', function () {
+		deleteConfirm.showModal();
+	});
+
+	deleteConfirm.querySelector('.cancel').addEventListener('click', function () {
+		deleteConfirm.close();
+	});
+	deleteConfirm.querySelector('.confirm').addEventListener('click', function () {
+		deleteConfirm.close();
+		editor.emit('editor:remove', {
+			id: getId(),
+			type: getType()
+		});
+	});
+}
+
 function writeMode () {
 	viewButton.classList.remove('selected');
 	writeButton.classList.add('selected');
 	form.classList.add('write-selected');
 	textarea.focus();
-}
-
-function setNew(isNew) {
-	if (isNew) {
-		form.setAttribute('data-new', 'true');
-	} else {
-		form.setAttribute('data-new', 'false');
-	}
-}
-
-function isNew () {
-	return form.getAttribute('data-new', 'true');
-}
-
-function isWriting () {
-	return writeButton.classList.contains('selected');
 }
 
 function viewMode () {
@@ -67,14 +112,20 @@ function viewMode () {
 	});
 }
 
-module.exports = {
-	updateTitle: updateTitle,
+function toggleMode () {
+	if (writeButton.classList.contains('selected')) {
+		viewMode();
+	} else {
+		writeMode();
+	}
+}
+
+module.exports = Object.assign(editor, {
 	getTitle: getTitle,
-	updateContent: updateContent,
 	getContent: getContent,
-	setNew: setNew,
-	isNew: isNew,
-	isWriting: isWriting,
+	setNote: setNote,
+	startListening: startListening,
 	viewMode: viewMode,
-	writeMode: writeMode
-};
+	writeMode: writeMode,
+	toggleMode: toggleMode
+});

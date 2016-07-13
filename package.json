@@ -6,10 +6,10 @@
   "scripts": {
     "hooks": "cd .git/hooks && ln -sfv ../../hooks/pre-commit .",
     "server": "forever start server/index.js && forever logs -f 0",
-    "server:watch": "forever start -w server/index.js && forever logs -f 0",
+    "server:watch": "nodemon --debug",
     "js": "browserify client/index.js -o public/index.js",
     "js:watch": "watchify client/index.js -o public/index.js -dv",
-    "copy": "cp node_modules/github-markdown-css/github-markdown.css public/",
+    "copy": "cp -v node_modules/github-markdown-css/github-markdown.css public/",
     "build": "npm run copy",
     "start": "npm run build && npm run js && npm run server",
     "dev": "npm run build && npm run js:watch & npm run server:watch",
@@ -29,6 +29,7 @@
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "dotenv-safe": "^2.3.1",
+    "eventemitter3": "^1.2.0",
     "express": "^4.14.0",
     "forever": "^0.15.2",
     "github-markdown-css": "^2.3.0",
@@ -38,6 +39,7 @@
     "markdown-it-task-lists": "^1.2.2",
     "mkdirp": "^0.5.1",
     "query-string": "^4.2.2",
+    "request-promise": "^3.0.0",
     "rimraf": "^2.5.3",
     "simple-fetch": "^1.2.1",
     "user-home": "^2.0.0"
