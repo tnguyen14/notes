@@ -6,30 +6,24 @@ var deleteJson = simpleFetch.deleteJson;
 var note = require('./note');
 var editor = require('./editor');
 var notify = require('./notify');
-var add = require('./add');
 
 var endPoint = '/api/local';
+var TYPE = 'local';
 var list = document.querySelector('.list.local ul');
 var notes;
 
 function getNotes () {
 	return getJson(endPoint).then(function (response) {
-		notes = response.notes;
-		list.parentNode.querySelector('h3').innerHTML = response.label;
-		notes.forEach(function (n, index) {
-			n.type = 'local';
-			var li = note.createNoteLi(n);
-			list.appendChild(li);
-			if (index === 0) {
-				note.showNote(li, n);
-			}
+		notes = response.notes.map(function (n) {
+			n.type = TYPE;
+			return n;
 		});
-		add.registerHandler({
+		note.renderNotes({
+			notes: notes,
 			label: response.label,
-			type: 'local',
-			handler: newNote
+			type: TYPE,
+			addHandler: newNote
 		});
-		return notes;
 	});
 }
 
@@ -42,9 +36,8 @@ function newNote () {
 		new: true
 	};
 	notes.push(n);
-	var li = note.createNoteLi(n);
-	list.appendChild(li);
-	note.showNote(li, n);
+	note.addNote(TYPE, n);
+	note.showNote(n);
 	editor.writeMode();
 	return n;
 }

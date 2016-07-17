@@ -5,9 +5,8 @@ var notify = require('./notify');
 var driveEndPoint = '/api/drive';
 var queryString = require('query-string');
 var note = require('./note');
-var add = require('./add');
 
-var list = document.querySelector('.list.drive ul');
+var TYPE = 'drive';
 var notes;
 function getNotes () {
 	var qs = queryString.parse(window.location.search);
@@ -70,18 +69,15 @@ function submitAuth (code) {
 }
 
 function renderDriveNotes (response) {
-	console.log(response);
-	notes = response.notes;
-	list.parentNode.querySelector('h3').innerHTML = response.label;
-	notes.forEach(function (n, index) {
-		n.type = 'drive';
-		var li = note.createNoteLi(n);
-		list.appendChild(li);
+	notes = response.notes.map(function (n) {
+		n.type = TYPE;
+		return n;
 	});
-	add.registerHandler({
+	note.renderNotes({
+		notes: notes,
 		label: response.label,
-		type: 'drive',
-		handler: newNote
+		type: TYPE,
+		addHandler: newNote
 	});
 }
 
