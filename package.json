@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/tnguyen14/notes#readme",
   "dependencies": {
+    "async": "^2.0.0",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "dotenv-safe": "^2.3.1",

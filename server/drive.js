@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var fs = Promise.promisifyAll(require('fs'));
 var mkdirp = Promise.promisify(require('mkdirp'));
+var async = require('async');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -210,62 +211,62 @@ app.put('/:id', function (req, res) {
 });
 
 app.post('/', function (req, res) {
-	drive.files.create({
-		resource: {
-			name: req.body.name,
-			mimeType: mimeTypes.folder,
-			parents: [rootDir]
+	async.waterfall([
+		function (callback) {
+			drive.files.create({
+				resource: {
+					name: req.body.name,
+					mimeType: mimeTypes.folder,
+					parents: [rootDir]
+				}
+			}, callback);
+		},
+		function (resp, body, callback) {
+			drive.files.create({
+				resource: {
+					name: 'index.md',
+					parents: [resp.id]
+				},
+				media: {
+					body: req.body.content,
+					mimeType: mimeTypes.md
+				}
+			}, callback);
 		}
-	}, (err, resp) => {
+	], (err, resp) => {
 		if (err) {
 			console.error(err);
 			res.status(400).json(err);
 			return;
 		}
-		drive.files.create({
-			resource: {
-				name: 'index.md',
-				parents: [resp.id]
-			},
-			media: {
-				body: req.body.content,
-				mimeType: mimeTypes.md
-			}
-		}, (err, resp) => {
-			if (err) {
-				console.error(err);
-				res.status(400).json(err);
-				return;
-			}
-			res.json(resp);
-		});
+		res.json(resp);
 	});
 });
 
 app.delete('/:id', function (req, res) {
-	drive.files.get({
-		fileId: req.params.id,
-		fields: 'name,parents'
-	}, (err, resp) => {
+	async.waterfall([
+		function (callback) {
+			drive.files.get({
+				fileId: req.params.id,
+				fields: 'name,parents'
+			}, callback);
+		},
+		function (resp, body, callback) {
+			let toDelete = req.params.id;
+			if (resp.name === 'index.md') {
+				toDelete = resp.parents[0];
+			}
+			drive.files.delete({
+				fileId: toDelete
+			}, callback);
+		}
+	], (err, resp) => {
 		if (err) {
 			console.error(err);
 			res.status(400).json(err);
 			return;
 		}
-		let toDelete = req.params.id;
-		if (resp.name === 'index.md') {
-			toDelete = resp.parents[0];
-		}
-		drive.files.delete({
-			fileId: toDelete
-		}, (err, resp) => {
-			if (err) {
-				console.error(err);
-				res.status(400).json(err);
-				return;
-			}
-			res.json('OK!');
-		});
+		res.json('OK!');
 	});
 });
 
