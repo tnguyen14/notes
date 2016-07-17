@@ -12,3 +12,4 @@
 - Add the "Authorized JavaScript origins" to the `.env` file under `AUTHORIZED_ORIGINS`, separated by comma
 - Server: `npm run dev` on development, or `npm start` on production.
 - Add your server URL as `API_URL` to `.env` file.
+- Client: `npm run deploy`
