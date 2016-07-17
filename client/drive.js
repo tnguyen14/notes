@@ -7,7 +7,6 @@ var queryString = require('query-string');
 var note = require('./note');
 
 var TYPE = 'drive';
-var notes;
 function getNotes () {
 	var qs = queryString.parse(window.location.search);
 	if (qs.code) {
@@ -69,20 +68,11 @@ function submitAuth (code) {
 }
 
 function renderDriveNotes (response) {
-	notes = response.notes.map(function (n) {
-		n.type = TYPE;
-		return n;
-	});
 	note.renderNotes({
-		notes: notes,
+		notes: response.notes,
 		label: response.label,
-		type: TYPE,
-		addHandler: newNote
+		type: TYPE
 	});
-}
-
-function newNote () {
-
 }
 
 module.exports = {

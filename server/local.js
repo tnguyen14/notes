@@ -106,7 +106,9 @@ app.post('/', function (req, res) {
 	var name = req.body.name;
 	var content = req.body.content;
 	newNote(name, content).then(() => {
-		res.status(200).json('OK!');
+		res.status(200).json({
+			id: name + '/index.md'
+		});
 	}, (err) => {
 		console.error(err);
 		if (err.message.indexOf('already exists') !== -1) {

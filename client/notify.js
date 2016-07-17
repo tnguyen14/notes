@@ -14,7 +14,7 @@ function clearNotification () {
 	notificationMessage.innerHTML = '';
 	notification.setAttribute('data-type', '');
 }
-module.exports = function notify (opts) {
+function notify (opts) {
 	if (!opts || !Object.keys(opts).length) {
 		return;
 	}
@@ -38,4 +38,12 @@ module.exports = function notify (opts) {
 	} else {
 		notification.classList.add('permanent');
 	}
+}
+
+module.exports = notify;
+module.exports.error = function (err) {
+	notify({
+		message: err,
+		type: 'red'
+	});
 };

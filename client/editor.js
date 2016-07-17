@@ -1,10 +1,7 @@
 var md = require('markdown-it')()
 	.use(require('markdown-it-task-lists'));
 
-var handlers = {
-	save: {},
-	remove: {}
-};
+var handlers = {};
 
 var container = document.querySelector('.editor-container');
 var title = document.querySelector('.title');
@@ -57,10 +54,10 @@ function setType (type) {
 }
 
 function setNote (note) {
-	setId(note.id);
-	setType(note.type);
-	updateTitle(note.name);
-	updateContent(note.content);
+	setId((note && note.id) ? note.id : '');
+	setType((note && note.type) ? note.type : '');
+	updateTitle((note && note.name) ? note.name : '');
+	updateContent((note && note.content) ? note.content : '');
 }
 
 function startListening () {
@@ -75,9 +72,8 @@ function startListening () {
 	});
 
 	save.addEventListener('click', function () {
-		var type = getType();
-		if (handlers.save[type]) {
-			handlers.save[type]({
+		if (handlers.save) {
+			handlers.save(getType(), {
 				id: getId(),
 				title: getTitle(),
 				content: getContent()
@@ -93,18 +89,24 @@ function startListening () {
 	});
 	deleteConfirm.querySelector('.confirm').addEventListener('click', function () {
 		deleteConfirm.close();
-		var type = getType();
-		if (handlers.remove[type]) {
-			handlers.remove[type](getId());
+		if (handlers.remove) {
+			handlers.remove(getType(), getId());
 		}
 	});
 }
 
-function registerHandler (opts) {
-	if (!opts.event || !opts.type || typeof opts.handler !== 'function') {
+function registerSaveHandler (handler) {
+	if (typeof handler !== 'function') {
 		return;
 	}
-	handlers[opts.event][opts.type] = opts.handler;
+	handlers.save = handler;
+}
+
+function registerRemoveHandler (handler) {
+	if (typeof handler !== 'function') {
+		return;
+	}
+	handlers.remove = handler;
 }
 
 function writeMode () {
@@ -139,8 +141,10 @@ module.exports = {
 	getTitle: getTitle,
 	getContent: getContent,
 	setNote: setNote,
+	setId: setId,
 	startListening: startListening,
 	viewMode: viewMode,
 	writeMode: writeMode,
-	registerHandler: registerHandler
+	registerSaveHandler: registerSaveHandler,
+	registerRemoveHandler: registerRemoveHandler
 };
