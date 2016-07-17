@@ -11,7 +11,7 @@
     "js:watch": "watchify -t envlocalify client/index.js -o public/index.js -dv",
     "copy": "cp -v node_modules/github-markdown-css/github-markdown.css public/",
     "build": "npm run copy",
-    "start": "npm run build && npm run js && npm run server",
+    "start": "npm run server",
     "dev": "npm run build && npm run js:watch & npm run server:watch",
     "test": "tap test/**/*.js",
     "lint": "happiness",
