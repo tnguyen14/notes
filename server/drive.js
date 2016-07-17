@@ -6,8 +6,9 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-var drive = require('googleapis').drive('v3');
-var GoogleAuth = require('google-auth-library');
+var google = require('googleapis');
+var drive = google.drive('v3');
+var OAuth2 = google.auth.OAuth2;
 
 var SCOPES = ['https://www.googleapis.com/auth/drive'];
 var mimeTypes = {
@@ -36,8 +37,8 @@ function isAuthenticated (req, res, next) {
 		} else if (process.env.NODE_ENV === 'production') {
 			redirectUrl = clientCredentials.web.redirect_uris[0];
 		}
-		let googleAuth = new GoogleAuth();
-		auth = new googleAuth.OAuth2(clientId, clientSecret, redirectUrl);
+		auth = new OAuth2(clientId, clientSecret, redirectUrl);
+		google.options({auth: auth});
 	}
 	fs.accessAsync(TOKEN_PATH)
 		.then(() => {
@@ -162,7 +163,6 @@ function processFile (file) {
 
 app.get('/', isAuthenticated, (req, res) => {
 	drive.files.list({
-		auth: auth,
 		corpus: 'user',
 		q: '\'' + rootDir + '\'' + ' in parents'
 	}, (err, resp) => {
@@ -188,7 +188,6 @@ app.get('/', isAuthenticated, (req, res) => {
 
 app.put('/:id', function (req, res) {
 	let params = {
-		auth: auth,
 		fileId: req.params.id,
 		media: {
 			body: req.body.content,
