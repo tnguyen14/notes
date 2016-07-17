@@ -242,6 +242,33 @@ app.post('/', function (req, res) {
 	});
 });
 
+app.delete('/:id', function (req, res) {
+	drive.files.get({
+		fileId: req.params.id,
+		fields: 'name,parents'
+	}, (err, resp) => {
+		if (err) {
+			console.error(err);
+			res.status(400).json(err);
+			return;
+		}
+		let toDelete = req.params.id;
+		if (resp.name === 'index.md') {
+			toDelete = resp.parents[0];
+		}
+		drive.files.delete({
+			fileId: toDelete
+		}, (err, resp) => {
+			if (err) {
+				console.error(err);
+				res.status(400).json(err);
+				return;
+			}
+			res.json('OK!');
+		});
+	});
+});
+
 app.post('/auth', function (req, res) {
 	if (!clientCredentials) {
 		console.error('No app credentails found.');
