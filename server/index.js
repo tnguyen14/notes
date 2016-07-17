@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 var config = require('../config.json');
 var local = require('./local');
-var googleDrive = require('./googledrive');
+var drive = require('./drive');
 
 config.endpoints.forEach((endpoint) => {
 	let module;
@@ -11,7 +11,7 @@ config.endpoints.forEach((endpoint) => {
 		module = local;
 	}
 	if (endpoint.type === 'google-drive') {
-		module = googleDrive;
+		module = drive;
 	}
 	app.use('/api/' + endpoint.path, module(endpoint));
 });
