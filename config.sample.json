@@ -1,10 +1,13 @@
 {
 	"endpoints": [{
-		"path": "local",
+		"uri": "local",
 		"type": "local",
-		"options": {
-			"rootDir": "~/Dropbox/Notes",
-			"label": "Local"
-		}
+		"label": "Local",
+		"rootDir": "~/Dropbox/Notes"
+	}, {
+		"uri": "drive",
+		"type": "google-drive",
+		"label": "Google Drive",
+		"rootDir": "root-folder-id"
 	}]
 }

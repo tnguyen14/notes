@@ -13,7 +13,7 @@ config.endpoints.forEach((endpoint) => {
 	if (endpoint.type === 'google-drive') {
 		module = drive;
 	}
-	app.use('/api/' + endpoint.path, module(endpoint));
+	app.use('/api/' + endpoint.uri, module(endpoint));
 });
 
 app.use(express.static('public'));
