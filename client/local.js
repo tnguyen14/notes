@@ -17,6 +17,7 @@ function getNotes () {
 		notes = response.notes;
 		notes.forEach(function (n, index) {
 			n.type = 'local';
+			// use path as id
 			n.id = n.path;
 			var li = note.createNoteLi(n);
 			list.parentNode.querySelector('h3').innerHTML = response.label;
@@ -109,6 +110,9 @@ function removeNote (id) {
 	var noteIndex = notes.find(function (_n) {
 		return _n.id === id;
 	});
+	if (noteIndex === -1) {
+		return;
+	}
 	var note = notes[noteIndex];
 	deleteJson(endPoint + '/' + encodeURIComponent(note.id))
 		.then(function () {

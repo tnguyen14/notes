@@ -40,9 +40,15 @@ function isAuthenticated (req, res, next) {
 			return fs.readFileAsync(TOKEN_PATH);
 		})
 		.then((token) => {
-			auth.credentials = JSON.parse(token);
+			var existingToken = JSON.parse(token);
+			// expired token
+			if (existingToken.expiry_date < new Date().getTime()) {
+				throw new Error('Token is expired.');
+			}
+			auth.credentials = existingToken;
 			return next();
-		}, () => {
+		}).catch((err) => {
+			console.error(err);
 			const authUrl = auth.generateAuthUrl({
 				access_type: 'offline',
 				scope: SCOPES
