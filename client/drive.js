@@ -3,11 +3,10 @@ var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var notify = require('./notify');
 var driveEndPoint = '/api/drive';
-
 var queryString = require('query-string');
-var qs = queryString.parse(window.location.search);
 
 function getNotes () {
+	var qs = queryString.parse(window.location.search);
 	if (qs.code) {
 		return submitAuth(qs.code);
 	}
@@ -33,11 +32,6 @@ function getNotes () {
 }
 
 function submitAuth (code) {
-	notify({
-		type: 'blue',
-		message: 'Authorizing with Google Drive',
-		permanent: true
-	});
 	if (!code) {
 		// @TODO handle error
 		notify({
@@ -46,6 +40,11 @@ function submitAuth (code) {
 		});
 		return;
 	}
+	notify({
+		type: 'blue',
+		message: 'Authorizing with Google Drive',
+		permanent: true
+	});
 	return postJson(driveEndPoint + '/auth', {
 		code: code
 	}).then(function () {
