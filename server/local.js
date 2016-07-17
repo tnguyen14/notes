@@ -94,7 +94,7 @@ function newNote (name, content) {
 	return Promise.any([fs.accessAsync(dirPath),
 		fs.accessAsync(dirPath + '.md')])
 		.then(() => {
-			throw new Error('Note ' + name + ' already exists.');
+			throw new Error('Note "' + name + '" already exists.');
 		}, () => {
 			return fs.mkdirAsync(dirPath);
 		}).then(() => {
@@ -116,7 +116,7 @@ app.post('/', function (req, res) {
 		} else {
 			res.status(400);
 		}
-		res.json(err);
+		res.json({message: err.message});
 	});
 });
 

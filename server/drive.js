@@ -162,10 +162,28 @@ function processFile (file) {
 	}
 }
 
+function findByName (name, callback) {
+	drive.files.list({
+		q: 'name contains \'' + name + '\' and trashed = false',
+		fields: 'files(id,mimeType,name,parents)'
+	}, (err, resp) => {
+		if (err) {
+			return callback(err);
+		}
+		callback(null, resp.files.filter((file) => {
+			if (file.parents.indexOf(rootDir) === -1) {
+				return false;
+			}
+			if (file.mimeType === mimeTypes.folder || file.mimeType === mimeTypes.md) {
+				return true;
+			}
+		}));
+	});
+}
+
 app.get('/', isAuthenticated, (req, res) => {
 	drive.files.list({
-		corpus: 'user',
-		q: '\'' + rootDir + '\'' + ' in parents'
+		q: '\'' + rootDir + '\'' + ' in parents and trashed = false'
 	}, (err, resp) => {
 		if (err) {
 			console.error(err);
@@ -213,6 +231,12 @@ app.put('/:id', function (req, res) {
 app.post('/', function (req, res) {
 	async.waterfall([
 		function (callback) {
+			findByName(req.body.name, callback);
+		},
+		function (files, callback) {
+			if (files.length > 0) {
+				return callback(new Error('Note "' + req.body.name + '" already exists.'));
+			}
 			drive.files.create({
 				resource: {
 					name: req.body.name,
@@ -235,8 +259,12 @@ app.post('/', function (req, res) {
 		}
 	], (err, resp) => {
 		if (err) {
-			console.error(err);
-			res.status(400).json(err);
+			if (err.message.indexOf('already exists') !== -1) {
+				res.status(409);
+			} else {
+				res.status(400);
+			}
+			res.json({message: err.message});
 			return;
 		}
 		res.json(resp);
