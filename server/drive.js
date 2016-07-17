@@ -121,38 +121,38 @@ function getFolderChildren (folderId) {
  */
 function processFile (file) {
 	switch (file.mimeType) {
-	case 'text/x-markdown':
-		let ext = path.extname(file.name);
-		return getFileContent(file.id)
-			.then((content) => {
-				return {
-					id: file.id,
-					name: path.basename(file.name, ext),
-					content: content
-				};
-			});
-	case 'application/vnd.google-apps.folder':
-		let indexMd;
-		return getFolderChildren(file.id)
-			.then((files) => {
-				indexMd = files.find((f) => {
-					return f.name === 'index.md';
-				});
-				if (!indexMd) {
-					return;
-				}
-				return indexMd.id;
-			})
-			.then(getFileContent)
-			.then((content) => {
-				if (content) {
+		case 'text/x-markdown':
+			let ext = path.extname(file.name);
+			return getFileContent(file.id)
+				.then((content) => {
 					return {
-						name: file.name,
-						id: indexMd.id,
+						id: file.id,
+						name: path.basename(file.name, ext),
 						content: content
 					};
-				}
-			});
+				});
+		case 'application/vnd.google-apps.folder':
+			let indexMd;
+			return getFolderChildren(file.id)
+				.then((files) => {
+					indexMd = files.find((f) => {
+						return f.name === 'index.md';
+					});
+					if (!indexMd) {
+						return;
+					}
+					return indexMd.id;
+				})
+				.then(getFileContent)
+				.then((content) => {
+					if (content) {
+						return {
+							name: file.name,
+							id: indexMd.id,
+							content: content
+						};
+					}
+				});
 	}
 }
 

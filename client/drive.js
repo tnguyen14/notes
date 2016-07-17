@@ -83,7 +83,6 @@ function renderDriveNotes (response) {
 		type: 'drive',
 		handler: newNote
 	});
-
 }
 
 function newNote () {

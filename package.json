@@ -13,7 +13,8 @@
     "build": "npm run copy",
     "start": "npm run build && npm run js && npm run server",
     "dev": "npm run build && npm run js:watch & npm run server:watch",
-    "test": "tap test/**/*.js"
+    "test": "tap test/**/*.js",
+    "lint": "happiness"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "browserify": "^13.0.1",
+    "happiness": "^7.1.2",
     "request": "^2.72.0",
     "tap": "^6.1.1",
     "watchify": "^3.7.0",
