@@ -11,11 +11,11 @@ var localDir, label;
 
 /**
  * @param {Object} file
- * @param {String} file.path
+ * @param {String} file.id
  * @returns {Promise}
  */
 function processFile (file) {
-	var filePath = path.resolve(localDir, file.path);
+	var filePath = path.resolve(localDir, file.id);
 	return fs.accessAsync(filePath).then(() => {
 		return fs.readFileAsync(filePath, 'utf8')
 			.then((data) => {
@@ -38,7 +38,7 @@ app.get('/', function (req, res) {
 					.then((stat) => {
 						if (stat.isDirectory()) {
 							return processFile({
-								path: f + '/index.md',
+								id: f + '/index.md',
 								name: f
 							});
 						}
@@ -46,7 +46,7 @@ app.get('/', function (req, res) {
 							var ext = path.extname(f);
 							if (ext === '.md') {
 								return processFile({
-									path: f,
+									id: f,
 									name: path.basename(f, ext)
 								});
 							}
@@ -64,8 +64,8 @@ app.get('/', function (req, res) {
 		});
 });
 
-app.put('/:path', function (req, res) {
-	var filePath = path.resolve(localDir, decodeURIComponent(req.params.path));
+app.put('/:id', function (req, res) {
+	var filePath = path.resolve(localDir, decodeURIComponent(req.params.id));
 	var content = req.body.content;
 	var newName;
 	if (req.body.name) {
@@ -126,8 +126,8 @@ function removeNote (filePath) {
 	return rimraf(dirToRemove);
 }
 
-app.delete('/:path', function (req, res) {
-	var filePath = path.resolve(localDir, decodeURIComponent(req.params.path));
+app.delete('/:id', function (req, res) {
+	var filePath = path.resolve(localDir, decodeURIComponent(req.params.id));
 	fs.accessAsync(filePath)
 		.then(() => {
 			return removeNote(filePath);

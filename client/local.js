@@ -15,12 +15,10 @@ var notes;
 function getNotes () {
 	return getJson(endPoint).then(function (response) {
 		notes = response.notes;
+		list.parentNode.querySelector('h3').innerHTML = response.label;
 		notes.forEach(function (n, index) {
 			n.type = 'local';
-			// use path as id
-			n.id = n.path;
 			var li = note.createNoteLi(n);
-			list.parentNode.querySelector('h3').innerHTML = response.label;
 			list.appendChild(li);
 			if (index === 0) {
 				note.showNote(li, n);

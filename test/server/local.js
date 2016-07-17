@@ -21,11 +21,11 @@ tap.test('get all notes', function (t) {
 		t.notOk(err);
 		t.strictSame(JSON.parse(body), {
 			notes: [{
-				path: 'Example Note/index.md',
+				id: 'Example Note/index.md',
 				name: 'Example Note',
 				content: ''
 			}, {
-				path: 'Standalone Note.md',
+				id: 'Standalone Note.md',
 				name: 'Standalone Note',
 				content: ''
 			}],
