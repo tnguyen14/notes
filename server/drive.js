@@ -10,6 +10,10 @@ var drive = require('googleapis').drive('v3');
 var GoogleAuth = require('google-auth-library');
 
 var SCOPES = ['https://www.googleapis.com/auth/drive'];
+var mimeTypes = {
+	md: 'text/x-markdown',
+	folder: 'application/vnd.google-apps.folder'
+};
 var TOKEN_DIR = 'private/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'notes.json';
 var rootDir, label, clientCredentials, auth;
@@ -121,7 +125,7 @@ function getFolderChildren (folderId) {
  */
 function processFile (file) {
 	switch (file.mimeType) {
-		case 'text/x-markdown':
+		case mimeTypes.md:
 			let ext = path.extname(file.name);
 			return getFileContent(file.id)
 				.then((content) => {
@@ -131,7 +135,7 @@ function processFile (file) {
 						content: content
 					};
 				});
-		case 'application/vnd.google-apps.folder':
+		case mimeTypes.folder:
 			let indexMd;
 			return getFolderChildren(file.id)
 				.then((files) => {
@@ -179,6 +183,30 @@ app.get('/', isAuthenticated, (req, res) => {
 					res.status(400).json(err);
 				}
 			});
+	});
+});
+
+app.put('/:id', function (req, res) {
+	let params = {
+		auth: auth,
+		fileId: req.params.id,
+		media: {
+			body: req.body.content,
+			mimeType: mimeTypes.md
+		}
+	};
+	if (req.body.name) {
+		params.resource = {
+			name: req.body.name
+		};
+	}
+	drive.files.update(params, (err, resp) => {
+		if (err) {
+			console.error(err);
+			res.status(400).json(err);
+			return;
+		}
+		res.json(resp);
 	});
 });
 

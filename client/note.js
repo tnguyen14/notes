@@ -13,7 +13,7 @@ var notes = {
 var lists = {};
 var endPoints = {
 	local: '/api/local',
-	drive: ''
+	drive: '/api/drive'
 };
 var listsContainer = document.querySelector('.lists');
 window.notes = notes;
