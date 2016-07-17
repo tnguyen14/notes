@@ -64,10 +64,7 @@ function saveNote (type, n) {
 		return;
 	}
 	if (n.content === note.content && n.title === note.name) {
-		notify({
-			type: 'blue',
-			message: 'No new change detected.'
-		});
+		notify.info('No new change detected.');
 		return;
 	}
 	// request body object
@@ -105,12 +102,7 @@ function saveNote (type, n) {
 			type: 'green',
 			timeout: 3000
 		});
-	}, function (err) {
-		notify({
-			message: err,
-			type: 'red'
-		});
-	});
+	}, notify.error);
 }
 
 function removeNote (type, id) {

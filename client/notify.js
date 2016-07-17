@@ -47,3 +47,9 @@ module.exports.error = function (err) {
 		type: 'red'
 	});
 };
+module.exports.info = function (message) {
+	notify({
+		message: message,
+		type: 'blue'
+	});
+};
