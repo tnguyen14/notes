@@ -209,6 +209,39 @@ app.put('/:id', function (req, res) {
 	});
 });
 
+app.post('/', function (req, res) {
+	drive.files.create({
+		resource: {
+			name: req.body.name,
+			mimeType: mimeTypes.folder,
+			parents: [rootDir]
+		}
+	}, (err, resp) => {
+		if (err) {
+			console.error(err);
+			res.status(400).json(err);
+			return;
+		}
+		drive.files.create({
+			resource: {
+				name: 'index.md',
+				parents: [resp.id]
+			},
+			media: {
+				body: req.body.content,
+				mimeType: mimeTypes.md
+			}
+		}, (err, resp) => {
+			if (err) {
+				console.error(err);
+				res.status(400).json(err);
+				return;
+			}
+			res.json(resp);
+		});
+	});
+});
+
 app.post('/auth', function (req, res) {
 	if (!clientCredentials) {
 		console.error('No app credentails found.');
