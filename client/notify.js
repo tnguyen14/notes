@@ -42,10 +42,20 @@ function notify (opts) {
 
 module.exports = notify;
 module.exports.error = function (err) {
-	notify({
-		message: err,
-		type: 'red'
-	});
+	if (!err.response) {
+		notify({
+			message: err.response.message || err,
+			type: 'red'
+		});
+		return;
+	}
+	err.response.json()
+		.then(function (resp) {
+			notify({
+				message: resp.message,
+				type: 'red'
+			});
+		});
 };
 module.exports.info = function (message) {
 	notify({

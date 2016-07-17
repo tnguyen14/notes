@@ -122,6 +122,11 @@ function removeNote (type, id) {
 			li.parentNode.removeChild(li);
 			notes[type].splice(noteIndex, 1);
 			editor.setNote();
+			notify({
+				message: 'Successfully deleted note.',
+				type: 'green',
+				timeout: 3000
+			});
 		});
 }
 
