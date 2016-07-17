@@ -2,7 +2,7 @@ var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var notify = require('./notify');
-var driveEndPoint = '/api/drive';
+var driveEndPoint = process.env.API_URL + '/drive';
 var queryString = require('query-string');
 var note = require('./note');
 

@@ -9,4 +9,5 @@
 - Under "Authorized JavaScript origins" and "Authorized redirect URIs", enter your production URL as the first value and development URL as the second (such as `http://localhost:4002`).
 - Create a `private` directory and move the downloaded JSON credentials file to `private/client_secret.json`.
 - Create a `.env` file with the value of `NODE_ENV` set to either `production` or `development`.
-- `npm run dev` on development, or `npm start` on production.
+- Server: `npm run dev` on development, or `npm start` on production.
+- Add your server URL as `API_URL` to `.env` file.

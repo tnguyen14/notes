@@ -2,7 +2,7 @@ var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var note = require('./note');
 
-var endPoint = '/api/local';
+var endPoint = process.env.API_URL + '/local';
 var TYPE = 'local';
 
 function getNotes () {

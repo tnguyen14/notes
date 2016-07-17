@@ -7,8 +7,8 @@
     "hooks": "cd .git/hooks && ln -sfv ../../hooks/pre-commit .",
     "server": "forever start server/index.js && forever logs -f 0",
     "server:watch": "nodemon --debug",
-    "js": "browserify client/index.js -o public/index.js",
-    "js:watch": "watchify client/index.js -o public/index.js -dv",
+    "js": "browserify -t envlocalify client/index.js -o public/index.js",
+    "js:watch": "watchify -t envlocalify client/index.js -o public/index.js -dv",
     "copy": "cp -v node_modules/github-markdown-css/github-markdown.css public/",
     "build": "npm run copy",
     "start": "npm run build && npm run js && npm run server",
@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "browserify": "^13.0.1",
+    "envlocalify": "^1.1.1",
     "happiness": "^7.1.2",
     "request": "^2.72.0",
     "tap": "^6.1.1",

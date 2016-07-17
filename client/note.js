@@ -12,8 +12,8 @@ var notes = {
 };
 var lists = {};
 var endPoints = {
-	local: '/api/local',
-	drive: '/api/drive'
+	local: process.env.API_URL + '/local',
+	drive: process.env.API_URL + '/drive'
 };
 var listsContainer = document.querySelector('.lists');
 window.notes = notes;
