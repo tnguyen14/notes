@@ -4,7 +4,11 @@ var postJson = simpleFetch.postJson;
 var notify = require('./notify');
 var driveEndPoint = '/api/drive';
 var queryString = require('query-string');
+var note = require('./note');
+var add = require('./add');
 
+var list = document.querySelector('.list.drive ul');
+var notes;
 function getNotes () {
 	var qs = queryString.parse(window.location.search);
 	if (qs.code) {
@@ -67,6 +71,23 @@ function submitAuth (code) {
 
 function renderDriveNotes (response) {
 	console.log(response);
+	notes = response.notes;
+	list.parentNode.querySelector('h3').innerHTML = response.label;
+	notes.forEach(function (n, index) {
+		n.type = 'drive';
+		var li = note.createNoteLi(n);
+		list.appendChild(li);
+	});
+	add.registerHandler({
+		label: response.label,
+		type: 'drive',
+		handler: newNote
+	});
+
+}
+
+function newNote () {
+
 }
 
 module.exports = {
