@@ -5,6 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "hooks": "cd .git/hooks && ln -sfv ../../hooks/pre-commit .",
+    "client": "http-server public -p 3001",
     "server": "forever start server/index.js && forever logs -f 0",
     "server:watch": "nodemon --debug",
     "js": "browserify -t envlocalify client/index.js -o public/index.js",
@@ -12,7 +13,7 @@
     "copy": "cp -v node_modules/github-markdown-css/github-markdown.css public/",
     "build": "npm run copy",
     "start": "npm run server",
-    "dev": "npm run build && npm run js:watch & npm run server:watch",
+    "dev": "npm run build && npm run js:watch & npm run client & npm run server:watch",
     "test": "tap test/**/*.js",
     "lint": "happiness",
     "deploy": "npm run build && npm run js && gh-pages -d public"
@@ -51,6 +52,7 @@
     "envlocalify": "^1.1.1",
     "gh-pages": "^0.11.0",
     "happiness": "^7.1.2",
+    "http-server": "^0.9.0",
     "nodemon": "^1.10.2",
     "request": "^2.72.0",
     "tap": "^6.1.1",
