@@ -51,6 +51,7 @@
     "envlocalify": "^1.1.1",
     "gh-pages": "^0.11.0",
     "happiness": "^7.1.2",
+    "nodemon": "^1.10.2",
     "request": "^2.72.0",
     "tap": "^6.1.1",
     "watchify": "^3.7.0",
