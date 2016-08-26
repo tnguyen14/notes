@@ -8,7 +8,7 @@ var signin = require('./signin');
 add.startListening();
 editor.startListening();
 
-signin().then(function () {
+signin.getProfile().then(function () {
 	return Promise.all([
 		local.getNotes(),
 		drive.getNotes()

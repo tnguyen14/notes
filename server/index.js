@@ -11,7 +11,8 @@ var authorizedOrigins = process.env.AUTHORIZED_ORIGINS.split(',');
 app.use(cors({
 	origin: function (origin, callback) {
 		callback(null, authorizedOrigins.indexOf(origin) !== -1);
-	}
+	},
+	credentials: true
 }));
 
 config.endpoints.forEach((endpoint) => {
@@ -27,8 +28,6 @@ config.endpoints.forEach((endpoint) => {
 app.use('/auth', auth({
 	cors: true
 }));
-
-app.use(express.static('public'));
 
 app.listen(process.env.PORT || 3000, function () {
 	console.log('Express is listening.');

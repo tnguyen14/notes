@@ -3,8 +3,11 @@ var getJson = simpleFetch.getJson;
 var signIn = document.querySelector('.sign-in');
 var signInButton = signIn.querySelector('button');
 
-module.exports = function signin () {
-	return getJson(process.env.AUTH_URL + '/profile', {
+module.exports.authorize = authorize;
+module.exports.getProfile = getProfile;
+
+function getProfile () {
+	return getJson(process.env.API_URL + '/auth/profile', {
 		credentials: 'include'
 	})
 		.catch(function (err) {
@@ -13,9 +16,19 @@ module.exports = function signin () {
 			}
 			throw err;
 		});
-};
+}
 
 signInButton.addEventListener('click', function () {
-	var currentUrl = window.location.href;
-	window.location = process.env.AUTH_URL + '/login/google' + '?redirect=' + encodeURIComponent(currentUrl);
+	authorize();
 });
+
+function authorize (scopes) {
+	// default scope is just profile
+	var scope = ['profile', 'https://www.googleapis.com/auth/drive'];
+	if (scopes) {
+		scope = scope.concat(scopes);
+	}
+	var currentUrl = window.location.href;
+	window.location = process.env.API_URL + '/auth/login/google' + '?scope=' + encodeURIComponent(scope.join(' ')) + '&redirect=' + encodeURIComponent(currentUrl);
+}
+

@@ -1,6 +1,4 @@
 var Promise = require('bluebird');
-var fs = Promise.promisifyAll(require('fs'));
-var mkdirp = Promise.promisify(require('mkdirp'));
 var async = require('async');
 var path = require('path');
 var express = require('express');
@@ -10,74 +8,42 @@ var app = express();
 var google = require('googleapis');
 var drive = google.drive('v3');
 var OAuth2 = google.auth.OAuth2;
+var cookieSession = require('cookie-session');
+var passport = require('passport');
 
-var SCOPES = ['https://www.googleapis.com/auth/drive'];
+app.use(cookieSession({
+	name: process.env.COOKIE_NAME,
+	secret: process.env.COOKIE_SECRET,
+	domain: process.env.COOKIE_DOMAIN
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 var mimeTypes = {
 	md: 'text/x-markdown',
 	folder: 'application/vnd.google-apps.folder'
 };
-var TOKEN_DIR = 'private/.credentials/';
-var TOKEN_PATH = TOKEN_DIR + 'notes.json';
-var rootDir, label, clientCredentials, auth;
+var rootDir, label, auth;
 
 function isAuthenticated (req, res, next) {
-	if (!clientCredentials) {
-		console.error('No app credentails found.');
-		res.status(400).json('No app credentials found.');
-		return;
-	}
-	if (auth && Object.keys(auth.credentials).length) {
-		return next();
+	if (!req.isAuthenticated || !req.isAuthenticated) {
+		return res.sendStatus(401);
 	}
 	if (!auth) {
-		let clientSecret = clientCredentials.web.client_secret;
-		let clientId = clientCredentials.web.client_id;
-		let redirectUrl;
-		if (process.env.NODE_ENV === 'development') {
-			redirectUrl = clientCredentials.web.redirect_uris[1];
-		} else if (process.env.NODE_ENV === 'production') {
-			redirectUrl = clientCredentials.web.redirect_uris[0];
-		}
-		auth = new OAuth2(clientId, clientSecret, redirectUrl);
+		auth = new OAuth2();
 		google.options({auth: auth});
 	}
-	fs.accessAsync(TOKEN_PATH)
-		.then(() => {
-			return fs.readFileAsync(TOKEN_PATH);
-		})
-		.then((token) => {
-			var existingToken = JSON.parse(token);
-			// expired token
-			if (existingToken.expiry_date < new Date().getTime()) {
-				throw new Error('Token is expired.');
-			}
-			auth.credentials = existingToken;
-			return next();
-		}).catch((err) => {
-			console.error(err);
-			const authUrl = auth.generateAuthUrl({
-				access_type: 'offline',
-				scope: SCOPES
-			});
-			res.status(401).json({
-				message: 'No token found. Please visit the provided URL to authorize the app and submit the code from that page to the /auth endpoint as a query parameter named "code".',
-				url: authUrl
-			});
-		});
+	if (!Object.keys(auth.credentials).length) {
+		auth.credentials = {
+			access_token: req.user.accessToken,
+			refresh_token: req.user.refreshToken
+		};
+	}
+	return next();
 }
 
 app.use(bodyParser.json());
-// Load client secrets from a local file.
-fs.accessAsync('private/client_secret.json')
-	.then(() => {
-		fs.readFileAsync('private/client_secret.json')
-			.then((content) => {
-				clientCredentials = JSON.parse(content);
-			});
-	}, (err) => {
-		console.error('Error loading client secret file: ' + err);
-		process.exit(1);
-	});
 
 function getFileContent (fileId) {
 	if (!fileId) {
@@ -187,7 +153,12 @@ app.get('/', isAuthenticated, (req, res) => {
 	}, (err, resp) => {
 		if (err) {
 			console.error(err);
-			res.status(400).json(err);
+			if (err.code === 401 || err.code === 403) {
+				res.status(err.code);
+			} else {
+				res.status(400);
+			}
+			res.json(err);
 			return;
 		}
 		Promise.all(resp.files.map(processFile))
@@ -295,48 +266,6 @@ app.delete('/:id', function (req, res) {
 			return;
 		}
 		res.json('OK!');
-	});
-});
-
-app.post('/auth', function (req, res) {
-	if (!clientCredentials) {
-		console.error('No app credentails found.');
-		res.status(400).json('No app credentials found.');
-		return;
-	}
-	if (!auth) {
-		console.error('No auth instance found.');
-		res.status(400).json('No auth instance found.');
-		return;
-	}
-	return new Promise((resolve, reject) => {
-		if (Object.keys(auth.credentials).length) {
-			return resolve();
-		}
-		auth.getToken(req.body.code, (err, token) => {
-			if (err) {
-				console.error(err);
-				return reject(err);
-			}
-			auth.credentials = token;
-			// store token
-			mkdirp(TOKEN_DIR)
-				.then(() => {
-					return fs.writeFileAsync(TOKEN_PATH, JSON.stringify(token));
-				})
-				.then(function () {
-					resolve();
-				});
-		});
-	}).then(() => {
-		if (req.body.redirectUrl) {
-			res.redirect(req.body.redirectUrl);
-		} else {
-			res.json('OK!');
-		}
-	}, (err) => {
-		console.error('Error while retrieving access token', err);
-		res.status(400).json('Error while retrieving access token.');
 	});
 });
 
