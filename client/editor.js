@@ -1,11 +1,14 @@
 var md = require('markdown-it')({
 	breaks: true
 })
-	.use(require('markdown-it-task-lists'));
+	.use(require('markdown-it-task-lists'))
+	.use(require('markdown-it-front-matter'), updateMetadata);
+var yaml = require('js-yaml');
 
 var handlers = {};
 
 var container = document.querySelector('.editor-container');
+var tagsEl = document.querySelector('.metadata .tags .values');
 var title = document.querySelector('.title');
 var textarea = document.querySelector('.write-content textarea');
 var viewButton = document.querySelector('.view-button');
@@ -60,6 +63,16 @@ function setNote (note) {
 	setType((note && note.type) ? note.type : '');
 	updateTitle((note && note.name) ? note.name : '');
 	updateContent((note && note.content) ? note.content : '');
+}
+
+function updateMetadata (frontmatter) {
+	var metadata = yaml.safeLoad(frontmatter);
+	var tags = metadata.tags.split(',');
+	tagsEl.innerHTML = '';
+	tags.forEach(function (tag) {
+		var tagEl = tagsEl.appendChild(document.createElement('span'));
+		tagEl.innerText = tag;
+	});
 }
 
 function startListening () {
