@@ -5,9 +5,9 @@
   "main": "server/index.js",
   "scripts": {
     "hooks": "cd .git/hooks && ln -sfv ../../hooks/pre-commit .",
-    "client": "http-server public -p 3001",
+    "client": "http-server public -p 4002",
     "server": "forever start server/index.js && forever logs -f 0",
-    "server:watch": "nodemon --debug",
+    "server:watch": "nodemon --inspect",
     "js": "browserify -t envlocalify client/index.js -o public/index.js",
     "js:watch": "watchify -t envlocalify client/index.js -o public/index.js -dv",
     "copy": "cp -v node_modules/github-markdown-css/github-markdown.css public/",
