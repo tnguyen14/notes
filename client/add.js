@@ -2,7 +2,7 @@ var addNoteChoice = document.querySelector('.add-note-choice');
 var handlers = {};
 
 function startListening () {
-	document.querySelector('.lists .add').addEventListener('click', addNoteChoice.showModal.bind(addNoteChoice));
+	document.querySelector('.menu .add').addEventListener('click', addNoteChoice.showModal.bind(addNoteChoice));
 	addNoteChoice.addEventListener('click', function (e) {
 		if (!e.target.classList.contains('add-option')) {
 			return;
