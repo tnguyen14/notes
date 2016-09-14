@@ -67,10 +67,13 @@ function setNote (note) {
 
 function updateMetadata (frontmatter) {
 	var metadata = yaml.safeLoad(frontmatter);
-	var tags = metadata.tags.split(',');
+	var tags = metadata.tags.split(',').map(function (t) {
+		return t.trim();
+	});
 	tagsEl.innerHTML = '';
 	tags.forEach(function (tag) {
 		var tagEl = tagsEl.appendChild(document.createElement('span'));
+		tagEl.classList.add('value');
 		tagEl.innerText = tag;
 	});
 }
