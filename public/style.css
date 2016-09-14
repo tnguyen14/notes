@@ -54,7 +54,8 @@ button.blue {
 	background-color: #3498db;
 	color: #fff;
 }
-button.blue:hover {
+button.blue:hover,
+button.blue.active {
 	background-color: #2980b9;
 }
 
@@ -64,13 +65,27 @@ button.blue:hover {
 	text-align: center;
 	width: 4rem;
 	height: 100%;
+	z-index: 1;
+}
+.menu button {
+	border-radius: 0;
+	font-family: monospace;
+	font-size: 1.3em;
+	margin-bottom: 1rem;
 }
 
 .lists {
 	border-right: 1px solid var(--color-white-smoke);
-	margin-left: .5em;
-	width: 20%;
+	width: 0;
+	left: -20%;
+	padding-left: .5em;
 	position: relative;
+	transition: left .2s ease-in-out, width .2s ease-in-out .2s;
+}
+.lists.active {
+	left: 0;
+	width: 20%;
+	transition: width .2s ease-in-out, left .2s ease-in-out .2s;
 }
 .lists .add {
 	float: right;
@@ -99,9 +114,13 @@ button.blue:hover {
 }
 
 .editor-container {
-	width: 80%;
+	width: 100%;
 	margin: 0 auto;
 	padding: 1rem 2rem;
+	transition: width .2s ease-in-out;
+}
+.editor-container.lists-active {
+	width: 80%;
 }
 
 .notification {

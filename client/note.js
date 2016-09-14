@@ -3,7 +3,7 @@ var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
 var editor = require('./editor');
-var add = require('./add');
+var menu = require('./menu');
 var notify = require('./notify');
 
 var notes = {
@@ -36,7 +36,7 @@ function renderNotes (opts) {
 	var list = lists[opts.type] = listsContainer.querySelector('.list.' + opts.type + ' ul');
 	list.parentNode.querySelector('h3').innerHTML = opts.label;
 	opts.notes.forEach(addNote.bind(window, opts.type));
-	add.registerHandler({
+	menu.registerHandler({
 		label: opts.label,
 		type: opts.type,
 		handler: newNote.bind(window, opts.type)

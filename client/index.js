@@ -2,10 +2,10 @@ var Promise = require('bluebird');
 var drive = require('./drive');
 var local = require('./local');
 var editor = require('./editor');
-var add = require('./add');
+var menu = require('./menu');
 var signin = require('./signin');
 
-add.startListening();
+menu.startListening();
 editor.startListening();
 
 signin.getProfile().then(function () {

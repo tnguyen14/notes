@@ -7,9 +7,10 @@
 	</head>
 	<body>
 		<div class="menu">
-			<button type="button" class="add blue">+</button>
+			<button type="button" class="toggle blue active">&#9776;</button>
+			<button type="button" class="add green">+</button>
 		</div>
-		<div class="lists">
+		<div class="lists active">
 			<section class="list local">
 				<h3></h3>
 				<ul></ul>
@@ -19,7 +20,7 @@
 				<ul></ul>
 			</section>
 		</div>
-		<div class="editor-container">
+		<div class="editor-container lists-active">
 			<div class="notification">
 				<p class="message"></p>
 				<div class="close">x</div>
@@ -32,7 +33,7 @@
 			</div>
 			<form>
 				<div class="title-container">
-					<input type="text" class="title" placeholder=""/>
+					<input type="text" class="title" placeholder="No note selected."/>
 				</div>
 				<div class="tabnav-container">
 					<nav class="tabnav clearfix">
@@ -42,7 +43,7 @@
 				</div>
 				<div class="content-container">
 					<div class="view-content">
-						<div class="markdown-body">No note selected.</div>
+						<div class="markdown-body"></div>
 					</div>
 					<div class="write-content">
 						<textarea placeholder="Write a note..."></textarea>
