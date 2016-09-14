@@ -8,7 +8,7 @@ var yaml = require('js-yaml');
 var handlers = {};
 
 var container = document.querySelector('.editor-container');
-var tagsEl = document.querySelector('.metadata .tags .values');
+var metadataEl = document.querySelector('.metadata');
 var title = document.querySelector('.title');
 var textarea = document.querySelector('.write-content textarea');
 var viewButton = document.querySelector('.view-button');
@@ -66,16 +66,29 @@ function setNote (note) {
 }
 
 function updateMetadata (frontmatter) {
+	// clear out existing metadata
+	metadataEl.innerHTML = '';
+	if (!frontmatter) {
+		return;
+	}
 	var metadata = yaml.safeLoad(frontmatter);
-	var tags = metadata.tags.split(',').map(function (t) {
-		return t.trim();
-	});
-	tagsEl.innerHTML = '';
-	tags.forEach(function (tag) {
-		var tagEl = tagsEl.appendChild(document.createElement('span'));
-		tagEl.classList.add('value');
-		tagEl.innerText = tag;
-	});
+	if (metadata.tags) {
+		var tagsEl = metadataEl.appendChild(document.createElement('div'));
+		tagsEl.classList.add('tags');
+		var labelEl = tagsEl.appendChild(document.createElement('span'));
+		labelEl.classList.add('label');
+		labelEl.innerText = 'tags: ';
+		var valuesEl = tagsEl.appendChild(document.createElement('span'));
+		valuesEl.classList.add('values');
+		var tags = metadata.tags.split(',').map(function (t) {
+			return t.trim();
+		});
+		tags.forEach(function (tag) {
+			var tagEl = valuesEl.appendChild(document.createElement('span'));
+			tagEl.classList.add('value');
+			tagEl.innerText = tag;
+		});
+	}
 }
 
 function startListening () {
@@ -139,6 +152,8 @@ function viewMode () {
 	viewButton.classList.add('selected');
 	form.classList.remove('write-selected');
 	var content = getContent();
+	// reset metadata first
+	updateMetadata();
 	view.innerHTML = md.render(content);
 	Array.prototype.forEach.call(view.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
 		input.removeAttribute('disabled');
