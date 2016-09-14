@@ -1,4 +1,6 @@
-var md = require('markdown-it')()
+var md = require('markdown-it')({
+	breaks: true
+})
 	.use(require('markdown-it-task-lists'));
 
 var handlers = {};
