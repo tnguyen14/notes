@@ -34,12 +34,11 @@ function isAuthenticated (req, res, next) {
 		auth = new OAuth2();
 		google.options({auth: auth});
 	}
-	if (!Object.keys(auth.credentials).length) {
-		auth.credentials = {
-			access_token: req.user.accessToken,
-			refresh_token: req.user.refreshToken
-		};
-	}
+	// update Google credentials
+	auth.credentials = {
+		access_token: req.user.accessToken,
+		refresh_token: req.user.refreshToken
+	};
 	return next();
 }
 
