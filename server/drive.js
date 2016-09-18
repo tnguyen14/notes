@@ -6,7 +6,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var flatfile = require('flat-file-db');
-var db = flatfile.sync('../data/users.db');
+var db = flatfile.sync('./data/users.db');
 
 var google = require('googleapis');
 var drive = google.drive('v3');
@@ -22,6 +22,7 @@ app.use(cookieSession({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(bodyParser.json());
 
 var mimeTypes = {
 	md: 'text/x-markdown',
@@ -60,11 +61,11 @@ function hasRootDir (req, res, next) {
 	return next();
 }
 
-function getRootDirs () {
+function getDirs (rootDir) {
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
-			q: `mimeType = '${mimeTypes.folder}' and 'root' in parents and trashed = false`
+			q: `mimeType = '${mimeTypes.folder}' and '${rootDir}' in parents and trashed = false`
 		}, (err, resp) => {
 			if (err) {
 				console.error(err);
@@ -75,8 +76,6 @@ function getRootDirs () {
 		});
 	});
 }
-
-app.use(bodyParser.json());
 
 function getFileContent (fileId) {
 	if (!fileId) {
@@ -181,7 +180,7 @@ function findByName (name, rootDir, callback) {
 }
 
 app.get('/me', isAuthenticated, (req, res) => {
-	getRootDirs().then((rootDirs) => {
+	getDirs('root').then((rootDirs) => {
 		res.json(Object.assign(db.get(req.user.id), {
 			rootDirs: rootDirs
 		}));
@@ -200,15 +199,8 @@ app.patch('/me', isAuthenticated, (req, res) => {
 
 app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
-	drive.files.list({
-		q: '\'' + driveConfig.rootDir + '\'' + ' in parents and trashed = false'
-	}, (err, resp) => {
-		if (err) {
-			res.status(err.code);
-			res.json(err);
-			return;
-		}
-		Promise.all(resp.files.map(processFile))
+	getDirs(driveConfig.rootDir).then((files) => {
+		Promise.all(files.map(processFile))
 			.then((notes) => {
 				res.json({
 					label: driveConfig.label,
@@ -220,6 +212,10 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 					res.status(400).json(err);
 				}
 			});
+	}, (err) => {
+		res.status(err.code);
+		res.json(err);
+		return;
 	});
 });
 
