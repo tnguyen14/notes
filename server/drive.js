@@ -204,12 +204,7 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 		q: '\'' + driveConfig.rootDir + '\'' + ' in parents and trashed = false'
 	}, (err, resp) => {
 		if (err) {
-			console.error(err);
-			if (err.code === 401 || err.code === 403) {
-				res.status(err.code);
-			} else {
-				res.status(400);
-			}
+			res.status(err.code);
 			res.json(err);
 			return;
 		}

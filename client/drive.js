@@ -11,7 +11,7 @@ function getNotes () {
 	return getJson(driveEndPoint, {
 		credentials: 'include'
 	}).then(renderDriveNotes, (err) => {
-		if (err.response.status === 401 || err.response.status === 403) {
+		if (err.response.status === 401) {
 			notify({
 				type: 'blue',
 				message: 'Redirecting to Google Drive for authorization',

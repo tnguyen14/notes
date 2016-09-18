@@ -2,6 +2,8 @@
 :root {
 	--color-white-smoke: #eee;
 	--color-heather: #bdc3c7;
+	--color-oslo-grey: #7f8c8d;
+	--color-submarine: #95a5a6;
 	--color-cinnabar: #e74c3c;
 	--color-persian-red: #c0392b;
 	--color-shamrock: #2ecc71;
@@ -64,6 +66,13 @@ button.blue:hover,
 button.blue.active {
 	background-color: var(--color-pelorous);
 }
+button.grey {
+	background-color: var(--color-oslo-grey);
+	color: #fff;
+}
+button.grey:hover {
+	background-color: var(--color-submarine);
+}
 
 .menu {
 	background-color: var(--color-white-smoke);
@@ -78,6 +87,8 @@ button.blue.active {
 	font-family: monospace;
 	font-size: 1.3em;
 	margin-bottom: 1rem;
+	width: 2.5em;
+	height: 2.5em;
 }
 
 .lists {
