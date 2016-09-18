@@ -4,6 +4,7 @@ var notify = require('./notify');
 var driveEndPoint = process.env.API_URL + '/drive';
 var note = require('./note');
 var signin = require('./signin');
+var config = require('./config');
 
 var TYPE = 'drive';
 function getNotes () {
@@ -24,6 +25,9 @@ function getNotes () {
 					message: 'Error in getting Google Drive notes: ' + error.message,
 					permanent: true
 				});
+				if (error.message.startsWith('Configuration:')) {
+					config.open();
+				}
 			});
 		}
 	});

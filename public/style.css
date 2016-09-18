@@ -171,6 +171,10 @@ button.blue.active {
 	visibility: visible;
 }
 
+input {
+	font-size: 1rem;
+}
+
 textarea {
 	background-color: #fafafa;
 	border: 1px solid #ddd;
@@ -187,6 +191,25 @@ textarea:focus {
 	border-color: #51a7e8;
 	box-shadow: inset 0 1px 2px rgba(0,0,0,0.075), 0 0 5px rgba(81,167,232,0.5);
 }
+
+select {
+	font-size: 1rem;
+}
+
+.form-item {
+	display: flex;
+	margin: .8rem 0;
+	justify-content: space-between;
+}
+.form-item label {
+	width: 28%;
+}
+.form-item select,
+.form-item input,
+.form-teim textarea {
+	width: 68%;
+}
+
 
 .title-container .title {
 	border: none;
@@ -278,4 +301,14 @@ textarea:focus {
 .delete-confirm .cancel {
 	float: right;
 	margin-right: .5rem;
+}
+
+.configuration {
+	width: 60%;
+}
+.configuration form {
+	margin-top: 2rem;
+}
+.configuration button[type=submit] {
+	float: right;
 }

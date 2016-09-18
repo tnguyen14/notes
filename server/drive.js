@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var async = require('async');
 var path = require('path');
+var pick = require('lodash.pick');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -53,10 +54,26 @@ function hasRootDir (req, res, next) {
 	}
 	if (!db.get(req.user.id).rootDir) {
 		return res.status(400).json({
-			message: 'No root dir defined for current user.'
+			message: 'Configuration: No root dir defined for current user.'
 		});
 	}
 	return next();
+}
+
+function getRootDirs () {
+	return new Promise((resolve, reject) => {
+		drive.files.list({
+			auth: auth,
+			q: `mimeType = '${mimeTypes.folder}' and 'root' in parents and trashed = false`
+		}, (err, resp) => {
+			if (err) {
+				console.error(err);
+				reject(err);
+				return;
+			}
+			resolve(resp.files);
+		});
+	});
 }
 
 app.use(bodyParser.json());
@@ -162,6 +179,24 @@ function findByName (name, rootDir, callback) {
 		}));
 	});
 }
+
+app.get('/me', isAuthenticated, (req, res) => {
+	getRootDirs().then((rootDirs) => {
+		res.json(Object.assign(db.get(req.user.id), {
+			rootDirs: rootDirs
+		}));
+	}, (err) => {
+		res.status(err.code);
+		res.json(err);
+	});
+});
+
+app.patch('/me', isAuthenticated, (req, res) => {
+	var driveConfig = db.get(req.user.id);
+	var newConfig = pick(req.body, ['rootDir', 'label']);
+	db.put(req.user.id, Object.assign({}, driveConfig, newConfig));
+	res.sendStatus(200);
+});
 
 app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
