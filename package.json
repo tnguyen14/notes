@@ -37,6 +37,7 @@
     "cors": "^2.7.1",
     "dotenv-safe": "^2.3.1",
     "express": "^4.14.0",
+    "flat-file-db": "^1.0.0",
     "forever": "^0.15.2",
     "github-markdown-css": "^2.3.0",
     "googleapis": "^9.0.0",

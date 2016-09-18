@@ -146,7 +146,7 @@ button.blue.active {
 	color: #fff;
 }
 .notification[data-type=red] {
-	background-color: var(--color-presian-red);
+	background-color: var(--color-persian-red);
 	color: #fff;
 }
 .notification[data-type=green] {

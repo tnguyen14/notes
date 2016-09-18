@@ -4,6 +4,8 @@ var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var flatfile = require('flat-file-db');
+var db = flatfile.sync('../data/users.db');
 
 var google = require('googleapis');
 var drive = google.drive('v3');
@@ -24,7 +26,7 @@ var mimeTypes = {
 	md: 'text/x-markdown',
 	folder: 'application/vnd.google-apps.folder'
 };
-var rootDir, label, auth;
+var auth;
 
 function isAuthenticated (req, res, next) {
 	if (!req.isAuthenticated || !req.isAuthenticated) {
@@ -39,6 +41,21 @@ function isAuthenticated (req, res, next) {
 		access_token: req.user.accessToken,
 		refresh_token: req.user.refreshToken
 	};
+	return next();
+}
+
+function hasRootDir (req, res, next) {
+	if (!db.has(req.user.id)) {
+		db.put(req.user.id, {
+			type: 'google-drive',
+			label: 'Google Drive'
+		});
+	}
+	if (!db.get(req.user.id).rootDir) {
+		return res.status(400).json({
+			message: 'No root dir defined for current user.'
+		});
+	}
 	return next();
 }
 
@@ -127,7 +144,7 @@ function processFile (file) {
 	}
 }
 
-function findByName (name, callback) {
+function findByName (name, rootDir, callback) {
 	drive.files.list({
 		q: 'name contains \'' + name + '\' and trashed = false',
 		fields: 'files(id,mimeType,name,parents)'
@@ -146,9 +163,10 @@ function findByName (name, callback) {
 	});
 }
 
-app.get('/', isAuthenticated, (req, res) => {
+app.get('/', isAuthenticated, hasRootDir, (req, res) => {
+	var driveConfig = db.get(req.user.id);
 	drive.files.list({
-		q: '\'' + rootDir + '\'' + ' in parents and trashed = false'
+		q: '\'' + driveConfig.rootDir + '\'' + ' in parents and trashed = false'
 	}, (err, resp) => {
 		if (err) {
 			console.error(err);
@@ -163,7 +181,7 @@ app.get('/', isAuthenticated, (req, res) => {
 		Promise.all(resp.files.map(processFile))
 			.then((notes) => {
 				res.json({
-					label: label,
+					label: driveConfig.label,
 					notes: notes.filter((n) => n)
 				});
 			}, (err) => {
@@ -198,10 +216,11 @@ app.put('/:id', function (req, res) {
 	});
 });
 
-app.post('/', function (req, res) {
+app.post('/', isAuthenticated, hasRootDir, function (req, res) {
+	var driveConfig = db.get(req.user.id);
 	async.waterfall([
 		function (callback) {
-			findByName(req.body.name, callback);
+			findByName(req.body.name, driveConfig.rootDir, callback);
 		},
 		function (files, callback) {
 			if (files.length > 0) {
@@ -211,7 +230,7 @@ app.post('/', function (req, res) {
 				resource: {
 					name: req.body.name,
 					mimeType: mimeTypes.folder,
-					parents: [rootDir]
+					parents: [req.user.rootDir]
 				}
 			}, callback);
 		},
@@ -269,7 +288,5 @@ app.delete('/:id', function (req, res) {
 });
 
 module.exports = function (endpoint) {
-	rootDir = endpoint.rootDir;
-	label = endpoint.label;
 	return app;
 };

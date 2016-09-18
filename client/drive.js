@@ -9,7 +9,7 @@ var TYPE = 'drive';
 function getNotes () {
 	return getJson(driveEndPoint, {
 		credentials: 'include'
-	}).then(renderDriveNotes, function (err) {
+	}).then(renderDriveNotes, (err) => {
 		if (err.response.status === 401 || err.response.status === 403) {
 			notify({
 				type: 'blue',
@@ -18,10 +18,12 @@ function getNotes () {
 			});
 			signin.authorize('https://www.googleapis.com/auth/drive');
 		} else {
-			notify({
-				type: 'red',
-				message: 'Error in getting Google Drive notes: ' + err.message,
-				permanent: true
+			return err.response.json().then((error) => {
+				notify({
+					type: 'red',
+					message: 'Error in getting Google Drive notes: ' + error.message,
+					permanent: true
+				});
 			});
 		}
 	});
