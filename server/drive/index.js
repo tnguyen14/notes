@@ -78,7 +78,10 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 		Promise.all(files.map((file) => {
 			return api.processFile({
 				file: file,
-				accessToken: req.user.accessToken
+				credentials: {
+					access_token: req.user.accessToken,
+					refresh_token: req.user.refreshToken
+				}
 			});
 		})).then((notes) => {
 			res.json({

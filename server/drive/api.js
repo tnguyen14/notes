@@ -91,7 +91,7 @@ function processFile (opts) {
 			let ext = path.extname(file.name);
 			return getFileContent({
 				fileId: file.id,
-				accessToken: opts.accessToken
+				credentials: opts.credentials
 			}).then((content) => {
 				return {
 					id: file.id,
@@ -103,7 +103,7 @@ function processFile (opts) {
 			let indexMd;
 			return getFolderChildren({
 				folderId: file.id,
-				accessToken: opts.accessToken
+				credentials: opts.credentials
 			}).then((files) => {
 				indexMd = files.find((f) => {
 					return f.name === 'index.md';
@@ -115,7 +115,7 @@ function processFile (opts) {
 			}).then((fileId) => {
 				return getFileContent({
 					fileId: fileId,
-					accessToken: opts.accessToken
+					credentials: opts.credentials
 				});
 			}).then((content) => {
 				if (content) {
