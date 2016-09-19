@@ -5,14 +5,14 @@ RUN addgroup -S app && adduser -S -g app app
 COPY package.json /src/
 RUN chown -R app:app /src/
 
-USER app
+# USER app
 WORKDIR /src
 RUN npm install
 
-USER root
+# USER root
 COPY . /src/
-RUN chown -R app:app /src/*
+# RUN chown -R app:app /src/*
 
-USER app
+# USER app
 CMD ["npm", "start"]
 
