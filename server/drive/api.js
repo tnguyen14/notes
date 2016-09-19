@@ -3,6 +3,7 @@ var google = require('googleapis');
 var drive = google.drive('v3');
 var OAuth2 = google.auth.OAuth2;
 var auth = new OAuth2();
+var debug = require('debug')('notes');
 
 var mimeTypes = {
 	md: 'text/x-markdown',
@@ -25,7 +26,7 @@ function getDirs (opts) {
 			q: `mimeType = '${mimeTypes.folder}' and '${opts.rootDir}' in parents and trashed = false`
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				reject(err);
 				return;
 			}
@@ -46,7 +47,7 @@ function getFileContent (opts) {
 			alt: 'media'
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				reject(err);
 				return;
 			}
@@ -67,7 +68,7 @@ function getFolderChildren (opts) {
 			q: '\'' + opts.folderId + '\'' + ' in parents'
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				reject(err);
 				return;
 			}
@@ -146,7 +147,7 @@ function updateNote (opts) {
 	return new Promise((resolve, reject) => {
 		drive.files.update(params, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				reject(err);
 				return;
 			}
@@ -164,7 +165,7 @@ function findByName (opts) {
 			fields: 'files(id,mimeType,name,parents)'
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				reject(err);
 			}
 			resolve(resp.files.filter((file) => {
@@ -191,7 +192,7 @@ function createFolder (opts) {
 			}
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				reject(err);
 				return;
 			}
@@ -215,7 +216,7 @@ function createFile (opts) {
 			}
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				return reject(err);
 			}
 			resolve(resp);
@@ -250,7 +251,7 @@ function deleteNote (opts) {
 			fields: 'name,parents'
 		}, (err, resp) => {
 			if (err) {
-				console.error(err);
+				debug(err);
 				return reject(err);
 			}
 			if (resp.name === 'index.md') {
@@ -261,7 +262,7 @@ function deleteNote (opts) {
 				fileId: toDelete
 			}, (err, resp) => {
 				if (err) {
-					console.error(err);
+					debug(err);
 					return reject(err);
 				}
 				resolve({

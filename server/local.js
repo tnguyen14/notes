@@ -6,6 +6,7 @@ var userHome = require('user-home');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var debug = require('debug')('notes');
 
 var localDir, label;
 
@@ -24,7 +25,7 @@ function processFile (file) {
 				});
 			});
 	}, (err) => {
-		console.error(err);
+		debug(err);
 	});
 }
 
@@ -59,7 +60,7 @@ app.get('/', function (req, res) {
 				notes: notes.filter((n) => n)
 			});
 		}, (err) => {
-			console.error(err);
+			debug(err);
 			res.status(400).json(err);
 		});
 });
@@ -84,7 +85,7 @@ app.put('/:id', function (req, res) {
 		.then(() => {
 			res.status(200).json('OK!');
 		}, (err) => {
-			console.error(err);
+			debug(err);
 			res.status(400).json(err);
 		});
 });
@@ -110,7 +111,7 @@ app.post('/', function (req, res) {
 			id: name + '/index.md'
 		});
 	}, (err) => {
-		console.error(err);
+		debug(err);
 		if (err.message.indexOf('already exists') !== -1) {
 			res.status(409);
 		} else {
@@ -137,7 +138,7 @@ app.delete('/:id', function (req, res) {
 		.then(() => {
 			res.status(200).json('OK!');
 		}, (err) => {
-			console.error(err);
+			debug(err);
 			res.status(400).json(err);
 		});
 });
