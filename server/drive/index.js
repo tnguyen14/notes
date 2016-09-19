@@ -47,7 +47,7 @@ app.get('/me', isAuthenticated, (req, res) => {
 		rootDir: 'root',
 		accessToken: req.user.accessToken
 	}).then((rootDirs) => {
-		res.json(Object.assign(db.get(req.user.id), {
+		res.json(Object.assign({}, db.get(req.user.id), {
 			rootDirs: rootDirs
 		}));
 	}, (err) => {
@@ -60,7 +60,7 @@ app.patch('/me', isAuthenticated, (req, res) => {
 	var driveConfig = db.get(req.user.id);
 	var newConfig = pick(req.body, ['rootDir', 'label']);
 	db.put(req.user.id, Object.assign({}, driveConfig, newConfig));
-	res.sendStatus(200);
+	res.status(200).json(db.get(req.user.id));
 });
 
 app.get('/', isAuthenticated, hasRootDir, (req, res) => {

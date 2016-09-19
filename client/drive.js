@@ -26,7 +26,7 @@ function getNotes () {
 					permanent: true
 				});
 				if (error.message.startsWith('Configuration:')) {
-					config.open();
+					config.open(getNotes);
 				}
 			});
 		}

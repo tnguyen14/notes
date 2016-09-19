@@ -12,6 +12,7 @@ var originalConfig = {
 	rootDir: rootDirSelect.value,
 	label: labelInput.value
 };
+var callback;
 
 module.exports.open = open;
 
@@ -28,14 +29,27 @@ saveButton.addEventListener('click', function (e) {
 	saveButton.innerText = 'Saving...';
 	patchJson(configUrl, newConfig, {
 		credentials: 'include'
-	}, () => {
+	}).then(() => {
 		saveButton.removeAttribute('disabled');
 		saveButton.innerText = 'Save';
 		configEl.close();
+		if (callback) {
+			callback();
+		}
+	}, (err) => {
+		saveButton.removeAttribute('disabled');
+		saveButton.innerText = 'Save';
+		configEl.close();
+		notify({
+			type: 'red',
+			message: 'Error saving configuration: ' + err.message,
+			permanent: true
+		});
 	});
 });
 
-function open () {
+function open (cb) {
+	callback = cb;
 	return getJson(configUrl, {
 		credentials: 'include'
 	}).then((config) => {
