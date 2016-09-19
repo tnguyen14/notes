@@ -128,29 +128,6 @@ function processFile (opts) {
 	}
 }
 
-function findByName (name, rootDir) {
-	return new Promise((resolve, reject) => {
-		drive.files.list({
-			auth: auth,
-			q: 'name contains \'' + name + '\' and trashed = false',
-			fields: 'files(id,mimeType,name,parents)'
-		}, (err, resp) => {
-			if (err) {
-				console.error(err);
-				reject(err);
-			}
-			resolve(resp.files.filter((file) => {
-				if (file.parents.indexOf(rootDir) === -1) {
-					return false;
-				}
-				if (file.mimeType === mimeTypes.folder || file.mimeType === mimeTypes.md) {
-					return true;
-				}
-			}));
-		});
-	});
-}
-
 function updateNote (opts) {
 	auth.credentials.access_token = opts.accessToken;
 	let params = {
@@ -174,6 +151,30 @@ function updateNote (opts) {
 				return;
 			}
 			resolve(resp);
+		});
+	});
+}
+
+function findByName (opts) {
+	auth.credentials.access_token = opts.accessToken;
+	return new Promise((resolve, reject) => {
+		drive.files.list({
+			auth: auth,
+			q: 'name contains \'' + opts.name + '\' and trashed = false',
+			fields: 'files(id,mimeType,name,parents)'
+		}, (err, resp) => {
+			if (err) {
+				console.error(err);
+				reject(err);
+			}
+			resolve(resp.files.filter((file) => {
+				if (file.parents.indexOf(opts.rootDir) === -1) {
+					return false;
+				}
+				if (file.mimeType === mimeTypes.folder || file.mimeType === mimeTypes.md) {
+					return true;
+				}
+			}));
 		});
 	});
 }
@@ -222,7 +223,11 @@ function createFile (opts) {
 	});
 }
 function createNote (opts) {
-	return findByName(opts.name, opts.rootDir).then((files) => {
+	return findByName({
+		accessToken: opts.accessToken,
+		name: opts.name,
+		rootDir: opts.rootDir
+	}).then((files) => {
 		if (files.length > 0) {
 			return Promise.reject(new Error('Note "' + opts.name + '" already exists.'));
 		}
@@ -252,13 +257,16 @@ function deleteNote (opts) {
 				toDelete = resp.parents[0];
 			}
 			drive.files.delete({
+				auth: auth,
 				fileId: toDelete
 			}, (err, resp) => {
 				if (err) {
 					console.error(err);
 					return reject(err);
 				}
-				resolve(resp);
+				resolve({
+					status: 'OK!'
+				});
 			});
 		});
 	});
