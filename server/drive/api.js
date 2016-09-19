@@ -34,14 +34,15 @@ function getDirs (opts) {
 	});
 }
 
-function getFileContent (fileId) {
-	if (!fileId) {
+function getFileContent (opts) {
+	if (!opts.fileId) {
 		return;
 	}
+	auth.credentials.access_token = opts.accessToken;
 	return new Promise((resolve, reject) => {
 		drive.files.get({
 			auth: auth,
-			fileId: fileId,
+			fileId: opts.fileId,
 			alt: 'media'
 		}, (err, resp) => {
 			if (err) {
@@ -54,15 +55,16 @@ function getFileContent (fileId) {
 	});
 }
 
-function getFolderChildren (folderId) {
-	if (!folderId) {
+function getFolderChildren (opts) {
+	if (!opts.folderId) {
 		return;
 	}
+	auth.credentials.access_token = opts.accessToken;
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
 			corpus: 'user',
-			q: '\'' + folderId + '\'' + ' in parents'
+			q: '\'' + opts.folderId + '\'' + ' in parents'
 		}, (err, resp) => {
 			if (err) {
 				console.error(err);
@@ -72,6 +74,58 @@ function getFolderChildren (folderId) {
 			resolve(resp.files);
 		});
 	});
+}
+
+/**
+ * @param {Object} file
+ * @param {String} file.id eg. '0B8Jsod-g6nz2ZWRzRjNqdzZVRE0a'
+ * @param {String} file.name
+ * @param {String} file.mimeType 'application/vnd.google-apps.folder' or
+ * 'text/x-markdown'
+ */
+function processFile (opts) {
+	var file = opts.file;
+	switch (file.mimeType) {
+		case mimeTypes.md:
+			let ext = path.extname(file.name);
+			return getFileContent({
+				fileId: file.id,
+				accessToken: opts.accessToken
+			}).then((content) => {
+				return {
+					id: file.id,
+					name: path.basename(file.name, ext),
+					content: content
+				};
+			});
+		case mimeTypes.folder:
+			let indexMd;
+			return getFolderChildren({
+				folderId: file.id,
+				accessToken: opts.accessToken
+			}).then((files) => {
+				indexMd = files.find((f) => {
+					return f.name === 'index.md';
+				});
+				if (!indexMd) {
+					return;
+				}
+				return indexMd.id;
+			}).then((fileId) => {
+				return getFileContent({
+					fileId: fileId,
+					accessToken: opts.accessToken
+				});
+			}).then((content) => {
+				if (content) {
+					return {
+						name: file.name,
+						id: indexMd.id,
+						content: content
+					};
+				}
+			});
+	}
 }
 
 function findByName (name, rootDir) {
@@ -95,52 +149,6 @@ function findByName (name, rootDir) {
 			}));
 		});
 	});
-}
-
-/**
- * @param {Object} file
- * @param {String} file.id eg. '0B8Jsod-g6nz2ZWRzRjNqdzZVRE0a'
- * @param {String} file.name
- * @param {String} file.mimeType 'application/vnd.google-apps.folder' or
- * 'text/x-markdown'
- */
-function processFile (opts) {
-	var file = opts.file;
-	auth.credentials.access_token = opts.accessToken;
-	switch (file.mimeType) {
-		case mimeTypes.md:
-			let ext = path.extname(file.name);
-			return getFileContent(file.id)
-				.then((content) => {
-					return {
-						id: file.id,
-						name: path.basename(file.name, ext),
-						content: content
-					};
-				});
-		case mimeTypes.folder:
-			let indexMd;
-			return getFolderChildren(file.id)
-				.then((files) => {
-					indexMd = files.find((f) => {
-						return f.name === 'index.md';
-					});
-					if (!indexMd) {
-						return;
-					}
-					return indexMd.id;
-				})
-				.then(getFileContent)
-				.then((content) => {
-					if (content) {
-						return {
-							name: file.name,
-							id: indexMd.id,
-							content: content
-						};
-					}
-				});
-	}
 }
 
 function updateNote (opts) {
