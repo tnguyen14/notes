@@ -41,6 +41,7 @@ function notify (opts) {
 }
 
 module.exports = notify;
+module.exports.clear = hideNotification;
 module.exports.error = function (err) {
 	if (!err.response) {
 		notify({

@@ -3,6 +3,7 @@ config.json
 .env
 docker-compose.dev.yml
 docker-compose.prod.yml
+docker-compose.override.yml
 private
 public/index.js
 public/github-markdown.css
