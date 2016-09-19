@@ -2,6 +2,7 @@
 
 [![js-happiness-style](https://img.shields.io/badge/code%20style-happiness-brightgreen.svg)](https://github.com/JedWatson/happiness)
 [![Build Status](https://travis-ci.org/tnguyen14/notes.svg?branch=master)](https://travis-ci.org/tnguyen14/notes)
+[![Coverage Status](https://coveralls.io/repos/github/tnguyen14/notes/badge.svg?branch=master)](https://coveralls.io/github/tnguyen14/notes?branch=master)
 
 ## Usage
 

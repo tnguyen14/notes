@@ -7,3 +7,5 @@ private
 public/index.js
 public/github-markdown.css
 data
+coverage
+.nyc_output
