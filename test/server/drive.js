@@ -28,19 +28,24 @@ tap.test('Drive API', (t) => {
 	});
 	t.test('getDirs', (t) => {
 		driveApi.getDirs({
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			rootDir: 'rootdir'
 		});
 		var auth = driveApi.__get__('auth');
 		t.deepEqual(auth, {
 			credentials: {
-				access_token: '2233445566'
+				access_token: '2233445566',
+				refresh_token: '12345'
 			}
 		});
 		t.ok(driveApi.__get__('drive').files.list.calledWith({
 			auth: {
 				credentials: {
-					access_token: '2233445566'
+					access_token: '2233445566',
+					refresh_token: '12345'
 				}
 			},
 			q: 'mimeType = \'application/vnd.google-apps.folder\' and \'rootdir\' in parents and trashed = false'
@@ -49,20 +54,25 @@ tap.test('Drive API', (t) => {
 	});
 	t.test('updateNote', (t) => {
 		driveApi.updateNote({
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			fileId: 'test-file-id',
 			content: 'new test content'
 		});
 		var auth = driveApi.__get__('auth');
 		t.deepEqual(auth, {
 			credentials: {
-				access_token: '2233445566'
+				access_token: '2233445566',
+				refresh_token: '12345'
 			}
 		});
 		t.ok(driveApi.__get__('drive').files.update.calledWith({
 			auth: {
 				credentials: {
-					access_token: '2233445566'
+					access_token: '2233445566',
+					refresh_token: '12345'
 				}
 			},
 			fileId: 'test-file-id',
@@ -75,7 +85,10 @@ tap.test('Drive API', (t) => {
 	});
 	t.test('updateNote - with name', (t) => {
 		driveApi.updateNote({
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			fileId: 'test-file-id',
 			content: 'new test content',
 			name: 'new-note-name'
@@ -83,7 +96,8 @@ tap.test('Drive API', (t) => {
 		t.ok(driveApi.__get__('drive').files.update.calledWith({
 			auth: {
 				credentials: {
-					access_token: '2233445566'
+					access_token: '2233445566',
+					refresh_token: '12345'
 				}
 			},
 			fileId: 'test-file-id',
@@ -114,26 +128,38 @@ tap.test('Drive API', (t) => {
 		driveApi.createNote({
 			name: 'Test',
 			rootDir: 'notes-rootdir',
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			content: 'new note content'
 		}).then((resp) => {
 			t.ok(driveApi.__get__('findByName').calledOnce);
 			t.ok(driveApi.__get__('findByName').calledWith({
-				accessToken: '2233445566',
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				},
 				name: 'Test',
 				rootDir: 'notes-rootdir'
 
 			}));
 			t.ok(driveApi.__get__('createFolder').calledOnce);
 			t.ok(driveApi.__get__('createFolder').calledWith({
-				accessToken: '2233445566',
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				},
 				name: 'Test',
 				rootDir: 'notes-rootdir',
 				content: 'new note content'
 			}));
 			t.ok(driveApi.__get__('createFile').calledOnce);
 			t.ok(driveApi.__get__('createFile').calledWith({
-				accessToken: '2233445566',
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				},
 				name: 'index.md',
 				rootDir: 'notes-rootdir',
 				content: 'new note content',
@@ -175,7 +201,10 @@ tap.test('Drive API', (t) => {
 		driveApi.createNote({
 			name: 'Test',
 			rootDir: 'notes-rootdir',
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			content: 'new note content'
 		}).then((resp) => {
 			var driveMock = driveApi.__get__('drive');
@@ -183,7 +212,8 @@ tap.test('Drive API', (t) => {
 			t.ok(driveMock.files.create.firstCall.calledWith({
 				auth: {
 					credentials: {
-						access_token: '2233445566'
+						access_token: '2233445566',
+						refresh_token: '12345'
 					}
 				},
 				resource: {
@@ -195,7 +225,8 @@ tap.test('Drive API', (t) => {
 			t.ok(driveMock.files.create.secondCall.calledWith({
 				auth: {
 					credentials: {
-						access_token: '2233445566'
+						access_token: '2233445566',
+						refresh_token: '12345'
 					}
 				},
 				resource: {
@@ -222,7 +253,10 @@ tap.test('Drive API', (t) => {
 		driveApi.createNote({
 			name: 'Current Note',
 			rootDir: 'notes-rootdir',
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			content: 'new note content'
 		}).then(() => {
 			t.ok(false, 'Should not succeed');
@@ -249,14 +283,18 @@ tap.test('Drive API', (t) => {
 		});
 		deleteStub.callsArgWith(1, null, undefined);
 		driveApi.deleteNote({
-			accessToken: '2233445566',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
 			fileId: 'test-note-file-id'
 		}).then(() => {
 			t.ok(getStub.calledOnce);
 			t.ok(getStub.calledWith({
 				auth: {
 					credentials: {
-						access_token: '2233445566'
+						access_token: '2233445566',
+						refresh_token: '12345'
 					}
 				},
 				fileId: 'test-note-file-id',
@@ -266,7 +304,8 @@ tap.test('Drive API', (t) => {
 			t.ok(deleteStub.calledWith({
 				auth: {
 					credentials: {
-						access_token: '2233445566'
+						access_token: '2233445566',
+						refresh_token: '12345'
 					}
 				},
 				fileId: 'test-note-dir-id'

@@ -18,7 +18,7 @@ module.exports = {
 };
 
 function getDirs (opts) {
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
@@ -38,7 +38,7 @@ function getFileContent (opts) {
 	if (!opts.fileId) {
 		return;
 	}
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.get({
 			auth: auth,
@@ -59,7 +59,7 @@ function getFolderChildren (opts) {
 	if (!opts.folderId) {
 		return;
 	}
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
@@ -129,7 +129,7 @@ function processFile (opts) {
 }
 
 function updateNote (opts) {
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	let params = {
 		auth: auth,
 		fileId: opts.fileId,
@@ -156,7 +156,7 @@ function updateNote (opts) {
 }
 
 function findByName (opts) {
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
@@ -180,7 +180,7 @@ function findByName (opts) {
 }
 
 function createFolder (opts) {
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.create({
 			auth: auth,
@@ -201,7 +201,7 @@ function createFolder (opts) {
 }
 
 function createFile (opts) {
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.create({
 			auth: auth,
@@ -224,7 +224,7 @@ function createFile (opts) {
 }
 function createNote (opts) {
 	return findByName({
-		accessToken: opts.accessToken,
+		credentials: opts.credentials,
 		name: opts.name,
 		rootDir: opts.rootDir
 	}).then((files) => {
@@ -242,7 +242,7 @@ function createNote (opts) {
 
 function deleteNote (opts) {
 	var toDelete = opts.fileId;
-	auth.credentials.access_token = opts.accessToken;
+	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
 		drive.files.get({
 			auth: auth,

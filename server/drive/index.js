@@ -45,7 +45,10 @@ function hasRootDir (req, res, next) {
 app.get('/me', isAuthenticated, (req, res) => {
 	api.getDirs({
 		rootDir: 'root',
-		accessToken: req.user.accessToken
+		credentials: {
+			access_token: req.user.accessToken,
+			refresh_token: req.user.refreshToken
+		}
 	}).then((rootDirs) => {
 		res.json(Object.assign({}, db.get(req.user.id), {
 			rootDirs: rootDirs
@@ -67,7 +70,10 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
 	api.getDirs({
 		rootDir: driveConfig.rootDir,
-		accessToken: req.user.accessToken
+		credentials: {
+			access_token: req.user.accessToken,
+			refresh_token: req.user.refreshToken
+		}
 	}).then((files) => {
 		Promise.all(files.map((file) => {
 			return api.processFile({
@@ -81,7 +87,6 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 			});
 		}, (err) => {
 			if (err) {
-				console.error(err);
 				res.status(400).json(err);
 			}
 		});
@@ -97,7 +102,10 @@ app.put('/:id', function (req, res) {
 		fileId: req.params.id,
 		content: req.body.content,
 		name: req.body.name,
-		accessToken: req.user.accessToken
+		credentials: {
+			access_token: req.user.accessToken,
+			refresh_token: req.user.refreshToken
+		}
 	}).then((resp) => {
 		res.json(resp);
 	}, (err) => {
@@ -111,7 +119,10 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 		name: req.body.name,
 		rootDir: driveConfig.rootDir,
 		content: req.body.content,
-		accessToken: req.user.accessToken
+		credentials: {
+			access_token: req.user.accessToken,
+			refresh_token: req.user.refreshToken
+		}
 	}).then((resp) => {
 		res.json(resp);
 	}, (err) => {
@@ -127,7 +138,10 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 app.delete('/:id', function (req, res) {
 	api.deleteNote({
 		fileId: req.params.id,
-		accessToken: req.user.accessToken
+		credentials: {
+			access_token: req.user.accessToken,
+			refresh_token: req.user.refreshToken
+		}
 	}).then((resp) => {
 		res.json(resp);
 	}, (err) => {
