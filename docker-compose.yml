@@ -2,4 +2,6 @@ version: '2'
 services:
   notes:
     build: .
+    volumes:
+      - ./data:/src/data
 

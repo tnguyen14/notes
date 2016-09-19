@@ -1,3 +1,4 @@
+var config = require('./config');
 var addNoteChoice = document.querySelector('.add-note-choice');
 var handlers = {};
 
@@ -22,6 +23,11 @@ function startListening () {
 		e.target.classList.toggle('active');
 		listsEl.classList.toggle('active');
 		editorEl.classList.toggle('lists-active');
+	});
+
+	// config
+	document.querySelector('.menu .config').addEventListener('click', function (e) {
+		config.open();
 	});
 }
 

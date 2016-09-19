@@ -2,6 +2,8 @@
 :root {
 	--color-white-smoke: #eee;
 	--color-heather: #bdc3c7;
+	--color-oslo-grey: #7f8c8d;
+	--color-submarine: #95a5a6;
 	--color-cinnabar: #e74c3c;
 	--color-persian-red: #c0392b;
 	--color-shamrock: #2ecc71;
@@ -64,6 +66,13 @@ button.blue:hover,
 button.blue.active {
 	background-color: var(--color-pelorous);
 }
+button.grey {
+	background-color: var(--color-oslo-grey);
+	color: #fff;
+}
+button.grey:hover {
+	background-color: var(--color-submarine);
+}
 
 .menu {
 	background-color: var(--color-white-smoke);
@@ -78,6 +87,8 @@ button.blue.active {
 	font-family: monospace;
 	font-size: 1.3em;
 	margin-bottom: 1rem;
+	width: 2.5em;
+	height: 2.5em;
 }
 
 .lists {
@@ -146,7 +157,7 @@ button.blue.active {
 	color: #fff;
 }
 .notification[data-type=red] {
-	background-color: var(--color-presian-red);
+	background-color: var(--color-persian-red);
 	color: #fff;
 }
 .notification[data-type=green] {
@@ -171,6 +182,10 @@ button.blue.active {
 	visibility: visible;
 }
 
+input {
+	font-size: 1rem;
+}
+
 textarea {
 	background-color: #fafafa;
 	border: 1px solid #ddd;
@@ -187,6 +202,25 @@ textarea:focus {
 	border-color: #51a7e8;
 	box-shadow: inset 0 1px 2px rgba(0,0,0,0.075), 0 0 5px rgba(81,167,232,0.5);
 }
+
+select {
+	font-size: 1rem;
+}
+
+.form-item {
+	display: flex;
+	margin: .8rem 0;
+	justify-content: space-between;
+}
+.form-item label {
+	width: 28%;
+}
+.form-item select,
+.form-item input,
+.form-teim textarea {
+	width: 68%;
+}
+
 
 .title-container .title {
 	border: none;
@@ -278,4 +312,14 @@ textarea:focus {
 .delete-confirm .cancel {
 	float: right;
 	margin-right: .5rem;
+}
+
+.configuration {
+	width: 60%;
+}
+.configuration form {
+	margin-top: 2rem;
+}
+.configuration button[type=submit] {
+	float: right;
 }

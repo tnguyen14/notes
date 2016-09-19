@@ -83,7 +83,9 @@ function saveNote (type, n) {
 			updated.name = n.title;
 		}
 	}
-	method(url, updated).then(function (resp) {
+	method(url, updated, {
+		credentials: 'include'
+	}).then(function (resp) {
 		if (note.new) {
 			delete note.new;
 		}
@@ -116,7 +118,9 @@ function removeNote (type, id) {
 		return;
 	}
 	var note = notes[type][noteIndex];
-	deleteJson(endPoints[type] + '/' + encodeURIComponent(note.id))
+	deleteJson(endPoints[type] + '/' + encodeURIComponent(note.id), {
+		credentials: 'include'
+	})
 		.then(function () {
 			var li = lists[type].querySelector('[data-id="' + note.id + '"]');
 			li.parentNode.removeChild(li);

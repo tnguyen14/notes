@@ -9,6 +9,7 @@
 		<div class="menu">
 			<button type="button" class="toggle blue active">&#9776;</button>
 			<button type="button" class="add green">+</button>
+			<button type="button" class="config grey">&#9881;</button>
 		</div>
 		<div class="lists active">
 			<section class="list local">
@@ -61,6 +62,21 @@
 				<p>Please sign in with Google to continue</p>
 				<button type="button">Sign In</button>
 			</div>
+		</dialog>
+		<dialog class="configuration">
+			<h3>Configurations</h3>
+			<form>
+				<div class="form-item">
+					<label for="label">Label</label>
+					<input type="text" id="label" name="label" value=""/>
+				</div>
+				<div class="form-item">
+					<label for="rootdir">Root directory</label>
+					<select id="rootdir" name="rootdir">
+					</select>
+				</div>
+				<button type="submit" class="blue">Save</button>
+			</form>
 		</dialog>
 		<script src="index.js"></script>
 	</body>
