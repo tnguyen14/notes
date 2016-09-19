@@ -52,6 +52,139 @@ tap.test('Drive API', (t) => {
 		}));
 		t.end();
 	});
+	t.test('getDirs - error', (t) => {
+		var listStub = sinon.stub();
+		var listRevert = driveApi.__set__('drive', {
+			files: {
+				list: listStub
+			}
+		});
+		listStub.callsArgWith(1, new Error('Oops'));
+		driveApi.getDirs({
+			rootDir: 'badrootdir'
+		}).then(() => {
+			t.ok(false, 'this should not happen');
+			listRevert();
+			t.end();
+		}, (err) => {
+			t.equal(err.message, 'Oops');
+			listRevert();
+			t.end();
+		});
+	});
+	t.test('processFile - folder - stub getFolderChildren and getFileContent', (t) => {
+		var getFolderChildrenStub = sinon.stub().resolves([{
+			id: 'test-note-index-id',
+			name: 'index.md',
+			kind: 'drive#file',
+			mimeType: 'text/x-markdown'
+		}]);
+		var getFolderChildrenRevert = driveApi.__set__('getFolderChildren', getFolderChildrenStub);
+		var getFileContentStub = sinon.stub().resolves('## Note content');
+		var getFileContentRevert = driveApi.__set__('getFileContent', getFileContentStub);
+		driveApi.processFile({
+			file: {
+				mimeType: 'application/vnd.google-apps.folder',
+				id: 'test-note-dir-id',
+				name: 'Test',
+				kind: 'drive#file'
+			},
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			}
+		}).then((resp) => {
+			t.ok(getFolderChildrenStub.calledOnce);
+			t.ok(getFolderChildrenStub.calledWith({
+				folderId: 'test-note-dir-id',
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				}
+			}));
+			t.ok(getFileContentStub.calledOnce);
+			t.ok(getFileContentStub.calledWith({
+				fileId: 'test-note-index-id',
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				}
+			}));
+			t.deepEqual(resp, {
+				name: 'Test',
+				id: 'test-note-index-id',
+				content: '## Note content'
+			});
+			getFolderChildrenRevert();
+			getFileContentRevert();
+			t.end();
+		});
+	});
+	t.test('processFile - folder - stub drive apis', (t) => {
+		var listStub = sinon.stub();
+		var getStub = sinon.stub();
+		listStub.callsArgWith(1, null, {
+			files: [{
+				id: 'test-note-index-id',
+				name: 'index.md',
+				kind: 'drive#file',
+				mimeType: 'text/x-markdown'
+			}]
+		});
+		getStub.callsArgWith(1, null, '## Note content');
+		var driveRevert = driveApi.__set__('drive', {
+			files: {
+				get: getStub,
+				list: listStub
+			}
+		});
+		driveApi.processFile({
+			file: {
+				mimeType: 'application/vnd.google-apps.folder',
+				id: 'test-note-dir-id',
+				name: 'Test',
+				kind: 'drive#file'
+			},
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			}
+		}).then((resp) => {
+			t.ok(listStub.calledOnce);
+			t.ok(listStub.calledWith({
+				auth: {
+					credentials: {
+						access_token: '2233445566',
+						refresh_token: '12345'
+					}
+				},
+				q: '\'test-note-dir-id\' in parents'
+			}));
+			t.ok(getStub.calledOnce);
+			t.ok(getStub.calledWith({
+				auth: {
+					credentials: {
+						access_token: '2233445566',
+						refresh_token: '12345'
+					}
+				},
+				fileId: 'test-note-index-id',
+				alt: 'media'
+			}));
+			t.deepEqual(resp, {
+				name: 'Test',
+				id: 'test-note-index-id',
+				content: '## Note content'
+			});
+			driveRevert();
+			t.end();
+		}, (err) => {
+			console.error(err);
+			t.ok(false);
+			driveRevert();
+			t.end();
+		});
+	});
 	t.test('updateNote', (t) => {
 		driveApi.updateNote({
 			credentials: {
@@ -110,6 +243,30 @@ tap.test('Drive API', (t) => {
 			}
 		}));
 		t.end();
+	});
+	t.test('updateNote - error', (t) => {
+		var driveRevert = driveApi.__set__('drive', {
+			files: {
+				update: sinon.stub().callsArgWith(1, new Error('Oops'))
+			}
+		});
+		driveApi.updateNote({
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
+			fileId: 'test-file-id',
+			content: 'new test content',
+			name: 'new-note-name'
+		}).then(() => {
+			t.ok(false, 'This should not occur');
+			driveRevert();
+			t.end();
+		}, (err) => {
+			t.equal(err.message, 'Oops');
+			driveRevert();
+			t.end();
+		});
 	});
 	t.test('createNote - stubbing createFolder and createFile', (t) => {
 		var findByNameRevert = driveApi.__set__('findByName', sinon.stub().resolves([]));
@@ -312,6 +469,51 @@ tap.test('Drive API', (t) => {
 			}));
 			driveRevert();
 			t.end();
+		});
+	});
+	t.test('deleteNote - error', (t) => {
+		var driveGetRevert = driveApi.__set__('drive', {
+			files: {
+				get: sinon.stub().callsArgWith(1, new Error('Oops'))
+			}
+		});
+		driveApi.deleteNote({
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
+			fileId: 'test-note-file-id'
+		}).then(() => {
+			t.ok(false);
+			driveGetRevert();
+			t.end();
+		}, (err) => {
+			t.equal(err.message, 'Oops');
+			driveGetRevert();
+			var driveDeleteRevert = driveApi.__set__('drive', {
+				files: {
+					get: sinon.stub().callsArgWith(1, null, {
+						name: 'index.md',
+						parents: ['test-note-dir-id']
+					}),
+					delete: sinon.stub().callsArgWith(1, new Error('Oops'))
+				}
+			});
+			driveApi.deleteNote({
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				},
+				fileId: 'test-note-file-id'
+			}).then(() => {
+				t.ok(false);
+				driveDeleteRevert();
+				t.end();
+			}, (err) => {
+				t.equal(err.message, 'Oops');
+				driveDeleteRevert();
+				t.end();
+			});
 		});
 	});
 	t.end();

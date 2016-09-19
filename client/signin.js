@@ -18,7 +18,8 @@ function getProfile () {
 		});
 }
 
-signInButton.addEventListener('click', function () {
+signInButton.addEventListener('click', function (e) {
+	e.preventDefault();
 	authorize();
 });
 

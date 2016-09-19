@@ -64,7 +64,6 @@ function getFolderChildren (opts) {
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
-			corpus: 'user',
 			q: '\'' + opts.folderId + '\'' + ' in parents'
 		}, (err, resp) => {
 			if (err) {
