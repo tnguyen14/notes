@@ -8,9 +8,24 @@
 	</head>
 	<body>
 		<div class="menu">
-			<button type="button" class="toggle blue active">&#9776;</button>
-			<button type="button" class="add green">+</button>
-			<button type="button" class="config grey">&#9881;</button>
+			<button type="button" class="toggle blue active hint--right" aria-label="Hide List" data-label-alt="Show List">
+				<svg class="octicon hide-lists">
+					<use xlink:href="sprite.octicons.svg#chevron-left">
+				</svg>
+				<svg class="octicon show-lists">
+					<use xlink:href="sprite.octicons.svg#chevron-right">
+				</svg>
+			</button>
+			<button type="button" class="add green hint--right" aria-label="Add Note">
+				<svg class="octicon">
+					<use xlink:href="sprite.octicons.svg#plus">
+				</svg>
+			</button>
+			<button type="button" class="config grey hint--right" aria-label="Configuration">
+				<svg class="octicon">
+					<use xlink:href="sprite.octicons.svg#gear">
+				</svg>
+			</button>
 		</div>
 		<div class="lists active">
 			<section class="list local">
@@ -35,12 +50,12 @@
 				<div class="tabnav-container">
 					<nav class="tabnav clearfix">
 						<button type="button" class="write-button hint--top" aria-label="Write">
-							<svg>
+							<svg class="octicon">
 								<use xlink:href="sprite.octicons.svg#markdown">
 							</svg>
 						</button>
 						<button type="button" class="view-button hint--top selected" aria-label="View">
-							<svg>
+							<svg class="octicon">
 								<use xlink:href="sprite.octicons.svg#eye">
 							</svg>
 						</button>
@@ -55,12 +70,12 @@
 					</div>
 				</div>
 				<button type="button" class="action remove red hint--left" aria-label="Delete">
-					<svg>
+					<svg class="octicon">
 						<use xlink:href="sprite.octicons.svg#trashcan">
 					</svg>
 				</button>
 				<button type="button" class="action save green hint--left" aria-label="Save">
-					<svg>
+					<svg class="octicon">
 						<use xlink:href="sprite.octicons.svg#file-text">
 					</svg>
 				</button>

@@ -20,9 +20,20 @@ function startListening () {
 	var listsEl = document.querySelector('.lists');
 	var editorEl = document.querySelector('.editor-container');
 	document.querySelector('.menu .toggle').addEventListener('click', function (e) {
-		e.target.classList.toggle('active');
+		var button;
+		if (e.target.nodeName === 'BUTTON') {
+			button = e.target;
+		} else if (e.target.nodeName === 'svg') {
+			button = e.target.parentNode;
+		}
+		button.classList.toggle('active');
 		listsEl.classList.toggle('active');
 		editorEl.classList.toggle('lists-active');
+		// swap labels
+		var currentLabel = button.getAttribute('aria-label');
+		var newLabel = button.getAttribute('data-label-alt');
+		button.setAttribute('aria-label', newLabel);
+		button.setAttribute('data-label-alt', currentLabel);
 	});
 
 	// config

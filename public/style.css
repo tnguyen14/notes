@@ -90,6 +90,19 @@ button.grey:hover {
 	width: 2.5em;
 	height: 2.5em;
 }
+.menu button svg {
+	width: 1rem;
+	height: 1.5rem;
+}
+.menu .toggle .hide-lists {
+	display: none;
+}
+.menu .toggle.active .show-lists {
+	display: none;
+}
+.menu .toggle.active .hide-lists {
+	display: inline-block;
+}
 
 .lists {
 	border-right: 1px solid var(--color-white-smoke);
@@ -419,4 +432,10 @@ select {
 	90% {
 		stroke: #ffa700;
 	}
+}
+
+.octicon {
+	display: inline-block;
+	vertical-align: text-top;
+	fill: currentColor;
 }
