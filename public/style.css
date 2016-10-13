@@ -269,7 +269,6 @@ select {
 }
 
 .content-container {
-	height: 85vh;
 	padding: .8rem .8rem 1rem .8rem;
 	overflow: auto;
 }
@@ -300,12 +299,22 @@ select {
 .write-content textarea {
 	margin-bottom: 1.5rem;
 	width: 100%;
-	height: 30rem;
+	height: 83vh;
+}
+.has-tags .write-content textarea {
+	height: 81vh;
 }
 .write-content textarea:focus {
 	background-color: #fff;
 }
 
+.view-content {
+	height: 83vh;
+	overflow: auto;
+}
+.has-tags .view-content {
+	height: 81vh;
+}
 .write-selected .view-content {
 	display: none;
 }

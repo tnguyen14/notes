@@ -83,10 +83,12 @@ function updateMetadata (frontmatter) {
 	// clear out existing metadata
 	metadataEl.innerHTML = '';
 	if (!frontmatter) {
+		container.classList.remove('has-tags');
 		return;
 	}
 	var metadata = yaml.safeLoad(frontmatter);
 	if (metadata.tags) {
+		container.classList.add('has-tags');
 		var tagsEl = metadataEl.appendChild(document.createElement('div'));
 		tagsEl.classList.add('tags');
 		var labelEl = tagsEl.appendChild(document.createElement('span'));
@@ -102,6 +104,8 @@ function updateMetadata (frontmatter) {
 			tagEl.classList.add('value');
 			tagEl.innerText = tag;
 		});
+	} else {
+		container.classList.remove('has-tags');
 	}
 }
 
