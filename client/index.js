@@ -1,7 +1,7 @@
 var note = require('./note');
 var editor = require('./editor');
 var menu = require('./menu');
-var signin = require('./signin');
+var signin = require('./lib/signin');
 
 menu.startListening();
 editor.startListening();

@@ -6,10 +6,10 @@ var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
 var editor = require('./editor');
 var menu = require('./menu');
-var notify = require('./notify');
-var signin = require('./signin');
-var config = require('./config');
 var loader = require('./lib/loader');
+var notify = require('./lib/notify');
+var signin = require('./lib/signin');
+var config = require('./config');
 
 module.exports = {
 	getNotes: getNotes,
