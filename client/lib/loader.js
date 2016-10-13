@@ -17,7 +17,7 @@ function showLoader (el, type) {
 }
 
 function removeLoader (el) {
-	var loader = el.querySelector('.svg-loader');
+	var loader = el.querySelector('.loader');
 	if (!loader) {
 		return;
 	}
