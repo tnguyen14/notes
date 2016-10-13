@@ -167,6 +167,9 @@ function findByName (opts) {
 				debug(err);
 				reject(err);
 			}
+			if (!resp) {
+				return false;
+			}
 			resolve(resp.files.filter((file) => {
 				if (file.parents.indexOf(opts.rootDir) === -1) {
 					return false;

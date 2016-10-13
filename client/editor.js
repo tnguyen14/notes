@@ -26,7 +26,7 @@ if (!RegExp.escape) {
 	};
 }
 
-function updateTitle (text) {
+function setTitle (text) {
 	title.value = text;
 }
 
@@ -34,7 +34,7 @@ function getTitle () {
 	return title.value;
 }
 
-function updateContent (content) {
+function setContent (content) {
 	textarea.value = content || '';
 }
 
@@ -61,8 +61,8 @@ function setType (type) {
 function setNote (note) {
 	setId((note && note.id) ? note.id : '');
 	setType((note && note.type) ? note.type : '');
-	updateTitle((note && note.name) ? note.name : '');
-	updateContent((note && note.content) ? note.content : '');
+	setTitle((note && note.name) ? note.name : '');
+	setContent((note && note.content) ? note.content : '');
 }
 
 function updateMetadata (frontmatter) {
@@ -145,6 +145,7 @@ function writeMode () {
 	writeButton.classList.add('selected');
 	form.classList.add('write-selected');
 	textarea.focus();
+	title.removeAttribute('disabled');
 }
 
 function viewMode () {
@@ -155,6 +156,9 @@ function viewMode () {
 	// reset metadata first
 	updateMetadata();
 	view.innerHTML = md.render(content);
+	title.setAttribute('disabled', 'disabled');
+
+	// handle markdown tasklists checkbox toggles
 	Array.prototype.forEach.call(view.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
 		input.removeAttribute('disabled');
 		input.addEventListener('change', function (e) {
@@ -165,7 +169,7 @@ function viewMode () {
 			} else {
 				noteText = noteText.replace(new RegExp('(-\\s?)\\[x\\](\\s?' + RegExp.escape(inputText) + ')'), '$1[ ]$2');
 			}
-			updateContent(noteText);
+			setContent(noteText);
 		});
 	});
 }

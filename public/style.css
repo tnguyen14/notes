@@ -234,6 +234,9 @@ select {
 .title-container .title:hover {
 	background-color: #fafafa;
 }
+.title-container .title:disabled:hover {
+	background-color: transparent;
+}
 
 .tabnav-container {
 	border-bottom: 1px solid #ddd;
