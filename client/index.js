@@ -7,6 +7,7 @@ menu.startListening();
 editor.startListening();
 
 signin.getProfile()
+	.then(menu.setProfile)
 	.then(note.getNotes)
 	.then(function () {
 		console.log('Done!');

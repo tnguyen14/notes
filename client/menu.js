@@ -51,7 +51,23 @@ function registerHandler (opt) {
 	handlers[opt.type] = opt.handler;
 }
 
+function setProfile (profile) {
+	var profileEl = document.querySelector('.menu .profile');
+	var image;
+	if (profile.photos.length > 0) {
+		image = document.createElement('img');
+		image.src = profile.photos[0].value;
+	} else {
+		image = document.createElement('span');
+		image.innerText = profile.displayName[0].toUpperCase();
+	}
+	image.classList.add('image');
+	profileEl.appendChild(image);
+	profileEl.setAttribute('aria-label', profile.displayName);
+}
+
 module.exports = {
 	startListening: startListening,
-	registerHandler: registerHandler
+	registerHandler: registerHandler,
+	setProfile: setProfile
 };
