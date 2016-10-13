@@ -45,8 +45,16 @@
 						<textarea placeholder="Write a note..."></textarea>
 					</div>
 				</div>
-				<button type="button" class="save green">Save</button>
-				<button type="button" class="remove red">Delete</button>
+				<button type="button" class="action remove red" aria-label="Delete">
+					<svg>
+						<use xlink:href="sprite.octicons.svg#trashcan">
+					</svg>
+				</button>
+				<button type="button" class="action save green" aria-label="Save">
+					<svg>
+						<use xlink:href="sprite.octicons.svg#file-text">
+					</svg>
+				</button>
 			</form>
 		</div>
 		<dialog class="delete-confirm">

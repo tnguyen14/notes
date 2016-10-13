@@ -310,15 +310,23 @@ select {
 	display: none;
 }
 
-.save {
+.editor-container form .action {
+	width: 2.5rem;
+	height: 2.5rem;
+	padding: 0;
 	position: absolute;
-	bottom: 0;
-	right: 0;
+	right: .2rem;
+}
+.editor-container form .action svg {
+	width: 2rem;
+	height: 1rem;
+	fill: #fff;
+}
+.save {
+	bottom: 1rem;
 }
 .remove {
-	position: absolute;
-	right: 0;
-	bottom: 1rem;
+	bottom: 4.5rem;
 }
 .delete-confirm .cancel {
 	float: right;
