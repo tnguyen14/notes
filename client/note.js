@@ -9,6 +9,7 @@ var menu = require('./menu');
 var notify = require('./notify');
 var signin = require('./signin');
 var config = require('./config');
+var loader = require('./lib/loader');
 
 module.exports = {
 	getNotes: getNotes,
@@ -50,9 +51,12 @@ function getLocalNotes () {
 }
 
 function getDriveNotes () {
+	lists.drive = listsContainer.querySelector('.list.drive ul');
+	loader.show(lists.drive);
 	return getJson(endPoints.drive, {
 		credentials: 'include'
 	}).then((response) => {
+		loader.hide(lists.drive);
 		renderNotes({
 			notes: response.notes,
 			label: response.label,
@@ -97,7 +101,7 @@ function addNote (type, note) {
 }
 
 function renderNotes (opts) {
-	var list = lists[opts.type] = listsContainer.querySelector('.list.' + opts.type + ' ul');
+	var list = lists[opts.type];
 	list.parentNode.querySelector('h3').innerHTML = opts.label;
 	opts.notes.forEach(addNote.bind(window, opts.type));
 	menu.registerHandler({

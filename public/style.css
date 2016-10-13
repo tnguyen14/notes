@@ -326,3 +326,13 @@ select {
 .configuration button[type=submit] {
 	float: right;
 }
+
+.svg-loader {
+	display: block;
+	margin: 0 auto;
+	width: 3.75em;
+	height: 3.75em;
+}
+.svg-loader path {
+	fill: var(--color-oslo-grey);
+}
