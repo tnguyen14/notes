@@ -83,12 +83,15 @@ button.grey:hover {
 	z-index: 1;
 }
 .menu button {
-	border-radius: 0;
+	border-radius: 50%;
 	font-family: monospace;
 	font-size: 1.3em;
 	margin-bottom: 1rem;
 	width: 2.5em;
 	height: 2.5em;
+}
+.menu button:focus {
+	outline: none;
 }
 .menu button svg {
 	width: 1rem;
@@ -97,10 +100,10 @@ button.grey:hover {
 .menu .toggle .hide-lists {
 	display: none;
 }
-.menu .toggle.active .show-lists {
+.menu .toggle.collapse .show-lists {
 	display: none;
 }
-.menu .toggle.active .hide-lists {
+.menu .toggle.collapse .hide-lists {
 	display: inline-block;
 }
 

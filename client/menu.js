@@ -26,7 +26,7 @@ function startListening () {
 		} else if (e.target.nodeName === 'svg') {
 			button = e.target.parentNode;
 		}
-		button.classList.toggle('active');
+		button.classList.toggle('collapse');
 		listsEl.classList.toggle('active');
 		editorEl.classList.toggle('lists-active');
 		// swap labels
