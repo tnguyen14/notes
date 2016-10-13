@@ -13,9 +13,7 @@ var loader = require('./lib/loader');
 
 module.exports = {
 	getNotes: getNotes,
-	addNote: addNote,
-	renderNotes: renderNotes,
-	showNote: showNote
+	addNote: addNote
 };
 
 var notes = {
@@ -35,20 +33,25 @@ editor.registerRemoveHandler(removeNote);
 
 function getNotes () {
 	return Promise.all([
-		getLocalNotes(),
+		// getLocalNotes(),
 		getDriveNotes()
-	]);
-}
-
-function getLocalNotes () {
-	return getJson(endPoints.local).then(function (response) {
-		renderNotes({
-			notes: response.notes,
-			label: response.label,
-			type: 'local'
-		});
+	]).then(function () {
+		// show the fist drive note
+		if (notes.drive.length > 0) {
+			showNote(notes.drive[0]);
+		}
 	});
 }
+
+// function getLocalNotes () {
+// 	return getJson(endPoints.local).then(function (response) {
+// 		renderNotes({
+// 			notes: response.notes,
+// 			label: response.label,
+// 			type: 'local'
+// 		});
+// 	});
+// }
 
 function getDriveNotes () {
 	lists.drive = listsContainer.querySelector('.list.drive ul');
