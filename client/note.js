@@ -1,10 +1,21 @@
+var Promise = require('bluebird');
 var simpleFetch = require('simple-fetch');
+var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
 var editor = require('./editor');
 var menu = require('./menu');
 var notify = require('./notify');
+var signin = require('./signin');
+var config = require('./config');
+
+module.exports = {
+	getNotes: getNotes,
+	addNote: addNote,
+	renderNotes: renderNotes,
+	showNote: showNote
+};
 
 var notes = {
 	local: [],
@@ -21,6 +32,59 @@ window.notes = notes;
 editor.registerSaveHandler(saveNote);
 editor.registerRemoveHandler(removeNote);
 
+function getNotes () {
+	return Promise.all([
+		getLocalNotes(),
+		getDriveNotes()
+	]);
+}
+
+function getLocalNotes () {
+	return getJson(endPoints.local).then(function (response) {
+		renderNotes({
+			notes: response.notes,
+			label: response.label,
+			type: 'local'
+		});
+	});
+}
+
+function getDriveNotes () {
+	return getJson(endPoints.drive, {
+		credentials: 'include'
+	}).then((response) => {
+		renderNotes({
+			notes: response.notes,
+			label: response.label,
+			type: 'drive'
+		});
+	}, (err) => {
+		if (err.response.status === 401) {
+			notify({
+				type: 'blue',
+				message: 'Redirecting to Google Drive for authorization',
+				permanent: true
+			});
+			signin.authorize('https://www.googleapis.com/auth/drive');
+		} else {
+			return err.response.json().then((error) => {
+				notify({
+					type: 'red',
+					message: 'Error in getting Google Drive notes: ' + error.message,
+					permanent: true
+				});
+				if (error.message.startsWith('Configuration:')) {
+					config.open(() => {
+						notify.clear();
+						getDriveNotes();
+					});
+				}
+			});
+		}
+	});
+}
+
+// add note to list
 function addNote (type, note) {
 	var li = document.createElement('li');
 	note.type = type;
@@ -157,9 +221,3 @@ function showNote (note) {
 	editor.setNote(note);
 	editor.viewMode();
 }
-
-module.exports = {
-	addNote: addNote,
-	renderNotes: renderNotes,
-	showNote: showNote
-};
