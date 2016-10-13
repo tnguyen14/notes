@@ -267,6 +267,10 @@ select {
 	border-radius: 3px 3px 0 0;
 	color: #333;
 }
+.tabnav button svg {
+	width: 2rem;
+	height: 1rem;
+}
 
 .content-container {
 	padding: .8rem .8rem 1rem .8rem;
