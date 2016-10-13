@@ -8,6 +8,7 @@ private
 public/index.js
 public/github-markdown.css
 public/sprite.octicons.svg
+public/hint.base.min.css
 data
 coverage
 .nyc_output
