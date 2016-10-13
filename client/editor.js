@@ -5,6 +5,20 @@ var md = require('markdown-it')({
 	.use(require('markdown-it-front-matter'), updateMetadata);
 var yaml = require('js-yaml');
 
+module.exports = {
+	getTitle: getTitle,
+	getContent: getContent,
+	setNote: setNote,
+	setId: setId,
+	startListening: startListening,
+	viewMode: viewMode,
+	writeMode: writeMode,
+	registerSaveHandler: registerSaveHandler,
+	registerRemoveHandler: registerRemoveHandler,
+	freeze: freeze,
+	unfreeze: unfreeze
+};
+
 var handlers = {};
 
 var container = document.querySelector('.editor-container');
@@ -145,7 +159,7 @@ function writeMode () {
 	writeButton.classList.add('selected');
 	form.classList.add('write-selected');
 	textarea.focus();
-	title.removeAttribute('disabled');
+	unfreeze();
 }
 
 function viewMode () {
@@ -156,7 +170,7 @@ function viewMode () {
 	// reset metadata first
 	updateMetadata();
 	view.innerHTML = md.render(content);
-	title.setAttribute('disabled', 'disabled');
+	freeze();
 
 	// handle markdown tasklists checkbox toggles
 	Array.prototype.forEach.call(view.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
@@ -174,14 +188,12 @@ function viewMode () {
 	});
 }
 
-module.exports = {
-	getTitle: getTitle,
-	getContent: getContent,
-	setNote: setNote,
-	setId: setId,
-	startListening: startListening,
-	viewMode: viewMode,
-	writeMode: writeMode,
-	registerSaveHandler: registerSaveHandler,
-	registerRemoveHandler: registerRemoveHandler
-};
+function freeze () {
+	title.setAttribute('disabled', 'disabled');
+	textarea.setAttribute('disabled', 'disabled');
+}
+
+function unfreeze () {
+	title.removeAttribute('disabled');
+	textarea.removeAttribute('disabled');
+}

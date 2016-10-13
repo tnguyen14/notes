@@ -83,9 +83,20 @@ function saveNote (type, n) {
 			updated.name = n.title;
 		}
 	}
+	notify({
+		message: 'Saving note...',
+		type: 'blue',
+		permanent: true
+	});
+	editor.freeze();
 	method(url, updated, {
 		credentials: 'include'
 	}).then(function (resp) {
+		notify({
+			message: 'Saved!',
+			type: 'green'
+		});
+		editor.unfreeze();
 		if (note.new) {
 			delete note.new;
 		}
