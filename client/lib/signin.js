@@ -2,6 +2,7 @@ var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var signIn = document.querySelector('.sign-in');
 var signInButton = signIn.querySelector('button');
+var notify = require('./notify');
 
 module.exports.authorize = authorize;
 module.exports.getProfile = getProfile;
@@ -30,6 +31,11 @@ function authorize (scopes) {
 		scope = scope.concat(scopes);
 	}
 	var currentUrl = window.location.href;
+	notify({
+		type: 'blue',
+		message: 'Logging in Google Drive...',
+		permanent: true
+	});
 	window.location = process.env.API_URL + '/auth/login/google' + '?scope=' + encodeURIComponent(scope.join(' ')) + '&redirect=' + encodeURIComponent(currentUrl);
 }
 

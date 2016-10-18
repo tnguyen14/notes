@@ -68,11 +68,6 @@ function open (cb) {
 		configEl.showModal();
 	}, (err) => {
 		if (err.response.status === 401) {
-			notify({
-				type: 'blue',
-				message: 'Redirecting to Google Drive for authorization',
-				permanent: true
-			});
 			signin.authorize();
 		}
 	});

@@ -67,11 +67,6 @@ function getDriveNotes () {
 		});
 	}, (err) => {
 		if (err.response.status === 401) {
-			notify({
-				type: 'blue',
-				message: 'Redirecting to Google Drive for authorization',
-				permanent: true
-			});
 			signin.authorize('https://www.googleapis.com/auth/drive');
 		} else {
 			return err.response.json().then((error) => {
