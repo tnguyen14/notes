@@ -175,7 +175,7 @@ button.grey:hover {
 	padding: .5rem 2rem 0;
 	position: relative; /* to match absolutely positioned action buttons */
 	transition: width .2s ease-in-out;
-	overflow: hidden;
+	overflow-y: hidden;
 }
 .editor-container.lists-active {
 	width: 80%;
