@@ -115,7 +115,7 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	});
 });
 
-app.put('/:id', function (req, res) {
+app.put('/:id', isAuthenticated, function (req, res) {
 	api.updateNote({
 		fileId: req.params.id,
 		content: req.body.content,
@@ -153,7 +153,7 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 	});
 });
 
-app.delete('/:id', function (req, res) {
+app.delete('/:id', isAuthenticated, function (req, res) {
 	api.deleteNote({
 		fileId: req.params.id,
 		credentials: {

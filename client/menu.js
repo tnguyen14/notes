@@ -3,6 +3,12 @@ var user = require('./lib/user');
 var addNoteChoice = document.querySelector('.add-note-choice');
 var handlers = {};
 
+module.exports = {
+	startListening,
+	registerAddNoteHandler,
+	setProfile
+};
+
 function startListening () {
 	// add button
 	document.querySelector('.menu .add').addEventListener('click', addNoteChoice.showModal.bind(addNoteChoice));
@@ -38,7 +44,13 @@ function startListening () {
 	});
 }
 
-function registerHandler (opt) {
+/**
+ * @param {object} opt
+ * @param {string} opt.label
+ * @param {string} opt.type
+ * @param {function} opt.handler
+ */
+function registerAddNoteHandler (opt) {
 	var option = document.createElement('button');
 	option.innerHTML = opt.label;
 	option.setAttribute('data-type', opt.type);
@@ -76,9 +88,3 @@ function setProfile (profile) {
 
 	profileEl.setAttribute('aria-label', profile.displayName);
 }
-
-module.exports = {
-	startListening: startListening,
-	registerHandler: registerHandler,
-	setProfile: setProfile
-};

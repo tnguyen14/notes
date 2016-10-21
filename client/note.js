@@ -6,106 +6,76 @@ var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
 var editor = require('./editor');
 var menu = require('./menu');
-var loader = require('./lib/loader');
+var list = require('./components/list');
 var notify = require('./lib/notify');
 var user = require('./lib/user');
 var config = require('./config');
 
 module.exports = {
-	getNotes: getNotes,
-	addNote: addNote
+	getNotes,
+	findNoteById
 };
 
 var notes = {
 	local: [],
 	drive: []
 };
-var lists = {};
 var endPoints = {
 	local: process.env.API_URL + '/local',
 	drive: process.env.API_URL + '/drive'
 };
-var listsContainer = document.querySelector('.lists');
-window.notes = notes;
 
 editor.registerSaveHandler(saveNote);
 editor.registerRemoveHandler(removeNote);
 
 function getNotes () {
 	return Promise.all([
-		// getLocalNotes(),
 		getDriveNotes()
-	]).then(function () {
+	]).then(() => {
 		// show the fist drive note
 		if (notes.drive.length > 0) {
-			showNote(notes.drive[0]);
+			let note = notes.drive[0];
+			list.setActiveNote(note.id);
+			editor.setNote(note);
+			editor.viewMode();
 		}
 	});
 }
 
-// function getLocalNotes () {
-// 	return getJson(endPoints.local).then(function (response) {
-// 		renderNotes({
-// 			notes: response.notes,
-// 			label: response.label,
-// 			type: 'local'
-// 		});
-// 	});
-// }
-
 function getDriveNotes () {
-	lists.drive = listsContainer.querySelector('.list.drive ul');
-	loader.show(lists.drive);
+	list.showLoader('drive');
 	return getJson(endPoints.drive, {
 		credentials: 'include'
 	}).then((response) => {
-		loader.hide(lists.drive);
-		renderNotes({
-			notes: response.notes,
+		list.hideLoader('drive');
+		notes.drive = response.notes;
+		list.registerOnNoteClickHandler(function (note) {
+			editor.setNote(note);
+			editor.viewMode();
+		});
+		list.renderNotes('drive', response);
+		menu.registerAddNoteHandler({
 			label: response.label,
-			type: 'drive'
+			type: 'drive',
+			handler: newNote.bind(window, 'drive')
 		});
 	}, (err) => {
 		if (err.response.status === 401) {
-			user.authorize('https://www.googleapis.com/auth/drive');
-		} else {
-			return err.response.json().then((error) => {
-				notify({
-					type: 'red',
-					message: 'Error in getting Google Drive notes: ' + error.message,
-					permanent: true
-				});
-				if (error.message.startsWith('Configuration:')) {
-					config.open(() => {
-						notify.clear();
-						getDriveNotes();
-					});
-				}
-			});
+			return user.authorize('https://www.googleapis.com/auth/drive');
 		}
-	});
-}
-
-// add note to list
-function addNote (type, note) {
-	var li = document.createElement('li');
-	note.type = type;
-	li.innerHTML = note.name;
-	li.classList.add('list-item');
-	li.setAttribute('data-id', note.id);
-	li.addEventListener('click', showNote.bind(window, note));
-	lists[type].appendChild(li);
-	notes[type].push(note);
-}
-
-function renderNotes (opts) {
-	var list = lists[opts.type];
-	list.parentNode.querySelector('h3').innerHTML = opts.label;
-	opts.notes.forEach(addNote.bind(window, opts.type));
-	menu.registerHandler({
-		label: opts.label,
-		type: opts.type,
-		handler: newNote.bind(window, opts.type)
+		err.response.json().then((error) => {
+			notify({
+				type: 'red',
+				message: 'Error in getting Google Drive notes: ' + error.message,
+				permanent: true
+			});
+			if (error.message.startsWith('Configuration:')) {
+				config.open(() => {
+					notify.clear();
+					getDriveNotes();
+				});
+			}
+		});
 	});
 }
 
@@ -117,8 +87,10 @@ function newNote (type) {
 		type: type,
 		new: true
 	};
-	addNote(type, note);
-	showNote(note);
+	notes[type].push(note);
+	list.renderNote(type, note);
+	list.setActiveNote(note.id);
+	editor.setNote(note);
 	editor.writeMode();
 }
 
@@ -127,7 +99,7 @@ function saveNote (type, n) {
 		return _n.id === n.id;
 	});
 	if (!note) {
-		return;
+		throw new Error('Unable to find note ' + n.id);
 	}
 	if (n.content === note.content && n.title === note.name) {
 		notify.info('No new change detected.');
@@ -157,7 +129,7 @@ function saveNote (type, n) {
 	editor.freeze();
 	method(url, updated, {
 		credentials: 'include'
-	}).then(function (resp) {
+	}).then((resp) => {
 		notify({
 			message: 'Saved!',
 			type: 'green'
@@ -167,11 +139,9 @@ function saveNote (type, n) {
 			delete note.new;
 		}
 		if (updated.name) {
-			let li = listsContainer.querySelector('[data-id="' + note.id + '"]');
-			li.innerHTML = updated.name;
+			list.updateNoteName(note.id, updated.name, resp.id);
 			note.name = updated.name;
 			note.id = resp.id;
-			li.setAttribute('data-id', resp.id);
 			editor.setId(resp.id);
 		}
 		note.content = updated.content;
@@ -181,7 +151,13 @@ function saveNote (type, n) {
 			type: 'green',
 			timeout: 3000
 		});
-	}, notify.error);
+	}, (err) => {
+		if (err.response.status === 401) {
+			// @TODO store localStorage
+			user.authorize('https://www.googleapis.com/auth/drive');
+			return;
+		}
+	});
 }
 
 function removeNote (type, id) {
@@ -199,27 +175,25 @@ function removeNote (type, id) {
 		credentials: 'include'
 	})
 		.then(function () {
-			var li = lists[type].querySelector('[data-id="' + note.id + '"]');
-			li.parentNode.removeChild(li);
+			list.removeNote(note.id);
 			notes[type].splice(noteIndex, 1);
-			editor.setNote();
 			notify({
 				message: 'Successfully deleted note.',
 				type: 'green',
 				timeout: 3000
 			});
+			// show the next note
+			var nextNote = notes[type][0];
+			list.setActiveNote(nextNote.id);
+			editor.setNote(nextNote);
+			editor.viewMode();
 		});
 }
 
-function showNote (note) {
-	var li = listsContainer.querySelector('[data-id="' + note.id + '"]');
-	if (!li) {
-		return;
-	}
-	Array.prototype.forEach.call(listsContainer.querySelectorAll('.lists .list-item'), function (l) {
-		l.classList.remove('selected');
+function findNoteById (id) {
+	// only search drive notes for now
+	var driveResult = notes.drive.find((note) => {
+		return note.id === id;
 	});
-	li.classList.add('selected');
-	editor.setNote(note);
-	editor.viewMode();
+	return driveResult;
 }
