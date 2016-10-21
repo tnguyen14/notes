@@ -3,7 +3,6 @@ var express = require('express');
 var app = express();
 var cors = require('cors');
 var config = require('../config.json');
-var auth = require('@tridnguyen/auth');
 var local = require('./local');
 var drive = require('./drive');
 
@@ -25,9 +24,6 @@ config.endpoints.forEach((endpoint) => {
 	}
 	app.use('/' + endpoint.uri, module(endpoint));
 });
-app.use('/auth', auth({
-	cors: true
-}));
 
 app.listen(process.env.PORT || 3000, function () {
 	console.log('Express is listening.');

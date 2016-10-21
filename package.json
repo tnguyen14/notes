@@ -46,6 +46,7 @@
     "markdown-it-front-matter": "^0.1.2",
     "markdown-it-task-lists": "^1.2.2",
     "mkdirp": "^0.5.1",
+    "needle": "^1.1.2",
     "octicons": "^4.4.0",
     "passport": "^0.3.2",
     "primer-markdown": "^3.3.1",

@@ -65,7 +65,7 @@ function setProfile (profile) {
 	options.classList.add('options');
 	var logout = document.createElement('a');
 	logout.innerText = 'Log Out';
-	logout.setAttribute('href', process.env.API_URL + '/auth/logout');
+	logout.setAttribute('href', process.env.AUTH_URL + '/logout');
 	options.appendChild(logout);
 	profileEl.appendChild(options);
 

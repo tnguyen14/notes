@@ -7,8 +7,9 @@ var flatfile = require('flat-file-db');
 var db = flatfile.sync('./data/users.db');
 
 var cookieSession = require('cookie-session');
-var passport = require('passport');
 var api = require('./api');
+
+var needle = require('needle');
 
 app.use(cookieSession({
 	name: process.env.COOKIE_NAME,
@@ -16,15 +17,29 @@ app.use(cookieSession({
 	domain: process.env.COOKIE_DOMAIN
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(bodyParser.json());
 
+/* call the AUTH_URL to see if user is authenticated */
 function isAuthenticated (req, res, next) {
-	if (!req.isAuthenticated || !req.isAuthenticated) {
-		return res.sendStatus(401);
-	}
-	return next();
+	// pass along cookies from the client-side
+	var cookies = {};
+	cookies[req.sessionKey] = req.sessionCookies.get(req.sessionKey, req.sessionOptions);
+	cookies[req.sessionKey + '.sig'] = req.sessionCookies.get(req.sessionKey + '.sig');
+	needle.get(process.env.AUTH_URL + '/profile', {
+		cookies: cookies
+	}, function (err, resp) {
+		if (err) {
+			console.error(err);
+			return res.sendStatus(500);
+		}
+		if (resp.statusCode === 200) {
+			req.user = resp.body;
+			return next();
+		}
+		if (resp.statusCode === 401) {
+			return res.sendStatus(401);
+		}
+	});
 }
 
 function hasRootDir (req, res, next) {

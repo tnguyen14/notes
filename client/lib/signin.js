@@ -8,7 +8,7 @@ module.exports.authorize = authorize;
 module.exports.getProfile = getProfile;
 
 function getProfile () {
-	return getJson(process.env.API_URL + '/auth/profile', {
+	return getJson(process.env.AUTH_URL + '/profile', {
 		credentials: 'include'
 	})
 		.catch(function (err) {
