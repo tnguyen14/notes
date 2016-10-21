@@ -10,6 +10,17 @@ var mimeTypes = {
 	folder: 'application/vnd.google-apps.folder'
 };
 
+var noteFields = [
+	'createdTime',
+	'id',
+	'kind',
+	'lastModifyingUser',
+	'mimeType',
+	'modifiedByMeTime',
+	'modifiedTime',
+	'name'
+];
+
 module.exports = {
 	getDirs: getDirs,
 	processFile: processFile,
@@ -23,7 +34,8 @@ function getDirs (opts) {
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
-			q: `mimeType = '${mimeTypes.folder}' and '${opts.rootDir}' in parents and trashed = false`
+			q: `mimeType = '${mimeTypes.folder}' and '${opts.rootDir}' in parents and trashed = false`,
+			fields: 'files(' + noteFields.join(',') + ')'
 		}, (err, resp) => {
 			if (err) {
 				debug(err);
@@ -64,7 +76,8 @@ function getFolderChildren (opts) {
 	return new Promise((resolve, reject) => {
 		drive.files.list({
 			auth: auth,
-			q: '\'' + opts.folderId + '\'' + ' in parents'
+			q: '\'' + opts.folderId + '\'' + ' in parents',
+			fields: 'files(' + noteFields.join(',') + ')'
 		}, (err, resp) => {
 			if (err) {
 				debug(err);
@@ -84,6 +97,9 @@ function getFolderChildren (opts) {
  * 'text/x-markdown'
  */
 function processFile (opts) {
+	function pickFileProperties ({name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
+		return {name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
+	}
 	var file = opts.file;
 	switch (file.mimeType) {
 		case mimeTypes.md:
@@ -92,11 +108,10 @@ function processFile (opts) {
 				fileId: file.id,
 				credentials: opts.credentials
 			}).then((content) => {
-				return {
-					id: file.id,
+				return Object.assign({}, pickFileProperties(file), {
 					name: path.basename(file.name, ext),
 					content: content
-				};
+				});
 			});
 		case mimeTypes.folder:
 			let indexMd;
@@ -110,20 +125,17 @@ function processFile (opts) {
 				if (!indexMd) {
 					return;
 				}
-				return indexMd.id;
-			}).then((fileId) => {
+				return indexMd;
+			}).then((indexMdFile) => {
 				return getFileContent({
-					fileId: fileId,
+					fileId: indexMdFile.id,
 					credentials: opts.credentials
-				});
-			}).then((content) => {
-				if (content) {
-					return {
+				}).then((content) => {
+					return Object.assign({}, pickFileProperties(indexMdFile), {
 						name: file.name,
-						id: indexMd.id,
 						content: content
-					};
-				}
+					});
+				});
 			});
 	}
 }

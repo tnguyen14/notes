@@ -48,7 +48,8 @@ tap.test('Drive API', (t) => {
 					refresh_token: '12345'
 				}
 			},
-			q: 'mimeType = \'application/vnd.google-apps.folder\' and \'rootdir\' in parents and trashed = false'
+			q: 'mimeType = \'application/vnd.google-apps.folder\' and \'rootdir\' in parents and trashed = false',
+			fields: 'files(createdTime,id,kind,lastModifyingUser,mimeType,modifiedByMeTime,modifiedTime,name)'
 		}));
 		t.end();
 	});
@@ -77,7 +78,18 @@ tap.test('Drive API', (t) => {
 			id: 'test-note-index-id',
 			name: 'index.md',
 			kind: 'drive#file',
-			mimeType: 'text/x-markdown'
+			mimeType: 'text/x-markdown',
+			createdTime: '2016-09-15T02:01:27.674Z',
+			modifiedTime: '2016-10-13T01:48:18.170Z',
+			modifiedByMeTime: '2016-10-13T01:48:18.170Z',
+			lastModifyingUser: {
+				kind: 'drive#user',
+				displayName: 'Test D. User',
+				photoLink: 'https://lh3.googleusercontent.com/asd/fd/photo.jpg',
+				me: true,
+				permissionId: '04428089804842140789',
+				emailAddress: 'testuser@email.com'
+			}
 		}]);
 		var getFolderChildrenRevert = driveApi.__set__('getFolderChildren', getFolderChildrenStub);
 		var getFileContentStub = sinon.stub().resolves('## Note content');
@@ -113,7 +125,13 @@ tap.test('Drive API', (t) => {
 			t.deepEqual(resp, {
 				name: 'Test',
 				id: 'test-note-index-id',
-				content: '## Note content'
+				content: '## Note content',
+				createdTime: '2016-09-15T02:01:27.674Z',
+				modifiedTime: '2016-10-13T01:48:18.170Z',
+				modifiedByMeTime: '2016-10-13T01:48:18.170Z',
+				lastModifyingUser: {
+					me: true
+				}
 			});
 			getFolderChildrenRevert();
 			getFileContentRevert();
@@ -128,7 +146,18 @@ tap.test('Drive API', (t) => {
 				id: 'test-note-index-id',
 				name: 'index.md',
 				kind: 'drive#file',
-				mimeType: 'text/x-markdown'
+				mimeType: 'text/x-markdown',
+				createdTime: '2016-07-17T23:58:41.712Z',
+				modifiedTime: '2016-10-11T18:25:20.634Z',
+				modifiedByMeTime: '2016-10-11T18:25:20.634Z',
+				lastModifyingUser: {
+					kind: 'drive#user',
+					displayName: 'Test D. User',
+					me: true,
+					photoLink: 'https://lh3.googleusercontent.com/asd/fd/photo.jpg',
+					permissionId: '04428089804842140789',
+					emailAddress: 'testuser@email.com'
+				}
 			}]
 		});
 		getStub.callsArgWith(1, null, '## Note content');
@@ -158,7 +187,8 @@ tap.test('Drive API', (t) => {
 						refresh_token: '12345'
 					}
 				},
-				q: '\'test-note-dir-id\' in parents'
+				q: '\'test-note-dir-id\' in parents',
+				fields: 'files(createdTime,id,kind,lastModifyingUser,mimeType,modifiedByMeTime,modifiedTime,name)'
 			}));
 			t.ok(getStub.calledOnce);
 			t.ok(getStub.calledWith({
@@ -174,7 +204,13 @@ tap.test('Drive API', (t) => {
 			t.deepEqual(resp, {
 				name: 'Test',
 				id: 'test-note-index-id',
-				content: '## Note content'
+				content: '## Note content',
+				createdTime: '2016-07-17T23:58:41.712Z',
+				modifiedTime: '2016-10-11T18:25:20.634Z',
+				modifiedByMeTime: '2016-10-11T18:25:20.634Z',
+				lastModifyingUser: {
+					me: true
+				}
 			});
 			driveRevert();
 			t.end();
