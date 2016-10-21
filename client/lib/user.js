@@ -6,6 +6,8 @@ var notify = require('./notify');
 
 module.exports.authorize = authorize;
 module.exports.getProfile = getProfile;
+module.exports.logoutUrl = process.env.AUTH_URL + '/logout?redirect=' +
+	encodeURIComponent(process.env.CLIENT_URL);
 
 function getProfile () {
 	return getJson(process.env.AUTH_URL + '/profile', {
@@ -24,18 +26,18 @@ signInButton.addEventListener('click', function (e) {
 	authorize();
 });
 
-function authorize (scopes) {
+function authorize (scopes, redirect) {
 	// default scope is just profile
 	var scope = ['profile', 'https://www.googleapis.com/auth/drive'];
 	if (scopes) {
 		scope = scope.concat(scopes);
 	}
-	var currentUrl = window.location.href;
+	var redirectUrl = redirect || window.location.href;
 	notify({
 		type: 'blue',
 		message: 'Logging in Google Drive...',
 		permanent: true
 	});
-	window.location = process.env.API_URL + '/auth/login/google' + '?scope=' + encodeURIComponent(scope.join(' ')) + '&redirect=' + encodeURIComponent(currentUrl);
+	window.location = process.env.AUTH_URL + '/login/google' + '?scope=' + encodeURIComponent(scope.join(' ')) + '&redirect=' + encodeURIComponent(redirectUrl);
 }
 

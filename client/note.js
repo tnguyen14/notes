@@ -8,7 +8,7 @@ var editor = require('./editor');
 var menu = require('./menu');
 var loader = require('./lib/loader');
 var notify = require('./lib/notify');
-var signin = require('./lib/signin');
+var user = require('./lib/user');
 var config = require('./config');
 
 module.exports = {
@@ -67,7 +67,7 @@ function getDriveNotes () {
 		});
 	}, (err) => {
 		if (err.response.status === 401) {
-			signin.authorize('https://www.googleapis.com/auth/drive');
+			user.authorize('https://www.googleapis.com/auth/drive');
 		} else {
 			return err.response.json().then((error) => {
 				notify({

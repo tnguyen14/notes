@@ -1,4 +1,5 @@
 var config = require('./config');
+var user = require('./lib/user');
 var addNoteChoice = document.querySelector('.add-note-choice');
 var handlers = {};
 
@@ -65,7 +66,7 @@ function setProfile (profile) {
 	options.classList.add('options');
 	var logout = document.createElement('a');
 	logout.innerText = 'Log Out';
-	logout.setAttribute('href', process.env.AUTH_URL + '/logout');
+	logout.setAttribute('href', user.logoutUrl);
 	options.appendChild(logout);
 	profileEl.appendChild(options);
 

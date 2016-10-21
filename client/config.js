@@ -2,7 +2,7 @@ var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var patchJson = simpleFetch.patchJson;
 var notify = require('./lib/notify');
-var signin = require('./lib/signin');
+var user = require('./lib/user');
 var configUrl = process.env.API_URL + '/drive/me';
 var configEl = document.querySelector('.configuration');
 var saveButton = configEl.querySelector('button[type=submit]');
@@ -68,7 +68,7 @@ function open (cb) {
 		configEl.showModal();
 	}, (err) => {
 		if (err.response.status === 401) {
-			signin.authorize();
+			user.authorize();
 		}
 	});
 }
