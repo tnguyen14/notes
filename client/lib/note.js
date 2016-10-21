@@ -4,12 +4,12 @@ var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
 var putJson = simpleFetch.putJson;
 var deleteJson = simpleFetch.deleteJson;
-var editor = require('./editor');
-var menu = require('./menu');
-var list = require('./components/list');
-var notify = require('./lib/notify');
-var user = require('./lib/user');
-var config = require('./config');
+var config = require('../components/config');
+var editor = require('../components/editor');
+var list = require('../components/list');
+var menu = require('../components/menu');
+var notify = require('./notify');
+var user = require('./user');
 
 module.exports = {
 	getNotes,

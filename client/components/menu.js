@@ -1,5 +1,5 @@
 var config = require('./config');
-var user = require('./lib/user');
+var user = require('../lib/user');
 var addNoteChoice = document.querySelector('.add-note-choice');
 var handlers = {};
 
