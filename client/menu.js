@@ -20,12 +20,7 @@ function startListening () {
 	var listsEl = document.querySelector('.lists');
 	var editorEl = document.querySelector('.editor-container');
 	document.querySelector('.menu .toggle').addEventListener('click', function (e) {
-		var button;
-		if (e.target.nodeName === 'BUTTON') {
-			button = e.target;
-		} else if (e.target.nodeName === 'svg') {
-			button = e.target.parentNode;
-		}
+		var button = e.currentTarget;
 		button.classList.toggle('collapse');
 		listsEl.classList.toggle('active');
 		editorEl.classList.toggle('lists-active');
@@ -52,6 +47,7 @@ function registerHandler (opt) {
 }
 
 function setProfile (profile) {
+	// profile image
 	var profileEl = document.querySelector('.menu .profile');
 	var image;
 	if (profile.photos.length > 0) {
@@ -63,6 +59,20 @@ function setProfile (profile) {
 	}
 	image.classList.add('image');
 	profileEl.appendChild(image);
+
+	// profile options
+	var options = document.createElement('div');
+	options.classList.add('options');
+	var logout = document.createElement('a');
+	logout.innerText = 'Log Out';
+	logout.setAttribute('href', process.env.API_URL + '/auth/logout');
+	options.appendChild(logout);
+	profileEl.appendChild(options);
+
+	profileEl.addEventListener('click', function (e) {
+		e.currentTarget.classList.toggle('active');
+	});
+
 	profileEl.setAttribute('aria-label', profile.displayName);
 }
 

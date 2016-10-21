@@ -1,5 +1,6 @@
 /* Variables */
 :root {
+	--color-eclipse: #383838;
 	--color-white-smoke: #eee;
 	--color-heather: #bdc3c7;
 	--color-oslo-grey: #7f8c8d;
@@ -108,6 +109,7 @@ button.grey:hover {
 	display: inline-block;
 }
 .menu .profile {
+	cursor: pointer;
 	position: absolute;
 	text-align: center;
 	bottom: 1rem;
@@ -127,6 +129,41 @@ button.grey:hover {
 .menu .profile span.image {
 	padding-top: .5em;
 }
+.menu .profile .options {
+	box-shadow: 0 3px 12px rgba(0, 0, 0, .15);
+	border: 1px solid rgba(0, 0, 0, .15);
+	display: none;
+	font-size: .8em;
+	position: absolute;
+	top: 0;
+	left: calc(100% + 3px);
+	width: 5rem;
+}
+.menu .profile .options::before {
+	content: '';
+	position: absolute;
+	border: 6px solid transparent;
+	border-right-color: rgba(0, 0, 0, .15);
+	left: -12px;
+	top: 2px;
+}
+.menu .profile .options::after {
+	content: '';
+	position: absolute;
+	border: 5px solid transparent;
+	border-right-color: white;
+	left: -10px;
+	top: 3px;
+}
+.menu .profile.active .options {
+	display: block;
+}
+.menu .options a {
+	color: black;
+	display: inline-block;
+	padding: .5rem;
+	text-decoration: none;
+}
 
 .lists {
 	border-right: 1px solid var(--color-white-smoke);
@@ -138,7 +175,7 @@ button.grey:hover {
 }
 .lists.active {
 	left: 0;
-	width: 20%;
+	width: calc(20% - 4rem);
 	transition: width .2s ease-in-out, left .2s ease-in-out .2s;
 }
 .lists .add {
