@@ -7,6 +7,7 @@ var onNoteClickHandler;
 module.exports = {
 	showLoader,
 	hideLoader,
+	renderLabel,
 	renderNotes,
 	renderNote,
 	setActiveNote,
@@ -23,9 +24,12 @@ function hideLoader (type) {
 	loader.hide(getUl(type));
 }
 
-function renderNotes (type, response) {
-	getUl(type).parentNode.querySelector('h3').innerHTML = response.label;
-	response.notes.forEach(renderNote.bind(window, type));
+function renderLabel (type, label) {
+	getUl(type).parentNode.querySelector('h3').innerHTML = label;
+}
+
+function renderNotes (type, notes) {
+	notes.forEach(renderNote.bind(window, type));
 }
 //
 // add note to list
@@ -38,7 +42,7 @@ function renderNote (type, note) {
 	li.addEventListener('click', (e) => {
 		setActiveNote(note.id);
 		if (onNoteClickHandler && typeof onNoteClickHandler === 'function') {
-			onNoteClickHandler(note);
+			onNoteClickHandler(type, note);
 		}
 	});
 	getUl(type).appendChild(li);
@@ -77,7 +81,9 @@ function updateNoteName (noteId, newName, newId) {
 		throw new Error('Could not locate note ' + noteId + ' on the list');
 	}
 	li.innerHTML = newName;
-	li.setAttribute('data-id', newId);
+	if (newId) {
+		li.setAttribute('data-id', newId);
+	}
 }
 
 var listUls = {};

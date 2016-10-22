@@ -10,9 +10,17 @@ module.exports.hide = removeLoader;
  */
 function showLoader (el, type) {
 	var template = loaders[type || 'circle'];
-	var loader = document.importNode(template.content, true);
 	var elToAttach = el || document.body;
-	elToAttach.appendChild(loader);
+	var loader = elToAttach.querySelector('.loader');
+	if (!loader) {
+		loader = document.importNode(template.content, true);
+		elToAttach.appendChild(loader);
+		// select it again so loader can be an element, not document fragment
+		// that is needed to access classList, because classList is undefined
+		// for document fragment
+		loader = elToAttach.querySelector('.loader');
+	}
+	loader.classList.add('active');
 	return loader;
 }
 
@@ -21,5 +29,6 @@ function removeLoader (el) {
 	if (!loader) {
 		return;
 	}
-	loader.parentNode.removeChild(loader);
+	loader.classList.remove('active');
+	return loader;
 }

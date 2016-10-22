@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var localforage = require('localforage');
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
@@ -11,31 +12,76 @@ var menu = require('../components/menu');
 var notify = require('./notify');
 var user = require('./user');
 
+const localForageSeparator = '!';
+
 module.exports = {
 	getNotes,
 	findNoteById
 };
 
+localforage.config({
+	name: 'inspiredNotes'
+});
+
 var notes = {
 	drive: []
 };
+
+window.notes = notes;
+
 var endPoints = {
 	drive: process.env.API_URL + '/drive'
 };
 
+// event handlers registration
 editor.registerSaveHandler(saveNote);
 editor.registerRemoveHandler(removeNote);
+list.registerOnNoteClickHandler(setActiveNote);
 
-function getNotes () {
+function getNotes (profile) {
+	let type = 'drive';
+	getJson(endPoints[type] + '/me', {  // get config
+		credentials: 'include'
+	}).then((config) => {
+		list.renderLabel(type, config.label);
+		menu.registerAddNoteHandler({
+			label: config.label,
+			type,
+			handler: newNote.bind(window, type)
+		});
+	});
 	return Promise.all([
-		getDriveNotes()
-	]).then(() => {
+		getDriveNotes(),
+		getLocalNotes(type, profile.id).then((localNotes) => {
+			// eagerly render localNotes first
+			notes[type] = localNotes;
+			list.renderNotes(type, localNotes);
+			return localNotes;
+		})
+	]).then((res) => {
+		// res: [driveNotes, localNotes]
+		notes[type] = res[0].map((note) => {
+			let localNote = res[1].find((n) => n.id === note.id);
+			if (!localNote) {
+				// if local note has not exist, store it and render it
+				localforage.setItem(getLocalNoteKey(type, profile.id, note.id),
+					note);
+				list.renderNote(type, note);
+			} else if (localNote.name !== note.name ||
+				localNote.content !== note.content) {
+				// if 2 versions differ
+				// @TODO alert user, allow resolution?
+				// for now, just store the latest version
+				localforage.setItem(getLocalNoteKey(type, profile.id, note.id),
+					note);
+				list.updateNoteName(note.id, note.name);
+			}
+			return note;
+		});
 		// show the fist drive note
-		if (notes.drive.length > 0) {
-			let note = notes.drive[0];
-			list.setActiveNote(note.id);
-			editor.setNote(note);
-			editor.viewMode();
+		if (notes[type].length > 0) {
+			let note = notes[type][0];
+			setActiveNote(type, note);
 		}
 	});
 }
@@ -46,18 +92,9 @@ function getDriveNotes () {
 		credentials: 'include'
 	}).then((response) => {
 		list.hideLoader('drive');
-		notes.drive = response.notes;
-		list.registerOnNoteClickHandler(function (note) {
-			editor.setNote(note);
-			editor.viewMode();
-		});
-		list.renderNotes('drive', response);
-		menu.registerAddNoteHandler({
-			label: response.label,
-			type: 'drive',
-			handler: newNote.bind(window, 'drive')
-		});
+		return response.notes;
 	}, (err) => {
+		list.hideLoader('drive');
 		if (err.response.status === 401) {
 			return user.authorize('https://www.googleapis.com/auth/drive');
 		}
@@ -87,9 +124,23 @@ function newNote (type) {
 	};
 	notes[type].push(note);
 	list.renderNote(type, note);
+	setActiveNote(type, note, true);
+}
+
+function setActiveNote (type, note, writeMode) {
 	list.setActiveNote(note.id);
 	editor.setNote(note);
-	editor.writeMode();
+	if (writeMode) {
+		editor.writeMode();
+	} else {
+		editor.viewMode();
+	}
+	// reset previous active note
+	let prevActive = notes[type].find((n) => n.active);
+	if (prevActive) {
+		prevActive.active = false;
+	}
+	note.active = true;
 }
 
 function saveNote (type, n) {
@@ -182,9 +233,7 @@ function removeNote (type, id) {
 			});
 			// show the next note
 			var nextNote = notes[type][0];
-			list.setActiveNote(nextNote.id);
-			editor.setNote(nextNote);
-			editor.viewMode();
+			setActiveNote(type, nextNote);
 		});
 }
 
@@ -194,4 +243,21 @@ function findNoteById (id) {
 		return note.id === id;
 	});
 	return driveResult;
+}
+
+function getLocalNoteKey (type, profileId, noteId) {
+	return ['note', type, profileId, noteId].join(localForageSeparator);
+}
+
+function getLocalNotes (type, userId) {
+	var notes = [];
+	return localforage.iterate((value, key) => {
+		// filter out note with the right type and userId
+		if (key.indexOf('note!' + type + '!' + userId) !== 0) {
+			return;
+		}
+		notes.push(value);
+	}).then(() => {
+		return notes;
+	});
 }

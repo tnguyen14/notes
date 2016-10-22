@@ -87,4 +87,6 @@ function setProfile (profile) {
 	});
 
 	profileEl.setAttribute('aria-label', profile.displayName);
+
+	return profile;
 }

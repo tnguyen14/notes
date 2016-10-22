@@ -204,6 +204,9 @@ button.grey:hover {
 .list li:hover {
 	background-color: #e0e0e0;
 }
+.list .loader.circle {
+	width: 2em;
+}
 
 .editor-container {
 	width: 100%;
@@ -431,6 +434,12 @@ select {
 }
 
 /* Loader */
+.loader {
+	display: none;
+}
+.loader.active {
+	display: block;
+}
 .loader.circle {
 	position: relative;
 	margin: 0 auto;
