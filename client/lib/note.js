@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var localforage = require('localforage');
+var moment = require('moment');
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
@@ -70,8 +71,18 @@ function getNotes (profile) {
 			} else if (localNote.name !== note.name ||
 				localNote.content !== note.content) {
 				// if 2 versions differ
-				// @TODO alert user, allow resolution?
-				// for now, just store the latest version
+				// if local version is later than remote version, keep local version
+				if (moment(note.modifiedTime).isBefore(localNote.modifiedTime)) {
+					console.log('dirty!');
+					localNote.oldNote = note;
+					return localNote;
+				}
+
+				// if local version is older, but was a result of a bad save
+				if (localNote.dirty) {
+					// @TODO resolve conflict somehow?
+				}
+				// if remote version is later, use remote version
 				localforage.setItem(getLocalNoteKey(type, profile.id, note.id),
 					note);
 				list.updateNoteName(note.id, note.name);
@@ -92,7 +103,7 @@ function getDriveNotes () {
 		credentials: 'include'
 	}).then((response) => {
 		list.hideLoader('drive');
-		return response.notes;
+		return response;
 	}, (err) => {
 		list.hideLoader('drive');
 		if (err.response.status === 401) {
@@ -104,13 +115,14 @@ function getDriveNotes () {
 				message: 'Error in getting Google Drive notes: ' + error.message,
 				permanent: true
 			});
-			if (error.message.startsWith('Configuration:')) {
+			if (error.message && error.message.startsWith('Configuration:')) {
 				config.open(() => {
 					notify.clear();
 					getDriveNotes();
 				});
 			}
 		});
+		return [];
 	});
 }
 
@@ -143,22 +155,34 @@ function setActiveNote (type, note, writeMode) {
 	note.active = true;
 }
 
+let savePending = false;
 function saveNote (type, n) {
-	var note = notes[type].find(function (_n) {
-		return _n.id === n.id;
-	});
+	if (savePending) {
+		// if in the middle of saving, wait 500ms before trying again
+		setTimeout(() => {
+			saveNote(type, n);
+		}, 500);
+	}
+	var note = findNoteById(n.id);
+	var oldNote = note;
 	if (!note) {
 		throw new Error('Unable to find note ' + n.id);
 	}
-	if (n.content === note.content && n.title === note.name) {
+	if (note.dirty && note.oldNote) {
+		oldNote = note.oldNote;
+	}
+	if (n.content === oldNote.content && n.title === oldNote.name) {
 		notify.info('No new change detected.');
+		// @TODO remove the dirty flag, which seems erroneous at this point?
 		return;
 	}
+	savePending = true;
+
 	// request body object
 	var updated = {};
 	var url = endPoints[type];
 	var method = postJson;
-	if (n.content !== note.content) {
+	if (n.content !== oldNote.content) {
 		updated.content = n.content;
 	}
 	if (note.new) {
@@ -166,7 +190,7 @@ function saveNote (type, n) {
 	} else {
 		url += '/' + encodeURIComponent(note.id);
 		method = putJson;
-		if (n.title !== note.name) {
+		if (n.title !== oldNote.name) {
 			updated.name = n.title;
 		}
 	}
@@ -179,21 +203,30 @@ function saveNote (type, n) {
 	method(url, updated, {
 		credentials: 'include'
 	}).then((resp) => {
+		savePending = false;
 		notify({
 			message: 'Saved!',
 			type: 'green'
 		});
 		editor.unfreeze();
 		if (note.new) {
+			editor.setId(resp.id);
+			note.id = resp.id;
 			delete note.new;
 		}
 		if (updated.name) {
 			list.updateNoteName(note.id, updated.name, resp.id);
 			note.name = updated.name;
-			note.id = resp.id;
-			editor.setId(resp.id);
 		}
 		note.content = updated.content;
+		if (note.dirty && note.oldNote) {
+			delete note.dirty;
+			delete note.oldNote;
+		}
+		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
+			note);
+
+		// switch to view mode after save
 		editor.viewMode();
 		notify({
 			message: 'Saved!',
@@ -201,11 +234,24 @@ function saveNote (type, n) {
 			timeout: 3000
 		});
 	}, (err) => {
+		savePending = false;
+		// save to local storage for later re-save
+
+		// @TODO maybe use a more precise timestamp of when textarea on blur?
+		// that would mean that after first failure to save,
+		// the next time save happens there won't be a new timestamp
+		var lastModifiedTime = new Date().toISOString();
+		note.name = n.title;
+		note.content = n.content;
+		note.modifiedTime = lastModifiedTime;
+		note.dirty = true;
+		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
+			note);
 		if (err.response.status === 401) {
-			// @TODO store localStorage
 			user.authorize('https://www.googleapis.com/auth/drive');
 			return;
 		}
+		notify.error(err);
 	});
 }
 
@@ -237,12 +283,16 @@ function removeNote (type, id) {
 		});
 }
 
-function findNoteById (id) {
-	// only search drive notes for now
-	var driveResult = notes.drive.find((note) => {
+function findNoteById (id, type) {
+	// only search in single note type for now
+	let _type = type;
+	// default to drive
+	if (!type) {
+		_type = 'drive';
+	}
+	return notes[_type].find((note) => {
 		return note.id === id;
 	});
-	return driveResult;
 }
 
 function getLocalNoteKey (type, profileId, noteId) {
@@ -261,3 +311,20 @@ function getLocalNotes (type, userId) {
 		return notes;
 	});
 }
+
+// expose utility method (useful to clean up localforage stuff)
+window.localF = {
+	listAll: function () {
+		localforage.iterate((value, key) => {
+			console.log(key);
+			console.log(value);
+		});
+	},
+	remove: function (key) {
+		if (!key) {
+			throw new Error('no key to be removed');
+		}
+		localforage.removeItem(key).then(console.log);
+	},
+	_: localforage
+};

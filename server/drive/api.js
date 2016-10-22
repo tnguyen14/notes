@@ -123,7 +123,7 @@ function processFile (opts) {
 					return f.name === 'index.md';
 				});
 				if (!indexMd) {
-					return;
+					return Promise.reject(new Error('Unable to find ' + file.name + '/index.md'));
 				}
 				return indexMd;
 			}).then((indexMdFile) => {
@@ -150,10 +150,9 @@ function updateNote (opts) {
 			mimeType: mimeTypes.md
 		}
 	};
+	let toChangeName;
 	if (opts.name) {
-		params.resource = {
-			name: opts.name
-		};
+		toChangeName = opts.fileId;
 	}
 	return new Promise((resolve, reject) => {
 		drive.files.update(params, (err, resp) => {
@@ -162,7 +161,40 @@ function updateNote (opts) {
 				reject(err);
 				return;
 			}
-			resolve(resp);
+			// if no name change, done
+			if (!toChangeName) {
+				return resolve(resp);
+			}
+			// look up file to see if it has a parent folder
+			drive.files.get({
+				auth: auth,
+				fileId: toChangeName,
+				fields: 'name,parents'
+			}, (err, resp2) => {
+				if (err) {
+					debug(err);
+					return reject(err);
+				}
+				if (resp.name === 'index.md') {
+					toChangeName = resp2.parents[0];
+				}
+				drive.files.update({
+					auth: auth,
+					fileId: toChangeName,
+					resource: {
+						name: opts.name
+					}
+				}, (err, resp3) => {
+					if (err) {
+						debug(err);
+						return reject(err);
+					}
+					// return back the original note file, with the new name
+					resolve(Object.assign({}, resp, {
+						name: resp3.name
+					}));
+				});
+			});
 		});
 	});
 }

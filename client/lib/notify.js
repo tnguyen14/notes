@@ -54,7 +54,7 @@ function notify (opts) {
 function error (err) {
 	if (!err.response) {
 		notify({
-			message: err.response.message || err,
+			message: err.response.message || err.message || err,
 			type: 'red'
 		});
 		return;

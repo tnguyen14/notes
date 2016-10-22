@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var flatfile = require('flat-file-db');
 var db = flatfile.sync('./data/users.db');
+var debug = require('debug')('notes');
 
 var cookieSession = require('cookie-session');
 var api = require('./api');
@@ -99,13 +100,19 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 				}
 			});
 		})).then((notes) => {
-			res.json({
-				label: driveConfig.label,
-				notes: notes.filter((n) => n)
-			});
+			res.json(notes.filter((n) => n).map((n) => {
+				// add userId and type to each note
+				n.userId = req.user.id;
+				n.type = 'drive';
+				return n;
+			}));
 		}, (err) => {
 			if (err) {
-				res.status(400).json(err);
+				debug(err);
+				debug(err.message);
+				res.status(400).json({
+					message: err.message
+				});
 			}
 		});
 	}, (err) => {

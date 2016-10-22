@@ -16,7 +16,8 @@ tap.test('Drive API', (t) => {
 			files: {
 				list: sinon.spy(),
 				update: sinon.spy(),
-				create: sinon.spy()
+				create: sinon.spy(),
+				get: sinon.spy()
 			}
 		});
 		done();
@@ -253,6 +254,30 @@ tap.test('Drive API', (t) => {
 		t.end();
 	});
 	t.test('updateNote - with name', (t) => {
+		var getStub = sinon.stub();
+		var updateStub = sinon.stub();
+		getStub.callsArgWith(1, null, {
+			name: 'index.md',
+			parents: ['test-note-dir-id']
+		});
+		updateStub.onFirstCall().callsArgWith(1, null, {
+			kind: 'drive#file',
+			id: 'test-file-id',
+			name: 'index.md',
+			mimeType: 'text/x-markdown'
+		});
+		updateStub.onSecondCall().callsArgWith(1, null, {
+			kind: 'drive#file',
+			id: 'test-note-dir-id',
+			name: 'new-note-name',
+			mimeType: 'application/vnd.google-apps.folder'
+		});
+		var driveRevert = driveApi.__set__('drive', {
+			files: {
+				get: getStub,
+				update: updateStub
+			}
+		});
 		driveApi.updateNote({
 			credentials: {
 				access_token: '2233445566',
@@ -261,24 +286,53 @@ tap.test('Drive API', (t) => {
 			fileId: 'test-file-id',
 			content: 'new test content',
 			name: 'new-note-name'
-		});
-		t.ok(driveApi.__get__('drive').files.update.calledWith({
-			auth: {
-				credentials: {
-					access_token: '2233445566',
-					refresh_token: '12345'
+		}).then((resp) => {
+			t.ok(getStub.calledOnce);
+			t.ok(getStub.calledWith({
+				auth: {
+					credentials: {
+						access_token: '2233445566',
+						refresh_token: '12345'
+					}
+				},
+				fileId: 'test-file-id',
+				fields: 'name,parents'
+			}));
+			t.ok(updateStub.calledTwice);
+			t.ok(updateStub.firstCall.calledWith({
+				auth: {
+					credentials: {
+						access_token: '2233445566',
+						refresh_token: '12345'
+					}
+				},
+				fileId: 'test-file-id',
+				media: {
+					body: 'new test content',
+					mimeType: 'text/x-markdown'
 				}
-			},
-			fileId: 'test-file-id',
-			media: {
-				body: 'new test content',
-				mimeType: 'text/x-markdown'
-			},
-			resource: {
+			}));
+			t.ok(updateStub.secondCall.calledWith({
+				auth: {
+					credentials: {
+						access_token: '2233445566',
+						refresh_token: '12345'
+					}
+				},
+				fileId: 'test-note-dir-id',
+				resource: {
+					name: 'new-note-name'
+				}
+			}));
+			t.deepEqual(resp, {
+				id: 'test-file-id',
+				mimeType: 'text/x-markdown',
+				kind: 'drive#file',
 				name: 'new-note-name'
-			}
-		}));
-		t.end();
+			});
+			driveRevert();
+			t.end();
+		});
 	});
 	t.test('updateNote - error', (t) => {
 		var driveRevert = driveApi.__set__('drive', {
