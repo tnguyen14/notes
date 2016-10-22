@@ -17,11 +17,9 @@ module.exports = {
 };
 
 var notes = {
-	local: [],
 	drive: []
 };
 var endPoints = {
-	local: process.env.API_URL + '/local',
 	drive: process.env.API_URL + '/drive'
 };
 

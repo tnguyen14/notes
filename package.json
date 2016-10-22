@@ -51,7 +51,6 @@
     "passport": "^0.3.2",
     "primer-markdown": "^3.3.1",
     "request-promise": "^3.0.0",
-    "rimraf": "^2.5.3",
     "simple-fetch": "^1.2.1",
     "user-home": "^2.0.0"
   },
