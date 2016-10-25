@@ -1,6 +1,9 @@
 node_modules
-public
 test
 hooks
-client
 data
+Session.vim
+.nyc_output
+.git
+# client # can't ignore for certain Dockerfile for now
+# public # see https://github.com/docker/docker/issues/12886

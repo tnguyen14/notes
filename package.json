@@ -55,7 +55,6 @@
     "passport": "^0.3.2",
     "pm2": "^2.0.18",
     "primer-markdown": "^3.3.1",
-    "request-promise": "^3.0.0",
     "simple-fetch": "^1.2.1",
     "user-home": "^2.0.0"
   },

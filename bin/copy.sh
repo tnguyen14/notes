@@ -7,10 +7,12 @@ node_modules/octicons/build/sprite.octicons.svg
 node_modules/hint.css/hint.base.min.css
 "
 
+mkdir -p ./public
+
 set -f; IFS='
 '                           # turn off variable value expansion except for splitting at newlines
 for file in $ASSETS; do
 	set +f; unset IFS       # restore globbing and field splitting at all whitespace
-	cp -vf "$file" public/
+	cp -vf "$file" ./public/
 done
 set +f; unset IFS           # do it again in case $ASSETS was empty
