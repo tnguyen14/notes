@@ -1,7 +1,11 @@
 version: '2'
 services:
-  notes:
+  server:
     build: .
     volumes:
       - ./data:/src/data
+  client:
+    build:
+      dockerfile: Dockerfile.client
+      context: .
 

@@ -14,5 +14,5 @@ COPY . /src/
 # RUN chown -R app:app /src/*
 
 # USER app
-CMD ["npm", "start"]
+CMD ["npm", "run server"]
 
