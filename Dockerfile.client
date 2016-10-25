@@ -8,4 +8,4 @@ RUN npm install
 COPY . /src/
 RUN npm run build 
 
-CMD ["npm", "run client"]
+CMD ["npm", "run", "client"]
