@@ -278,6 +278,7 @@ function removeNote (type, id) {
 	})
 		.then(function () {
 			list.removeNote(note.id);
+			localforage.removeItem(getLocalNoteKey(type, note.userId, note.id));
 			notes[type].splice(noteIndex, 1);
 			notify({
 				message: 'Successfully deleted note.',
