@@ -61,20 +61,21 @@ function getNotes (profile) {
 		})
 	]).then((res) => {
 		// res: [driveNotes, localNotes]
-		notes[type] = res[0].map((note) => {
-			let localNote = res[1].find((n) => n.id === note.id);
+		notes[type] = res[0].map((driveNote) => {
+			let localNote = res[1].find((n) => n.id === driveNote.id);
 			if (!localNote) {
 				// if local note has not exist, store it and render it
-				localforage.setItem(getLocalNoteKey(type, profile.id, note.id),
-					note);
-				list.renderNote(type, note);
-			} else if (localNote.name !== note.name ||
-				localNote.content !== note.content) {
+				localforage.setItem(getLocalNoteKey(type, profile.id, driveNote.id),
+					driveNote);
+				list.renderNote(type, driveNote);
+			} else if (localNote.name !== driveNote.name ||
+				localNote.content !== driveNote.content) {
 				// if 2 versions differ
-				// if local version is later than remote version, keep local version
-				if (moment(note.modifiedTime).isBefore(localNote.modifiedTime)) {
+				// if local version is newer than remote version,
+				// store drive version as old note, use local version
+				if (moment(driveNote.modifiedTime).isBefore(localNote.modifiedTime)) {
 					console.log('dirty!');
-					localNote.oldNote = note;
+					localNote.oldNote = driveNote;
 					return localNote;
 				}
 
@@ -83,13 +84,13 @@ function getNotes (profile) {
 					// @TODO resolve conflict somehow?
 				}
 				// if remote version is later, use remote version
-				localforage.setItem(getLocalNoteKey(type, profile.id, note.id),
-					note);
-				list.updateNoteName(note.id, note.name);
+				localforage.setItem(getLocalNoteKey(type, profile.id, driveNote.id),
+					driveNote);
+				list.updateNoteName(driveNote.id, driveNote.name);
 			}
-			return note;
+			return driveNote;
 		});
-		// show the fist drive note
+		// show the fist note
 		if (notes[type].length > 0) {
 			let note = notes[type][0];
 			setActiveNote(type, note);
@@ -245,6 +246,7 @@ function saveNote (type, n) {
 		note.content = n.content;
 		note.modifiedTime = lastModifiedTime;
 		note.dirty = true;
+		note.oldNote = oldNote;
 		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
 			note);
 		if (err.response.status === 401) {
@@ -266,6 +268,11 @@ function removeNote (type, id) {
 		return;
 	}
 	var note = notes[type][noteIndex];
+	notify({
+		message: 'Deleting note...',
+		type: 'blue',
+		permanent: true
+	});
 	deleteJson(endPoints[type] + '/' + encodeURIComponent(note.id), {
 		credentials: 'include'
 	})
