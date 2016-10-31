@@ -192,17 +192,32 @@ button.grey:hover {
 	font-weight: 300;
 }
 .list ul {
-	padding-left: .5rem;
+	padding-left: 0;
 }
 .list li {
 	color: #333;
 	cursor: pointer;
 	list-style: none;
-	padding: 1rem .5rem;
+	padding: 1rem .5rem 1rem 1rem;
+	position: relative; /* in order to position dirty round dot */
 }
 .list li.selected,
 .list li:hover {
 	background-color: #e0e0e0;
+}
+.list li.dirty {
+	color: var(--color-jungle-green);
+}
+.list li.dirty::before {
+	background-color: var(--color-jungle-green);
+	border-radius: 50%; /* round dot */
+	content: '';
+	display: block;
+	position: absolute;
+	top: calc(50% - 2.5px);
+	left: .4rem;
+	width: 5px;
+	height: 5px;
 }
 .list .loader.circle {
 	width: 2em;

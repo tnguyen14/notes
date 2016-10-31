@@ -74,7 +74,6 @@ function getNotes (profile) {
 				// if local version is newer than remote version,
 				// store drive version as old note, use local version
 				if (moment(driveNote.modifiedTime).isBefore(localNote.modifiedTime)) {
-					console.log('dirty!');
 					localNote.oldNote = driveNote;
 					return localNote;
 				}
@@ -83,9 +82,10 @@ function getNotes (profile) {
 				if (localNote.dirty) {
 					// @TODO resolve conflict somehow?
 				}
-				// if remote version is later, use remote version
+				// if remote version is newer, use remote version
 				localforage.setItem(getLocalNoteKey(type, profile.id, driveNote.id),
 					driveNote);
+				// @TODO why set name here?
 				list.updateNoteName(driveNote.id, driveNote.name);
 			}
 			return driveNote;
@@ -247,6 +247,7 @@ function saveNote (type, n) {
 		note.modifiedTime = lastModifiedTime;
 		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
 			note);
+		list.updateNoteStatus(note.id, note.dirty);
 		if (err.response.status === 401) {
 			user.authorize('https://www.googleapis.com/auth/drive');
 			return;

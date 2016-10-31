@@ -13,6 +13,7 @@ module.exports = {
 	setActiveNote,
 	removeNote,
 	updateNoteName,
+	updateNoteStatus,
 	registerOnNoteClickHandler
 };
 
@@ -46,6 +47,7 @@ function renderNote (type, note) {
 		}
 	});
 	getUl(type).appendChild(li);
+	updateNoteStatus(note.id, note.dirty);
 }
 
 function registerOnNoteClickHandler (handler) {
@@ -53,14 +55,7 @@ function registerOnNoteClickHandler (handler) {
 }
 
 function setActiveNote (noteId) {
-	if (!noteId) {
-		return;
-	}
-
-	var li = listsContainer.querySelector('[data-id="' + noteId + '"]');
-	if (!li) {
-		return;
-	}
+	var li = getNoteLi(noteId);
 	Array.prototype.forEach.call(listsContainer.querySelectorAll('.lists .list-item'), function (l) {
 		l.classList.remove('selected');
 	});
@@ -68,21 +63,24 @@ function setActiveNote (noteId) {
 }
 
 function removeNote (noteId) {
-	var li = listsContainer.querySelector('[data-id="' + noteId + '"]');
-	if (!li) {
-		throw new Error('Could not locate note ' + noteId + ' on the list');
-	}
+	var li = getNoteLi(noteId);
 	li.parentNode.removeChild(li);
 }
 
 function updateNoteName (noteId, newName, newId) {
-	var li = listsContainer.querySelector('[data-id="' + noteId + '"]');
-	if (!li) {
-		throw new Error('Could not locate note ' + noteId + ' on the list');
-	}
+	var li = getNoteLi(noteId);
 	li.innerHTML = newName;
 	if (newId) {
 		li.setAttribute('data-id', newId);
+	}
+}
+
+function updateNoteStatus (noteId, dirty) {
+	var li = getNoteLi(noteId);
+	if (dirty) {
+		li.classList.add('dirty');
+	} else {
+		li.classList.remove('dirty');
 	}
 }
 
@@ -93,4 +91,15 @@ function getUl (type) {
 		return listUls[type];
 	}
 	return listsContainer.querySelector('.list.' + type + ' ul');
+}
+
+function getNoteLi (noteId) {
+	if (!noteId) {
+		throw new Error('No note ID provided.');
+	}
+	var li = listsContainer.querySelector('[data-id="' + noteId + '"]');
+	if (!li) {
+		throw new Error('Could not locate note ' + noteId + ' on the list');
+	}
+	return li;
 }
