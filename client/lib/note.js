@@ -177,7 +177,6 @@ function saveNote (type, n) {
 		// @TODO remove the dirty flag, which seems erroneous at this point?
 		return;
 	}
-	savePending = true;
 
 	// request body object
 	var updated = {};
@@ -200,6 +199,11 @@ function saveNote (type, n) {
 		type: 'blue',
 		permanent: true
 	});
+	savePending = true;
+	note.dirty = true;
+	note.oldNote = oldNote;
+	Object.assign(note, updated);
+
 	editor.freeze();
 	method(url, updated, {
 		credentials: 'include'
@@ -210,16 +214,14 @@ function saveNote (type, n) {
 			type: 'green'
 		});
 		editor.unfreeze();
+		if (updated.name) {
+			list.updateNoteName(note.id, updated.name, resp.id);
+		}
 		if (note.new) {
 			editor.setId(resp.id);
 			note.id = resp.id;
 			delete note.new;
 		}
-		if (updated.name) {
-			list.updateNoteName(note.id, updated.name, resp.id);
-			note.name = updated.name;
-		}
-		note.content = updated.content;
 		if (note.dirty && note.oldNote) {
 			delete note.dirty;
 			delete note.oldNote;
@@ -242,11 +244,7 @@ function saveNote (type, n) {
 		// that would mean that after first failure to save,
 		// the next time save happens there won't be a new timestamp
 		var lastModifiedTime = new Date().toISOString();
-		note.name = n.title;
-		note.content = n.content;
 		note.modifiedTime = lastModifiedTime;
-		note.dirty = true;
-		note.oldNote = oldNote;
 		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
 			note);
 		if (err.response.status === 401) {
