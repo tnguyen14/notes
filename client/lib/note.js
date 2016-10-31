@@ -228,6 +228,7 @@ function saveNote (type, n) {
 		}
 		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
 			note);
+		list.updateNoteStatus(note.id);
 
 		// switch to view mode after save
 		editor.viewMode();
