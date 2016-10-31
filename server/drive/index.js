@@ -58,6 +58,21 @@ function hasRootDir (req, res, next) {
 	return next();
 }
 
+function handleError (res, err) {
+	// google drive 401 error
+	if (err.code === 401) {
+		res.status(401);
+	} else {
+		// if resource already exists (used for POST call mostly)
+		if (err.message.indexOf('already exists') !== -1) {
+			res.status(409);
+		} else {
+			res.status(400);
+		}
+	}
+	res.json(err);
+}
+
 app.get('/me', isAuthenticated, (req, res) => {
 	api.getDirs({
 		rootDir: 'root',
@@ -69,10 +84,7 @@ app.get('/me', isAuthenticated, (req, res) => {
 		res.json(Object.assign({}, db.get(req.user.id), {
 			rootDirs: rootDirs
 		}));
-	}, (err) => {
-		res.status(err.code);
-		res.json(err);
-	});
+	}, handleError.bind(null, res));
 });
 
 app.patch('/me', isAuthenticated, (req, res) => {
@@ -115,11 +127,7 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 				});
 			}
 		});
-	}, (err) => {
-		res.status(err.code);
-		res.json(err);
-		return;
-	});
+	}, handleError.bind(null, res));
 });
 
 app.put('/:id', isAuthenticated, function (req, res) {
@@ -133,9 +141,7 @@ app.put('/:id', isAuthenticated, function (req, res) {
 		}
 	}).then((resp) => {
 		res.json(resp);
-	}, (err) => {
-		res.status(400).json(err);
-	});
+	}, handleError.bind(null, res));
 });
 
 app.post('/', isAuthenticated, hasRootDir, function (req, res) {
@@ -150,14 +156,7 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 		}
 	}).then((resp) => {
 		res.json(resp);
-	}, (err) => {
-		if (err.message.indexOf('already exists') !== -1) {
-			res.status(409);
-		} else {
-			res.status(400);
-		}
-		res.json(err);
-	});
+	}, handleError.bind(null, res));
 });
 
 app.delete('/:id', isAuthenticated, function (req, res) {
@@ -169,9 +168,7 @@ app.delete('/:id', isAuthenticated, function (req, res) {
 		}
 	}).then((resp) => {
 		res.json(resp);
-	}, (err) => {
-		res.status(400).json(err);
-	});
+	}, handleError.bind(null, res));
 });
 
 module.exports = function (endpoint) {
