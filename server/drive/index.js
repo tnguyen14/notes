@@ -158,7 +158,10 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 			refresh_token: req.user.refreshToken
 		}
 	}).then((resp) => {
-		res.json(resp);
+		res.json(Object.assign(resp, {
+			userId: req.user.id,
+			type: 'drive'
+		}));
 	}, handleError.bind(null, res));
 });
 

@@ -216,10 +216,12 @@ function saveNote (type, n) {
 		editor.unfreeze();
 		if (updated.name) {
 			list.updateNoteName(note.id, updated.name, resp.id);
+			note.name = updated.name;
 		}
 		if (note.new) {
 			editor.setId(resp.id);
 			note.id = resp.id;
+			note.userId = resp.userId;
 			delete note.new;
 		}
 		if (note.dirty && note.oldNote) {
