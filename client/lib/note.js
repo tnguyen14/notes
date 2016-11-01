@@ -60,22 +60,24 @@ function getNotes (profile) {
 			return localNotes;
 		})
 	]).then((res) => {
-		// res: [driveNotes, localNotes]
-		notes[type] = res[0].map((driveNote) => {
-			let localNote = res[1].find((n) => n.id === driveNote.id);
+		let [driveNotes, localNotes] = res;
+		notes[type] = driveNotes.map((driveNote) => {
+			let localNote = localNotes.find(n => n.id === driveNote.id);
 			if (!localNote) {
 				// if local note has not exist, store it and render it
-				localforage.setItem(getLocalNoteKey(type, profile.id, driveNote.id),
-					driveNote);
+				saveLocalNote(driveNote);
 				list.renderNote(type, driveNote);
-			} else if (localNote.name !== driveNote.name ||
+				return driveNote;
+			}
+			if (localNote.name !== driveNote.name ||
 				localNote.content !== driveNote.content) {
 				// if 2 versions differ
 				// if local version is newer than remote version,
 				// store drive version as old note, use local version
 				if (moment(driveNote.modifiedTime).isBefore(localNote.modifiedTime)) {
-					localNote.oldNote = driveNote;
-					return localNote;
+					return Object.assign({}, localNote, {
+						oldNote: driveNote
+					});
 				}
 
 				// if local version is older, but was a result of a bad save
@@ -83,13 +85,21 @@ function getNotes (profile) {
 					// @TODO resolve conflict somehow?
 				}
 				// if remote version is newer, use remote version
-				localforage.setItem(getLocalNoteKey(type, profile.id, driveNote.id),
-					driveNote);
+				saveLocalNote(driveNote);
 				// @TODO why set name here?
 				list.updateNoteName(driveNote.id, driveNote.name);
 			}
+			localNote.hasMatchingRemote = true;
 			return driveNote;
 		});
+
+		// remove local note that is not new and does not have matching
+		// remote version
+		localNotes.filter(n => !n.hasMatchingRemote && !n.new)
+			.forEach((noteToBeRemoved) => {
+				list.removeNote(noteToBeRemoved.id);
+				removeLocalNote(noteToBeRemoved);
+			});
 		// show the fist note
 		if (notes[type].length > 0) {
 			let note = notes[type][0];
@@ -228,8 +238,7 @@ function saveNote (type, n) {
 			delete note.dirty;
 			delete note.oldNote;
 		}
-		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
-			note);
+		saveLocalNote(note);
 		list.updateNoteStatus(note.id);
 
 		// switch to view mode after save
@@ -248,8 +257,7 @@ function saveNote (type, n) {
 		// the next time save happens there won't be a new timestamp
 		var lastModifiedTime = new Date().toISOString();
 		note.modifiedTime = lastModifiedTime;
-		localforage.setItem(getLocalNoteKey(type, note.userId, note.id),
-			note);
+		saveLocalNote(note);
 		list.updateNoteStatus(note.id, note.dirty);
 		if (err.response.status === 401) {
 			user.authorize('https://www.googleapis.com/auth/drive');
@@ -280,7 +288,7 @@ function removeNote (type, id) {
 	})
 		.then(function () {
 			list.removeNote(note.id);
-			localforage.removeItem(getLocalNoteKey(type, note.userId, note.id));
+			removeLocalNote(note);
 			notes[type].splice(noteIndex, 1);
 			notify({
 				message: 'Successfully deleted note.',
@@ -322,6 +330,21 @@ function getLocalNotes (type, userId) {
 	});
 }
 
+function saveLocalNote (note) {
+	if (!note.type || !note.userId || !note.id) {
+		return Promise.reject('Missing required note properties');
+	}
+	let noteKey = getLocalNoteKey(note.type, note.userId, note.id);
+	return localforage.setItem(noteKey, note);
+}
+
+function removeLocalNote (note) {
+	if (!note.type || !note.userId || !note.id) {
+		return Promise.reject('Missing required note properties');
+	}
+	let noteKey = getLocalNoteKey(note.type, note.userId, note.id);
+	return localforage.removeItem(noteKey);
+}
 // expose utility method (useful to clean up localforage stuff)
 window._localF = {
 	listAll: function () {
