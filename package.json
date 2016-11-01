@@ -51,7 +51,7 @@
     "moment": "^2.15.1",
     "navigo": "^3.0.0",
     "needle": "^1.1.2",
-    "octicons": "^4.4.0",
+    "octicons": "^5.0.1",
     "passport": "^0.3.2",
     "pm2": "^2.0.18",
     "primer-markdown": "^3.3.1",

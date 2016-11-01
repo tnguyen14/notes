@@ -321,7 +321,7 @@ function getLocalNotes (type, userId) {
 }
 
 // expose utility method (useful to clean up localforage stuff)
-window.localF = {
+window._localF = {
 	listAll: function () {
 		localforage.iterate((value, key) => {
 			console.log(key);
