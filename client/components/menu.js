@@ -1,3 +1,4 @@
+var dialogPolyfill = require('dialog-polyfill');
 var config = require('./config');
 var user = require('../lib/user');
 var addNoteChoice = document.querySelector('.add-note-choice');
@@ -8,6 +9,9 @@ module.exports = {
 	registerAddNoteHandler,
 	setProfile
 };
+
+// polyfill dialog
+dialogPolyfill.registerDialog(addNoteChoice);
 
 function startListening () {
 	// add button

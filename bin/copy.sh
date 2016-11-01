@@ -5,6 +5,7 @@ ASSETS="
 node_modules/primer-markdown/build/build.css
 node_modules/octicons/build/sprite.octicons.svg
 node_modules/hint.css/hint.base.min.css
+node_modules/dialog-polyfill/dialog-polyfill.css
 "
 
 mkdir -p ./public

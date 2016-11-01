@@ -1,3 +1,4 @@
+var dialogPolyfill = require('dialog-polyfill');
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var signIn = document.querySelector('.sign-in');
@@ -8,6 +9,9 @@ module.exports.authorize = authorize;
 module.exports.getProfile = getProfile;
 module.exports.logoutUrl = process.env.AUTH_URL + '/logout?redirect=' +
 	encodeURIComponent(process.env.CLIENT_URL);
+
+// polyfill dialog
+dialogPolyfill.registerDialog(signIn);
 
 function getProfile () {
 	return getJson(process.env.AUTH_URL + '/profile', {

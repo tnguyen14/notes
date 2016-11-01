@@ -9,6 +9,7 @@ public/index.js
 public/build.css
 public/sprite.octicons.svg
 public/hint.base.min.css
+public/dialog-polyfill.css
 data
 coverage
 .nyc_output

@@ -1,3 +1,4 @@
+var dialogPolyfill = require('dialog-polyfill');
 var md = require('markdown-it')({
 	breaks: true
 })
@@ -32,6 +33,9 @@ var view = document.querySelector('.view-content .markdown-body');
 var save = container.querySelector('.save');
 var remove = container.querySelector('.remove');
 var deleteConfirm = document.querySelector('dialog.delete-confirm');
+
+// polyfill dialog
+dialogPolyfill.registerDialog(deleteConfirm);
 
 // https://github.com/benjamingr/RegExp.escape
 if (!RegExp.escape) {

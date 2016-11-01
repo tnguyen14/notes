@@ -1,3 +1,4 @@
+var dialogPolyfill = require('dialog-polyfill');
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var patchJson = simpleFetch.patchJson;
@@ -15,6 +16,9 @@ var originalConfig = {
 var callback;
 
 module.exports.open = open;
+
+// polyfill dialog
+dialogPolyfill.registerDialog(configEl);
 
 saveButton.addEventListener('click', function (e) {
 	e.preventDefault();
