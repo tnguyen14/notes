@@ -48,7 +48,7 @@ function getNotes (profile) {
 		menu.registerAddNoteHandler({
 			label: config.label,
 			type,
-			handler: newNote.bind(window, type)
+			handler: newNote.bind(window, type, profile.id)
 		});
 	});
 	return Promise.all([
@@ -93,13 +93,21 @@ function getNotes (profile) {
 			return driveNote;
 		});
 
-		// remove local note that is not new and does not have matching
-		// remote version
-		localNotes.filter(n => !n.hasMatchingRemote && !n.new)
-			.forEach((noteToBeRemoved) => {
-				list.removeNote(noteToBeRemoved.id);
-				removeLocalNote(noteToBeRemoved);
-			});
+		localNotes.forEach((localNote) => {
+			if (!localNote.hasMatchingRemote) {
+				if (localNote.new) {
+					// if new note that has not been saved, put it first
+					// to make it active
+					notes[type].unshift(localNote);
+				} else {
+					// if local note is not new and does not have matching
+					// remote version, then remove it
+					list.removeNote(localNote.id);
+					removeLocalNote(localNote);
+				}
+			}
+		});
+
 		// show the fist note
 		if (notes[type].length > 0) {
 			let note = notes[type][0];
@@ -137,12 +145,13 @@ function getDriveNotes () {
 	});
 }
 
-function newNote (type) {
+function newNote (type, profileId) {
 	var note = {
 		id: 'Untitled/index.md',
 		name: 'Untitled',
 		content: '',
 		type: type,
+		userId: profileId,
 		new: true
 	};
 	notes[type].push(note);
@@ -283,22 +292,28 @@ function removeNote (type, id) {
 		type: 'blue',
 		permanent: true
 	});
-	deleteJson(endPoints[type] + '/' + encodeURIComponent(note.id), {
-		credentials: 'include'
-	})
-		.then(function () {
-			list.removeNote(note.id);
-			removeLocalNote(note);
-			notes[type].splice(noteIndex, 1);
-			notify({
-				message: 'Successfully deleted note.',
-				type: 'green',
-				timeout: 3000
-			});
-			// show the next note
-			var nextNote = notes[type][0];
-			setActiveNote(type, nextNote);
+	let deleteAction;
+	// if new note, just remove it from memory and local storage
+	if (note.new) {
+		deleteAction = Promise.resolve();
+	} else {
+		deleteAction = deleteJson(endPoints[type] + '/' + encodeURIComponent(note.id), {
+			credentials: 'include'
 		});
+	}
+	deleteAction.then(function () {
+		list.removeNote(note.id);
+		removeLocalNote(note);
+		notes[type].splice(noteIndex, 1);
+		notify({
+			message: 'Successfully deleted note.',
+			type: 'green',
+			timeout: 3000
+		});
+		// show the next note
+		var nextNote = notes[type][0];
+		setActiveNote(type, nextNote);
+	});
 }
 
 function findNoteById (id, type) {
