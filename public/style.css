@@ -168,15 +168,31 @@ button.grey:hover {
 .lists {
 	border-right: 1px solid var(--color-white-smoke);
 	width: 0;
-	left: -20%;
+	left: -100%;
 	padding-left: .5em;
 	position: relative;
 	transition: left .2s ease-in-out, width .2s ease-in-out .2s;
 }
 .lists.active {
 	left: 0;
-	width: calc(20% - 4rem);
+	width: calc(100% - 4rem);
 	transition: width .2s ease-in-out, left .2s ease-in-out .2s;
+}
+@media (min-width: 45em) {
+	.lists {
+		left: -35%;
+	}
+	.lists.active {
+		width: calc(35% - 4rem);
+	}
+}
+@media (min-width: 75em) {
+	.lists {
+		left: -20%;
+	}
+	.lists.active {
+		width: calc(20% - 4rem);
+	}
 }
 .lists .add {
 	float: right;
@@ -224,16 +240,36 @@ button.grey:hover {
 }
 
 .editor-container {
-	width: 100%;
+	width: calc(100% - 4rem);
+	right: 0;
 	height: 100%;
 	margin: 0 auto;
-	padding: .5rem 2rem 0;
+	padding: .5rem .5rem 0;
 	position: relative; /* to match absolutely positioned action buttons */
-	transition: width .2s ease-in-out;
+	transition: right .2s ease-in-out, width .2s ease-in-out .2s;
 	overflow-y: hidden;
 }
+/* when list is active, hide editor-container for small viewport */
 .editor-container.lists-active {
-	width: 80%;
+	width: 0;
+	padding: 0;
+	right: -100%;
+	transition: width .2s ease-in-out, right .2s ease-in-out .2s;
+}
+@media (min-width: 45em) {
+	.editor-container {
+		padding: .5rem 2rem 0 .5rem;
+	}
+	.editor-container.lists-active {
+		right: 0;
+		width: 65%;
+		padding: .5rem 2rem 0 .5rem;
+	}
+}
+@media (min-width: 75em) {
+	.editor-container.lists-active {
+		width: 80%;
+	}
 }
 
 .notification {
@@ -365,8 +401,13 @@ select {
 }
 
 .content-container {
-	padding: .8rem .8rem 1rem .8rem;
+	padding: .8rem 0 .3rem;
 	overflow: auto;
+}
+@media (min-width: 45em) {
+	.content-container {
+		padding: .8rem .8rem 1rem;
+	}
 }
 
 .metadata {
@@ -395,43 +436,76 @@ select {
 .write-content textarea {
 	margin-bottom: 1.5rem;
 	width: 100%;
-	height: 83vh;
+	height: 79vh;
 }
 .has-tags .write-content textarea {
-	height: 81vh;
+	height: 77vh;
 }
 .write-content textarea:focus {
 	background-color: #fff;
 }
 
 .view-content {
-	height: 83vh;
+	height: 80vh;
 	overflow: auto;
 }
 .has-tags .view-content {
-	height: 81vh;
+	height: 78vh;
 }
 .write-selected .view-content {
 	display: none;
 }
 
-.editor-container form .action {
-	width: 2.5rem;
-	height: 2.5rem;
-	padding: 0;
-	position: absolute;
-	right: .2rem;
+@media (min-width: 45em) {
+	.write-content textarea {
+		height: 83vh;
+	}
+	.has-tags .write-content textarea {
+		height: 81vh;
+	}
+	.view-content {
+		height: 83vh;
+	}
+	.has-tags .view-content {
+		height: 81vh;
+	}
 }
-.editor-container form .action svg {
+.note-actions {
+	display: flex;
+	flex-direction: row-reverse;
+	height: 5vh;
+}
+.note-actions .action {
+	margin-left: 1rem;
+	padding: 0;
 	width: 2rem;
+	height: 2rem;
+}
+.note-actions svg {
+	width: 1rem;
 	height: 1rem;
 }
-.save {
-	bottom: 1rem;
+@media (min-width: 45em) {
+	.note-actions {
+		flex-direction: column-reverse;
+		position: absolute;
+		bottom: 0;
+		right: .4rem;
+		width: 2.5rem;
+		height: auto;
+	}
+	.note-actions .action {
+		width: 2.5rem;
+		height: 2.5rem;
+		margin-left: 0;
+		margin-bottom: 1rem;
+	}
+	.note-actions svg {
+		width: 2rem;
+		height: 1rem;
+	}
 }
-.remove {
-	bottom: 4.5rem;
-}
+
 .delete-confirm .cancel {
 	float: right;
 	margin-right: .5rem;
