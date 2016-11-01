@@ -110,6 +110,9 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 					access_token: req.user.accessToken,
 					refresh_token: req.user.refreshToken
 				}
+			}).catch((err) => {
+				debug(err);
+				return;
 			});
 		})).then((notes) => {
 			res.json(notes.filter((n) => n).map((n) => {
