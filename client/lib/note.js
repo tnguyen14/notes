@@ -69,6 +69,7 @@ function getNotes (profile) {
 				list.renderNote(type, driveNote);
 				return driveNote;
 			}
+			localNote.hasMatchingRemote = true;
 			if (localNote.name !== driveNote.name ||
 				localNote.content !== driveNote.content) {
 				// if 2 versions differ
@@ -89,7 +90,6 @@ function getNotes (profile) {
 				// @TODO why set name here?
 				list.updateNoteName(driveNote.id, driveNote.name);
 			}
-			localNote.hasMatchingRemote = true;
 			return driveNote;
 		});
 
