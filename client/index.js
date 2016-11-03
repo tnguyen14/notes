@@ -14,7 +14,7 @@ function init () {
 		.then(function () {
 			router.route();
 		}, function (err) {
-			console.error(err);
+			console.error(err.stack);
 		});
 }
 
