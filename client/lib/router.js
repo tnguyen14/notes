@@ -13,19 +13,19 @@ note.on('note:create', (n) => {
 		return;
 	}
 	router.updatePageLinks();
-	router.navigate('/' + n.name);
+	router.navigate('/' + encodeURIComponent(n.name));
 });
 
 note.on('note:activate', (n) => {
 	if (!n) {
 		return;
 	}
-	router.navigate('/' + n.name);
+	router.navigate('/' + encodeURIComponent(n.name));
 });
 
 let routes = {
 	'/:id': function (params) {
-		var noteId = params.id;
+		var noteId = decodeURIComponent(params.id);
 		if (noteId[noteId.length - 1] === '#') {
 			// remove ending hash
 			// see https://github.com/krasimir/navigo/issues/61
