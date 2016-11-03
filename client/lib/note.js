@@ -194,7 +194,13 @@ function saveNote (type, n) {
 	}
 	if (n.content === oldNote.content && n.title === oldNote.name) {
 		notify.info('No new change detected.');
-		// @TODO remove the dirty flag, which seems erroneous at this point?
+		// if there is no change but note was marked as dirty, remove that flag
+		if (note.dirty) {
+			delete note.dirty;
+			delete note.oldNote;
+			saveLocalNote(note);
+			list.updateNoteStatus(note.id);
+		}
 		return;
 	}
 
