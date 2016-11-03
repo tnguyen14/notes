@@ -1,13 +1,27 @@
 var Navigo = require('navigo');
 var router = new Navigo(process.env.CLIENT_URL);
 var note = require('./note');
-var list = require('../components/list');
 
 module.exports = router;
 module.exports.route = function () {
 	router.on(routes).resolve();
 	router.updatePageLinks();
 };
+
+note.on('note:create', (n) => {
+	if (!n) {
+		return;
+	}
+	router.updatePageLinks();
+	router.navigate('/' + n.name);
+});
+
+note.on('note:activate', (n) => {
+	if (!n) {
+		return;
+	}
+	router.navigate('/' + n.name);
+});
 
 let routes = {
 	'/:id': function (params) {
@@ -24,16 +38,16 @@ let routes = {
 			note.findNoteByName(noteId);
 		// try to find by Name
 		if (!n) {
-			// if no note found, replaceState to /
-			router.pause(true);
+			// if no note found, pushState to /
 			router.navigate('/');
-			router.pause(false);
 			return;
 		}
 		if (n) {
-			note.setActiveNote('drive', n);
-			list.setActiveNote(n.id);
+			note.setActiveNote(n, n.new);
 		}
-	}
+	},
+	// add wild card so that '/' route is matched, thus stored as
+	// _lastRouteResolved
+	'*': function () {}
 };
 

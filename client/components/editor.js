@@ -1,3 +1,4 @@
+var EventEmitter = require('eventemitter3');
 var dialogPolyfill = require('dialog-polyfill');
 var md = require('markdown-it')({
 	breaks: true
@@ -6,21 +7,19 @@ var md = require('markdown-it')({
 	.use(require('markdown-it-front-matter'), updateMetadata);
 var yaml = require('js-yaml');
 
-module.exports = {
-	getTitle: getTitle,
-	getContent: getContent,
-	setNote: setNote,
-	setId: setId,
-	startListening: startListening,
-	viewMode: viewMode,
-	writeMode: writeMode,
-	registerSaveHandler: registerSaveHandler,
-	registerRemoveHandler: registerRemoveHandler,
-	freeze: freeze,
-	unfreeze: unfreeze
-};
+const editor = Object.assign(new EventEmitter(), {
+	getTitle,
+	getContent,
+	setNote,
+	setId,
+	startListening,
+	viewMode,
+	writeMode,
+	freeze,
+	unfreeze
+});
 
-var handlers = {};
+module.exports = editor;
 
 var container = document.querySelector('.editor-container');
 var metadataEl = document.querySelector('.metadata');
@@ -125,13 +124,11 @@ function startListening () {
 	});
 
 	save.addEventListener('click', function () {
-		if (handlers.save) {
-			handlers.save(getType(), {
-				id: getId(),
-				title: getTitle(),
-				content: getContent()
-			});
-		}
+		editor.emit('note:save', getType(), {
+			id: getId(),
+			title: getTitle(),
+			content: getContent()
+		});
 	});
 	remove.addEventListener('click', function () {
 		deleteConfirm.showModal();
@@ -142,24 +139,8 @@ function startListening () {
 	});
 	deleteConfirm.querySelector('.confirm').addEventListener('click', function () {
 		deleteConfirm.close();
-		if (handlers.remove) {
-			handlers.remove(getType(), getId());
-		}
+		editor.emit('note:remove', getType(), getId());
 	});
-}
-
-function registerSaveHandler (handler) {
-	if (typeof handler !== 'function') {
-		return;
-	}
-	handlers.save = handler;
-}
-
-function registerRemoveHandler (handler) {
-	if (typeof handler !== 'function') {
-		return;
-	}
-	handlers.remove = handler;
 }
 
 function writeMode () {

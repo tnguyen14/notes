@@ -1,14 +1,16 @@
 var dialogPolyfill = require('dialog-polyfill');
+var EventEmitter = require('eventemitter3');
 var config = require('./config');
 var user = require('../lib/user');
 var addNoteChoice = document.querySelector('.add-note-choice');
-var handlers = {};
 
-module.exports = {
+const menu = Object.assign(new EventEmitter(), {
 	startListening,
-	registerAddNoteHandler,
+	createNoteChoice,
 	setProfile
-};
+});
+
+module.exports = menu;
 
 // polyfill dialog
 dialogPolyfill.registerDialog(addNoteChoice);
@@ -22,9 +24,7 @@ function startListening () {
 		}
 		addNoteChoice.close();
 		var type = e.target.getAttribute('data-type');
-		if (handlers[type] && typeof handlers[type] === 'function') {
-			handlers[type]();
-		}
+		menu.emit('note:add', type);
 	});
 
 	// list toggle
@@ -48,19 +48,12 @@ function startListening () {
 	});
 }
 
-/**
- * @param {object} opt
- * @param {string} opt.label
- * @param {string} opt.type
- * @param {function} opt.handler
- */
-function registerAddNoteHandler (opt) {
+function createNoteChoice (label, type) {
 	var option = document.createElement('button');
-	option.innerHTML = opt.label;
-	option.setAttribute('data-type', opt.type);
+	option.innerHTML = label;
+	option.setAttribute('data-type', type);
 	option.classList.add('add-option');
 	addNoteChoice.appendChild(option);
-	handlers[opt.type] = opt.handler;
 }
 
 function setProfile (profile) {

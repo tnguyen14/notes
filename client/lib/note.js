@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var localforage = require('localforage');
 var moment = require('moment');
+var EventEmitter = require('eventemitter3');
 var simpleFetch = require('simple-fetch');
 var getJson = simpleFetch.getJson;
 var postJson = simpleFetch.postJson;
@@ -15,12 +16,14 @@ var user = require('./user');
 
 const localForageSeparator = '!';
 
-module.exports = {
+const _note = Object.assign(new EventEmitter(), {
 	getNotes,
 	findNoteById,
 	findNoteByName,
 	setActiveNote
-};
+});
+
+module.exports = _note;
 
 localforage.config({
 	name: 'inspiredNotes'
@@ -37,20 +40,22 @@ var endPoints = {
 };
 
 // event handlers registration
-editor.registerSaveHandler(saveNote);
-editor.registerRemoveHandler(removeNote);
+editor.on('note:save', saveNote);
+editor.on('note:remove', removeNote);
 
 function getNotes (profile) {
 	let type = 'drive';
+
+	// listen inside this function to get access to profile ID
+	menu.on('note:add', (type) => {
+		newNote(type, profile.id);
+	});
+
 	getJson(endPoints[type] + '/me', {  // get config
 		credentials: 'include'
 	}).then((config) => {
 		list.renderLabel(type, config.label);
-		menu.registerAddNoteHandler({
-			label: config.label,
-			type,
-			handler: newNote.bind(window, type, profile.id)
-		});
+		menu.createNoteChoice(config.label, type);
 	});
 	return Promise.all([
 		getDriveNotes(),
@@ -112,8 +117,7 @@ function getNotes (profile) {
 
 		// show the fist note
 		if (notes[type].length > 0) {
-			let note = notes[type][0];
-			setActiveNote(type, note);
+			_note.emit('note:activate', notes[type][0]);
 		}
 	});
 }
@@ -159,10 +163,10 @@ function newNote (type, profileId) {
 	};
 	notes[type].push(note);
 	list.renderNote(type, note);
-	setActiveNote(type, note, true);
+	_note.emit('note:create', note);
 }
 
-function setActiveNote (type, note, writeMode) {
+function setActiveNote (note, writeMode) {
 	list.setActiveNote(note.id);
 	editor.setNote(note);
 	if (writeMode) {
@@ -170,12 +174,6 @@ function setActiveNote (type, note, writeMode) {
 	} else {
 		editor.viewMode();
 	}
-	// reset previous active note
-	let prevActive = notes[type].find((n) => n.active);
-	if (prevActive) {
-		prevActive.active = false;
-	}
-	note.active = true;
 }
 
 let savePending = false;
@@ -315,8 +313,7 @@ function removeNote (type, id) {
 			timeout: 3000
 		});
 		// show the next note
-		var nextNote = notes[type][0];
-		setActiveNote(type, nextNote);
+		_note.emit('note:activate', notes[type][0]);
 	});
 }
 
