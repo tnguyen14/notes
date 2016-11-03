@@ -6,7 +6,7 @@
   "scripts": {
     "hooks": "cd .git/hooks && ln -sfv ../../hooks/pre-commit .",
     "client": "pm2 start server/client.js --name=\"client\" && pm2 logs client",
-    "client:dev": "PORT=4002 node server/client.js",
+    "client:dev": "PORT=4002 nodemon --watch server/client.js server/client.js",
     "server": "pm2 start server/index.js --name=\"server\" && pm2 logs server",
     "server:watch": "PORT=4012 nodemon --watch server --inspect",
     "js": "browserify -t envlocalify client/index.js -o public/index.js",
