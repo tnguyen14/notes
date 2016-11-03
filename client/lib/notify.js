@@ -42,8 +42,8 @@ function notify (opts) {
 		notification.setAttribute('data-type', opts.type);
 	}
 	showNotification();
-	// auto dismiss after 10s
-	var timeout = opts.timeout || 10000;
+	// auto dismiss after 6s
+	var timeout = opts.timeout || 6000;
 	if (!opts.permanent) {
 		notificationTimeoutId = setTimeout(hideNotification, timeout);
 	} else {
