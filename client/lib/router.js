@@ -1,10 +1,12 @@
 var Navigo = require('navigo');
-var router = new Navigo();
+var router = new Navigo(process.env.CLIENT_URL);
 var note = require('./note');
+var list = require('../components/list');
 
 module.exports = router;
 module.exports.route = function () {
 	router.on(routes).resolve();
+	router.updatePageLinks();
 };
 
 let routes = {
@@ -22,10 +24,15 @@ let routes = {
 			note.findNoteByName(noteId);
 		// try to find by Name
 		if (!n) {
+			// if no note found, replaceState to /
+			router.pause(true);
+			router.navigate('/');
+			router.pause(false);
 			return;
 		}
 		if (n) {
 			note.setActiveNote('drive', n);
+			list.setActiveNote(n.id);
 		}
 	}
 };

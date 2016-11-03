@@ -2,8 +2,6 @@ var loader = require('../lib/loader');
 
 var listsContainer = document.querySelector('.lists');
 
-var onNoteClickHandler;
-
 module.exports = {
 	showLoader,
 	hideLoader,
@@ -13,8 +11,7 @@ module.exports = {
 	setActiveNote,
 	removeNote,
 	updateNoteName,
-	updateNoteStatus,
-	registerOnNoteClickHandler
+	updateNoteStatus
 };
 
 function showLoader (type) {
@@ -36,22 +33,15 @@ function renderNotes (type, notes) {
 // add note to list
 function renderNote (type, note) {
 	var li = document.createElement('li');
-	note.type = type;
-	li.innerHTML = note.name;
+	var a = document.createElement('a');
+	a.innerHTML = note.name;
+	a.setAttribute('href', note.name);
+	a.setAttribute('data-navigo', '');
+	li.appendChild(a);
 	li.classList.add('list-item');
 	li.setAttribute('data-id', note.id);
-	li.addEventListener('click', (e) => {
-		setActiveNote(note.id);
-		if (onNoteClickHandler && typeof onNoteClickHandler === 'function') {
-			onNoteClickHandler(type, note);
-		}
-	});
 	getUl(type).appendChild(li);
 	updateNoteStatus(note.id, note.dirty);
-}
-
-function registerOnNoteClickHandler (handler) {
-	onNoteClickHandler = handler;
 }
 
 function setActiveNote (noteId) {

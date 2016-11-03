@@ -39,7 +39,6 @@ var endPoints = {
 // event handlers registration
 editor.registerSaveHandler(saveNote);
 editor.registerRemoveHandler(removeNote);
-list.registerOnNoteClickHandler(setActiveNote);
 
 function getNotes (profile) {
 	let type = 'drive';
