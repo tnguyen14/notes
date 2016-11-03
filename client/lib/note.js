@@ -17,7 +17,9 @@ const localForageSeparator = '!';
 
 module.exports = {
 	getNotes,
-	findNoteById
+	findNoteById,
+	findNoteByName,
+	setActiveNote
 };
 
 localforage.config({
@@ -75,7 +77,8 @@ function getNotes (profile) {
 				// if 2 versions differ
 				// if local version is newer than remote version,
 				// store drive version as old note, use local version
-				if (moment(driveNote.modifiedTime).isBefore(localNote.modifiedTime)) {
+				if (moment(driveNote.modifiedTime).isBefore(
+						localNote.modifiedTime)) {
 					return Object.assign({}, localNote, {
 						oldNote: driveNote
 					});
@@ -131,7 +134,8 @@ function getDriveNotes () {
 		err.response.json().then((error) => {
 			notify({
 				type: 'red',
-				message: 'Error in getting Google Drive notes: ' + error.message,
+				message: 'Error in getting Google Drive notes: ' +
+					error.message,
 				permanent: true
 			});
 			if (error.message && error.message.startsWith('Configuration:')) {
@@ -297,9 +301,10 @@ function removeNote (type, id) {
 	if (note.new) {
 		deleteAction = Promise.resolve();
 	} else {
-		deleteAction = deleteJson(endPoints[type] + '/' + encodeURIComponent(note.id), {
-			credentials: 'include'
-		});
+		deleteAction = deleteJson(endPoints[type] + '/' +
+			encodeURIComponent(note.id), {
+				credentials: 'include'
+			});
 	}
 	deleteAction.then(function () {
 		list.removeNote(note.id);
@@ -325,6 +330,13 @@ function findNoteById (id, type) {
 	}
 	return notes[_type].find((note) => {
 		return note.id === id;
+	});
+}
+
+function findNoteByName (name, type) {
+	let _type = type || 'drive';
+	return notes[_type].find((note) => {
+		return note.name === name;
 	});
 }
 
