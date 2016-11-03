@@ -211,18 +211,22 @@ button.grey:hover {
 	padding-left: 0;
 }
 .list li {
-	color: #333;
 	cursor: pointer;
 	list-style: none;
-	padding: 1rem .5rem 1rem 1rem;
 	position: relative; /* in order to position dirty round dot */
+}
+.list li a {
+	color: #333;
+	display: block;
+	padding: 1rem .5rem 1rem 1rem;
+	text-decoration: none;
+}
+.list li.dirty a {
+	color: var(--color-jungle-green);
 }
 .list li.selected,
 .list li:hover {
 	background-color: #e0e0e0;
-}
-.list li.dirty {
-	color: var(--color-jungle-green);
 }
 .list li.dirty::before {
 	background-color: var(--color-jungle-green);
