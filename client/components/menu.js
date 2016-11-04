@@ -30,22 +30,17 @@ function startListening () {
 	// list toggle
 	var listsEl = document.querySelector('.lists');
 	var editorEl = document.querySelector('.editor-container');
-	document.querySelector('.menu .toggle').addEventListener('click', function (e) {
-		var button = e.currentTarget;
-		button.classList.toggle('collapse');
-		listsEl.classList.toggle('active');
-		editorEl.classList.toggle('lists-active');
-		// swap labels
-		var currentLabel = button.getAttribute('aria-label');
-		var newLabel = button.getAttribute('data-label-alt');
-		button.setAttribute('aria-label', newLabel);
-		button.setAttribute('data-label-alt', currentLabel);
-	});
-
-	// config
-	document.querySelector('.menu .config').addEventListener('click', function (e) {
-		config.open();
-	});
+	// document.querySelector('.menu .toggle').addEventListener('click', function (e) {
+	// 	var button = e.currentTarget;
+	// 	button.classList.toggle('collapse');
+	// 	listsEl.classList.toggle('active');
+	// 	editorEl.classList.toggle('lists-active');
+	// 	// swap labels
+	// 	var currentLabel = button.getAttribute('aria-label');
+	// 	var newLabel = button.getAttribute('data-label-alt');
+	// 	button.setAttribute('aria-label', newLabel);
+	// 	button.setAttribute('data-label-alt', currentLabel);
+	// });
 }
 
 function createNoteChoice (label, type) {
@@ -58,7 +53,7 @@ function createNoteChoice (label, type) {
 
 function setProfile (profile) {
 	// profile image
-	var profileEl = document.querySelector('.menu .profile');
+	var profileEl = document.querySelector('.profile');
 	var image;
 	if (profile.photos.length > 0) {
 		image = document.createElement('img');
@@ -71,19 +66,32 @@ function setProfile (profile) {
 	profileEl.appendChild(image);
 
 	// profile options
-	var options = document.createElement('div');
+	var options = document.createElement('ul');
 	options.classList.add('options');
+	var name = document.createElement('li');
+	name.innerText = profile.displayName;
+	options.appendChild(name);
+
+	var configurations = document.createElement('a');
+	configurations.innerText = 'Configurations';
+	configurations.setAttribute('href', 'config');
+	configurations.addEventListener('click', (e) => {
+		e.preventDefault();
+		config.open();
+	});
+	options.appendChild(document.createElement('li'))
+		.appendChild(configurations);
+
 	var logout = document.createElement('a');
 	logout.innerText = 'Log Out';
 	logout.setAttribute('href', user.logoutUrl);
-	options.appendChild(logout);
+	options.appendChild(document.createElement('li'))
+		.appendChild(logout);
 	profileEl.appendChild(options);
 
 	profileEl.addEventListener('click', function (e) {
 		e.currentTarget.classList.toggle('active');
 	});
-
-	profileEl.setAttribute('aria-label', profile.displayName);
 
 	return profile;
 }
