@@ -80,14 +80,24 @@ button.grey:hover {
 	color: var(--color-oslo-grey);
 	padding: 0;
 	position: absolute;
-	left: .5rem;
-	top: .5rem;
+	left: 0;
+	top: .2rem;
 	width: 2rem;
 	height: 2rem;
 	transition: left .2s ease-in-out;
 }
-.lists-toggle.collapse {
-	left: calc(20% - 2.5rem);
+@media (min-width: 45em) {
+	.lists-toggle.collapse {
+		left: calc(35% - 2.5rem);
+	}
+}
+@media (min-width: 75em) {
+	.lists-toggle {
+		left: .5rem;
+	}
+	.lists-toggle.collapse {
+		left: calc(20% - 2.5rem);
+	}
 }
 .lists-toggle .octicon {
 	width: 2rem;
@@ -218,9 +228,15 @@ button.grey:hover {
 
 .list h3 {
 	font-size: 1.2em;
-	margin: .5rem 0;
+	margin: .5rem 0 .5rem 1.5rem;
 	font-variant: small-caps;
 	font-weight: 300;
+	transition: margin .2s ease-in-out;
+}
+@media (min-width: 45em) {
+	.list h3 {
+		margin-left: 0;
+	}
 }
 .list ul {
 	padding-left: 0;
