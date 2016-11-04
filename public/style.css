@@ -166,7 +166,7 @@ button.grey:hover {
 	list-style: none;
 	padding: 0;
 	position: absolute;
-	bottom: -5.6rem;
+	bottom: -7.8rem;
 	right: 0;
 }
 .menu .profile .options::before {
@@ -174,23 +174,30 @@ button.grey:hover {
 	position: absolute;
 	border: 6px solid transparent;
 	border-bottom-color: rgba(0, 0, 0, .15);
-	right: 22px;
+	right: 16px;
 	top: -13px;
 }
 .menu .profile .options::after {
 	content: '';
 	position: absolute;
 	border: 5px solid transparent;
-	border-bottom-color: white;
-	right: 23px;
+	border-bottom-color: var(--color-white-smoke);
+	right: 17px;
 	top: -10px;
 }
 .menu .profile.active .options {
 	display: block;
 }
+.menu .options li {
+	border-bottom: 1px solid var(--color-white-smoke);
+}
+.menu .options .name {
+	background-color: var(--color-white-smoke);
+	padding: .5rem 0;
+}
 .menu .options a {
 	color: black;
-	display: inline-block;
+	display: block;
 	padding: .8rem;
 	text-decoration: none;
 }
@@ -469,7 +476,7 @@ select {
 @media (min-width: 45em) {
 	.content-container {
 		border-bottom: none;
-		padding: .8rem .8rem 1rem .8rem;
+		padding: .8rem 0 1rem .8rem;
 		border-right: 1px solid var(--color-gainsboro);
 	}
 }
@@ -520,6 +527,9 @@ select {
 }
 
 @media (min-width: 45em) {
+	.write-content {
+		margin-right: .8rem;
+	}
 	.write-content textarea {
 		height: 83vh;
 		margin-bottom: 1.5rem;

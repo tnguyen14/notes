@@ -55,6 +55,7 @@ function setProfile (profile) {
 	options.classList.add('options');
 	var name = document.createElement('li');
 	name.innerText = profile.displayName;
+	name.classList.add('name');
 	options.appendChild(name);
 
 	var configurations = document.createElement('a');
