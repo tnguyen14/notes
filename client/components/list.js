@@ -11,7 +11,8 @@ module.exports = {
 	setActiveNote,
 	removeNote,
 	updateNoteName,
-	updateNoteStatus
+	updateNoteStatus,
+	startListening
 };
 
 function showLoader (type) {
@@ -92,4 +93,17 @@ function getNoteLi (noteId) {
 		throw new Error('Could not locate note ' + noteId + ' on the list');
 	}
 	return li;
+}
+
+function startListening () {
+	document.querySelector('.lists-toggle').addEventListener('click', (e) => {
+		var button = e.currentTarget;
+		button.classList.toggle('collapse');
+		document.body.classList.toggle('lists-active');
+		// swap labels
+		var currentLabel = button.getAttribute('aria-label');
+		var newLabel = button.getAttribute('data-label-alt');
+		button.setAttribute('aria-label', newLabel);
+		button.setAttribute('data-label-alt', currentLabel);
+	});
 }

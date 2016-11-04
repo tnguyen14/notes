@@ -75,24 +75,33 @@ button.grey:hover {
 	background-color: var(--color-submarine);
 }
 
-/* .menu { */
-/* 	background-color: var(--color-white-smoke); */
-/* 	padding-top: 1rem; */
-/* 	position: relative; */
-/* 	text-align: center; */
-/* 	width: 4rem; */
-/* 	height: 100%; */
-/* 	z-index: 1; */
-/* } */
-/* .menu .toggle .hide-lists { */
-/* 	display: none; */
-/* } */
-/* .menu .toggle.collapse .show-lists { */
-/* 	display: none; */
-/* } */
-/* .menu .toggle.collapse .hide-lists { */
-/* 	display: inline-block; */
-/* } */
+.lists-toggle {
+	background-color: transparent;
+	color: var(--color-oslo-grey);
+	padding: 0;
+	position: absolute;
+	left: .5rem;
+	top: .5rem;
+	width: 2rem;
+	height: 2rem;
+	transition: left .2s ease-in-out;
+}
+.lists-toggle.collapse {
+	left: calc(20% - 2.5rem);
+}
+.lists-toggle .octicon {
+	width: 2rem;
+	height: 2rem;
+}
+.lists-toggle .hide-lists {
+	display: none;
+}
+.lists-toggle.collapse .show-lists {
+	display: none;
+}
+.lists-toggle.collapse .hide-lists {
+	display: inline-block;
+}
 
 .menu {
 	position: absolute;
@@ -185,7 +194,7 @@ button.grey:hover {
 	position: relative;
 	transition: left .2s ease-in-out, width .2s ease-in-out .2s;
 }
-.lists.active {
+.lists-active .lists {
 	left: 0;
 	width: 100%;
 	transition: width .2s ease-in-out, left .2s ease-in-out .2s;
@@ -194,7 +203,7 @@ button.grey:hover {
 	.lists {
 		left: -35%;
 	}
-	.lists.active {
+	.lists-active .lists {
 		width: 35%;
 	}
 }
@@ -202,17 +211,11 @@ button.grey:hover {
 	.lists {
 		left: -20%;
 	}
-	.lists.active {
+	.lists-active .lists {
 		width: 20%;
 	}
 }
-.lists .add {
-	float: right;
-	font-size: 1rem;
-	position: absolute;
-	top: 1rem;
-	right: 0;
-}
+
 .list h3 {
 	font-size: 1.2em;
 	margin: .5rem 0;
@@ -266,7 +269,7 @@ button.grey:hover {
 	overflow-y: hidden;
 }
 /* when list is active, hide editor-container for small viewport */
-.editor-container.lists-active {
+.lists-active .editor-container {
 	width: 0;
 	padding: 0;
 	right: -100%;
@@ -276,14 +279,14 @@ button.grey:hover {
 	.editor-container {
 		padding: .5rem 2rem 0 .5rem;
 	}
-	.editor-container.lists-active {
+	.lists-active .editor-container {
 		right: 0;
 		width: 65%;
 		padding: .5rem 2rem 0 .5rem;
 	}
 }
 @media (min-width: 75em) {
-	.editor-container.lists-active {
+	.lists-active .editor-container {
 		width: 80%;
 	}
 }

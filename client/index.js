@@ -1,5 +1,6 @@
 var editor = require('./components/editor');
 var menu = require('./components/menu');
+var list = require('./components/list');
 var note = require('./lib/note');
 var user = require('./lib/user');
 var router = require('./lib/router');
@@ -7,6 +8,7 @@ var router = require('./lib/router');
 function init () {
 	menu.startListening();
 	editor.startListening();
+	list.startListening();
 
 	return user.getProfile()
 		.then(menu.setProfile)
@@ -18,4 +20,4 @@ function init () {
 		});
 }
 
-window.onload = init;
+document.addEventListener('DOMContentLoaded', init);

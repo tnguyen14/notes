@@ -26,21 +26,6 @@ function startListening () {
 		var type = e.target.getAttribute('data-type');
 		menu.emit('note:add', type);
 	});
-
-	// list toggle
-	var listsEl = document.querySelector('.lists');
-	var editorEl = document.querySelector('.editor-container');
-	// document.querySelector('.menu .toggle').addEventListener('click', function (e) {
-	// 	var button = e.currentTarget;
-	// 	button.classList.toggle('collapse');
-	// 	listsEl.classList.toggle('active');
-	// 	editorEl.classList.toggle('lists-active');
-	// 	// swap labels
-	// 	var currentLabel = button.getAttribute('aria-label');
-	// 	var newLabel = button.getAttribute('data-label-alt');
-	// 	button.setAttribute('aria-label', newLabel);
-	// 	button.setAttribute('data-label-alt', currentLabel);
-	// });
 }
 
 function createNoteChoice (label, type) {
