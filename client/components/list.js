@@ -1,6 +1,6 @@
-var loader = require('../lib/loader');
+const loader = require('../lib/loader');
 
-var listsContainer = document.querySelector('.lists');
+const listsContainer = document.querySelector('.lists');
 
 module.exports = {
 	showLoader,
@@ -33,8 +33,8 @@ function renderNotes (type, notes) {
 //
 // add note to list
 function renderNote (type, note) {
-	var li = document.createElement('li');
-	var a = document.createElement('a');
+	let li = document.createElement('li');
+	let a = document.createElement('a');
 	a.innerHTML = note.name;
 	a.setAttribute('href', note.name);
 	a.setAttribute('data-navigo', '');
@@ -46,28 +46,28 @@ function renderNote (type, note) {
 }
 
 function setActiveNote (noteId) {
-	var li = getNoteLi(noteId);
-	Array.prototype.forEach.call(listsContainer.querySelectorAll('.lists .list-item'), function (l) {
+	let li = getNoteLi(noteId);
+	Array.prototype.forEach.call(listsContainer.querySelectorAll('.lists .list-item'), (l) => {
 		l.classList.remove('selected');
 	});
 	li.classList.add('selected');
 }
 
 function removeNote (noteId) {
-	var li = getNoteLi(noteId);
+	let li = getNoteLi(noteId);
 	li.parentNode.removeChild(li);
 }
 
 function updateNoteName (noteId, newName, newId) {
-	var li = getNoteLi(noteId);
-	li.innerHTML = newName;
+	let li = getNoteLi(noteId);
+	li.querySelector('a').innerHTML = newName;
 	if (newId) {
 		li.setAttribute('data-id', newId);
 	}
 }
 
 function updateNoteStatus (noteId, dirty) {
-	var li = getNoteLi(noteId);
+	let li = getNoteLi(noteId);
 	if (dirty) {
 		li.classList.add('dirty');
 	} else {
@@ -75,7 +75,7 @@ function updateNoteStatus (noteId, dirty) {
 	}
 }
 
-var listUls = {};
+let listUls = {};
 function getUl (type) {
 	// only search once
 	if (listUls[type]) {
@@ -88,7 +88,7 @@ function getNoteLi (noteId) {
 	if (!noteId) {
 		throw new Error('No note ID provided.');
 	}
-	var li = listsContainer.querySelector('[data-id="' + noteId + '"]');
+	let li = listsContainer.querySelector('[data-id="' + noteId + '"]');
 	if (!li) {
 		throw new Error('Could not locate note ' + noteId + ' on the list');
 	}
@@ -97,12 +97,12 @@ function getNoteLi (noteId) {
 
 function startListening () {
 	document.querySelector('.lists-toggle').addEventListener('click', (e) => {
-		var button = e.currentTarget;
+		let button = e.currentTarget;
 		button.classList.toggle('collapse');
 		document.body.classList.toggle('lists-active');
 		// swap labels
-		var currentLabel = button.getAttribute('aria-label');
-		var newLabel = button.getAttribute('data-label-alt');
+		let currentLabel = button.getAttribute('aria-label');
+		let newLabel = button.getAttribute('data-label-alt');
 		button.setAttribute('aria-label', newLabel);
 		button.setAttribute('data-label-alt', currentLabel);
 	});
