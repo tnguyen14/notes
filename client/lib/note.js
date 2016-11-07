@@ -83,9 +83,11 @@ function getNotes (profile) {
 				// store drive version as old note, use local version
 				if (moment(driveNote.modifiedTime).isBefore(
 						localNote.modifiedTime)) {
-					return Object.assign({}, localNote, {
+					Object.assign(localNote, {
 						oldNote: driveNote
 					});
+					saveLocalNote(localNote);
+					return localNote;
 				}
 
 				// if local version is older, but was a result of a bad save
@@ -96,6 +98,8 @@ function getNotes (profile) {
 				saveLocalNote(driveNote);
 				// @TODO why set name here?
 				list.updateNoteName(driveNote.id, driveNote.name);
+			} else {
+				saveLocalNote(localNote);
 			}
 			return driveNote;
 		});
