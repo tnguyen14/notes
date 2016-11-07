@@ -1,18 +1,18 @@
-var Promise = require('bluebird');
-var localforage = require('localforage');
-var moment = require('moment');
-var EventEmitter = require('eventemitter3');
-var simpleFetch = require('simple-fetch');
-var getJson = simpleFetch.getJson;
-var postJson = simpleFetch.postJson;
-var putJson = simpleFetch.putJson;
-var deleteJson = simpleFetch.deleteJson;
-var config = require('../components/config');
-var editor = require('../components/editor');
-var list = require('../components/list');
-var menu = require('../components/menu');
-var notify = require('./notify');
-var user = require('./user');
+const Promise = require('bluebird');
+const localforage = require('localforage');
+const moment = require('moment');
+const EventEmitter = require('eventemitter3');
+const simpleFetch = require('simple-fetch');
+const getJson = simpleFetch.getJson;
+const postJson = simpleFetch.postJson;
+const putJson = simpleFetch.putJson;
+const deleteJson = simpleFetch.deleteJson;
+const config = require('../components/config');
+const editor = require('../components/editor');
+const list = require('../components/list');
+const menu = require('../components/menu');
+const notify = require('./notify');
+const user = require('./user');
 
 const localForageSeparator = '!';
 
@@ -29,13 +29,20 @@ localforage.config({
 	name: 'inspiredNotes'
 });
 
-var notes = {
+let notes = {
 	drive: []
 };
 
 window.notes = notes;
 
-var endPoints = {
+const NEWNOTE = {
+	id: 'Untitled/index.md',
+	name: 'Untitled',
+	content: '',
+	new: true
+};
+
+const endPoints = {
 	drive: process.env.API_URL + '/drive'
 };
 
@@ -48,7 +55,7 @@ function getNotes (profile) {
 
 	// listen inside this function to get access to profile ID
 	menu.on('note:add', (type) => {
-		newNote(type, profile.id);
+		createNote(type, profile.id);
 	});
 
 	getJson(endPoints[type] + '/me', {  // get config
@@ -156,15 +163,11 @@ function getDriveNotes () {
 	});
 }
 
-function newNote (type, profileId) {
-	var note = {
-		id: 'Untitled/index.md',
-		name: 'Untitled',
-		content: '',
+function createNote (type, profileId) {
+	var note = Object.assign({}, NEWNOTE, {
 		type: type,
-		userId: profileId,
-		new: true
-	};
+		userId: profileId
+	});
 	notes[type].push(note);
 	list.renderNote(type, note);
 	_note.emit('note:create', note);
@@ -195,6 +198,10 @@ function saveNote (type, n) {
 	}
 	if (note.dirty && note.oldNote) {
 		oldNote = note.oldNote;
+	}
+	// if the note is new, compare with the stump NEWNOTE object instead
+	if (note.new) {
+		oldNote = NEWNOTE;
 	}
 	if (n.content === oldNote.content && n.title === oldNote.name) {
 		notify.info('No new change detected.');
