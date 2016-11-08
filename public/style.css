@@ -453,6 +453,9 @@ select {
 		right: .5rem;
 		top: 5rem;
 	}
+	.has-tags .tabnav-container {
+		top: calc(5rem + 3vh);
+	}
 	.tabnav {
 		display: flex;
 		flex-direction: column-reverse;
