@@ -6,6 +6,7 @@
 	--color-heather: #bdc3c7;
 	--color-submarine: #95a5a6;
 	--color-oslo-grey: #7f8c8d;
+	--color-mine-shaft: #343a3e;
 	--color-cinnabar: #e74c3c;
 	--color-persian-red: #c0392b;
 	--color-shamrock: #2ecc71;
@@ -206,7 +207,7 @@ button.grey:hover {
 }
 
 .lists {
-	border-right: 1px solid var(--color-white-smoke);
+	border-right: 1px solid var(--color-gainsboro);
 	width: 0;
 	left: -100%;
 	padding-left: .5em;
@@ -247,28 +248,40 @@ button.grey:hover {
 		margin-left: 0;
 	}
 }
+.list .loader.circle {
+	width: 2em;
+}
 .list ul {
 	padding-left: 0;
 }
-.list li {
+.list-item {
+	border-bottom: 1px solid var(--color-gainsboro);
 	cursor: pointer;
 	list-style: none;
 	position: relative; /* in order to position dirty round dot */
 }
-.list li a {
+.list-item:last-of-type {
+	border-bottom: none;
+}
+.list-item a {
 	color: #333;
 	display: block;
 	padding: 1rem .5rem 1rem 1rem;
 	text-decoration: none;
 }
-.list li.dirty a {
+.list-item.dirty a {
 	color: var(--color-jungle-green);
 }
-.list li.selected,
-.list li:hover {
-	background-color: #e0e0e0;
+.list-item:hover {
+	background-color: var(--color-white-smoke);
 }
-.list li.dirty::before {
+.list-item.selected {
+	background-color: var(--color-mine-shaft);
+}
+.list-item.selected a {
+	color: #fff;
+}
+.list-item.dirty::before {
 	background-color: var(--color-jungle-green);
 	border-radius: 50%; /* round dot */
 	content: '';
@@ -278,9 +291,6 @@ button.grey:hover {
 	left: .4rem;
 	width: 5px;
 	height: 5px;
-}
-.list .loader.circle {
-	width: 2em;
 }
 
 .editor-container {
