@@ -142,6 +142,8 @@ function startListening () {
 		editor.emit('note:remove', getType(), getId());
 	});
 }
+//
+// let saveInterval;
 
 function writeMode () {
 	viewButton.classList.remove('selected');
