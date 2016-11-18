@@ -335,7 +335,7 @@ button.grey:hover {
 	visibility: hidden;
 	transition: all .4s ease-out;
 	height: 4.5vh;
-	width: max-content:
+	width: max-content;
 }
 .notification.active {
 	visibility: visible;
@@ -365,6 +365,9 @@ button.grey:hover {
 	top: .2rem;
 	right: 1rem;
 	visibility: hidden;
+}
+.notification.active.permanent {
+	padding-right: 3em; /* space for the close button */
 }
 .notification.active.permanent .close {
 	visibility: visible;
