@@ -18,8 +18,14 @@ function getProfile () {
 		credentials: 'include'
 	})
 		.catch(function (err) {
-			if (err.response.status === 401) {
+			if (err.response && err.response.status === 401) {
 				signIn.showModal();
+			} else {
+				notify({
+					type: 'red',
+					message: 'Unable to get user profile. ' + err.message,
+					permanent: true
+				});
 			}
 			throw err;
 		});
