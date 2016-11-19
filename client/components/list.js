@@ -28,11 +28,13 @@ function renderLabel (type, label) {
 }
 
 function renderNotes (type, notes) {
-	notes.forEach(renderNote.bind(window, type));
+	notes.forEach((note) => {
+		renderNote(type, note);
+	});
 }
 //
 // add note to list
-function renderNote (type, note) {
+function renderNote (type, note, noteIdToInsertBefore) {
 	let li = document.createElement('li');
 	let a = document.createElement('a');
 	a.innerHTML = note.name;
@@ -41,7 +43,12 @@ function renderNote (type, note) {
 	li.appendChild(a);
 	li.classList.add('list-item');
 	li.setAttribute('data-id', note.id);
-	getUl(type).appendChild(li);
+	if (noteIdToInsertBefore) {
+		let refNode = getNoteLi(noteIdToInsertBefore);
+		getUl(type).insertBefore(li, refNode);
+	} else {
+		getUl(type).appendChild(li);
+	}
 	updateNoteStatus(note.id, note.dirty);
 }
 

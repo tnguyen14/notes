@@ -183,7 +183,8 @@ function createNote (type, profileId) {
 		userId: profileId
 	});
 	notes[type].push(note);
-	list.renderNote(type, note);
+	// insert before the first one
+	list.renderNote(type, note, notes[type][0].id);
 	_note.emit('note:create', note);
 }
 
