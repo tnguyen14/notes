@@ -50,6 +50,12 @@ function renderNote (type, note, noteIdToInsertBefore) {
 		getUl(type).appendChild(li);
 	}
 	updateNoteStatus(note.id, note.dirty);
+	li.addEventListener('click', () => {
+		// for small viewport, if clicking on note, show the content container
+		if (window.matchMedia('(max-width: 45em)').matches) {
+			toggleLists();
+		}
+	});
 }
 
 function setActiveNote (noteId) {
@@ -102,15 +108,19 @@ function getNoteLi (noteId) {
 	return li;
 }
 
+function toggleLists () {
+	let button = document.querySelector('.lists-toggle');
+	button.classList.toggle('collapse');
+	document.body.classList.toggle('lists-active');
+	// swap labels
+	let currentLabel = button.getAttribute('aria-label');
+	let newLabel = button.getAttribute('data-label-alt');
+	button.setAttribute('aria-label', newLabel);
+	button.setAttribute('data-label-alt', currentLabel);
+}
+
 function startListening () {
 	document.querySelector('.lists-toggle').addEventListener('click', (e) => {
-		let button = e.currentTarget;
-		button.classList.toggle('collapse');
-		document.body.classList.toggle('lists-active');
-		// swap labels
-		let currentLabel = button.getAttribute('aria-label');
-		let newLabel = button.getAttribute('data-label-alt');
-		button.setAttribute('aria-label', newLabel);
-		button.setAttribute('data-label-alt', currentLabel);
+		toggleLists();
 	});
 }
