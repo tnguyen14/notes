@@ -50,6 +50,16 @@ const endPoints = {
 editor.on('note:save', saveNote);
 editor.on('note:remove', removeNote);
 
+// sort by modified time
+function compareNotes (a, b) {
+	if (moment(a.modifiedTime).isAfter(b.modifiedTime)) {
+		return -1;
+	} else if (moment(a.modifiedTime).isBefore(b.modifiedTime)) {
+		return 1;
+	}
+	return 0;
+}
+
 function getNotes (profile) {
 	let type = 'drive';
 
@@ -69,6 +79,8 @@ function getNotes (profile) {
 		getLocalNotes(type, profile.id).then((localNotes) => {
 			// eagerly render localNotes first
 			notes[type] = localNotes;
+			// sort by modified times
+			localNotes.sort(compareNotes);
 			list.renderNotes(type, localNotes);
 			return localNotes;
 		})
@@ -126,6 +138,8 @@ function getNotes (profile) {
 			}
 		});
 
+		// sort notes again
+		notes[type].sort(compareNotes);
 		// show the fist note
 		if (notes[type].length > 0) {
 			_note.emit('note:activate', notes[type][0]);
