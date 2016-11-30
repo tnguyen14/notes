@@ -40,7 +40,6 @@
     "eventemitter3": "^2.0.2",
     "express": "^4.14.0",
     "flat-file-db": "^1.0.0",
-    "forever": "^0.15.2",
     "googleapis": "^9.0.0",
     "hint.css": "^2.4.0",
     "js-yaml": "^3.6.1",
