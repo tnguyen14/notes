@@ -13,3 +13,4 @@ public/dialog-polyfill.css
 data
 coverage
 .nyc_output
+ecosystem.config.js
