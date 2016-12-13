@@ -141,10 +141,6 @@ function getNotes (profile) {
 
 		// sort notes again
 		notes[type].sort(compareNotes);
-		// show the fist note
-		if (notes[type].length > 0) {
-			_note.emit('note:activate', notes[type][0]);
-		}
 	});
 }
 
@@ -354,12 +350,16 @@ function removeNote (type, id) {
 	});
 }
 
+/* find note by ID
+ * @param {string} [id] note ID. If no ID is provided, return the first
+ *                      note of default type
+ * @param {string} [type] note type, default to 'drive'
+ */
 function findNoteById (id, type) {
-	// only search in single note type for now
-	let _type = type;
 	// default to drive
-	if (!type) {
-		_type = 'drive';
+	let _type = type || 'drive';
+	if (!id) {
+		return notes[_type][0];
 	}
 	return notes[_type].find((note) => {
 		return note.id === id;

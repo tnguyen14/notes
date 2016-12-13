@@ -46,8 +46,14 @@ let routes = {
 			note.setActiveNote(n, n.new);
 		}
 	},
-	// add wild card so that '/' route is matched, thus stored as
+	// wild card is necessary so that '/' route is matched, thus stored as
 	// _lastRouteResolved
-	'*': function () {}
+	'*': function () {
+		// if no note is declared, show the first note
+		var firstNote = note.findNoteById();
+		if (firstNote) {
+			router.navigate('/' + encodeURIComponent(firstNote.name));
+		}
+	}
 };
 
