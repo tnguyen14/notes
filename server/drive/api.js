@@ -23,6 +23,7 @@ var noteFields = [
 
 module.exports = {
 	getDirs: getDirs,
+	getDirsAndFiles: getDirsAndFiles,
 	processFile: processFile,
 	updateNote: updateNote,
 	createNote: createNote,
@@ -35,6 +36,24 @@ function getDirs (opts) {
 		drive.files.list({
 			auth: auth,
 			q: `mimeType = '${mimeTypes.folder}' and '${opts.rootDir}' in parents and trashed = false`,
+			fields: 'files(' + noteFields.join(',') + ')'
+		}, (err, resp) => {
+			if (err) {
+				debug(err);
+				reject(err);
+				return;
+			}
+			resolve(resp.files);
+		});
+	});
+}
+
+function getDirsAndFiles (opts) {
+	auth.credentials = opts.credentials;
+	return new Promise((resolve, reject) => {
+		drive.files.list({
+			auth: auth,
+			q: `(mimeType = '${mimeTypes.folder}' or mimeType = '${mimeTypes.md}') and '${opts.rootDir}' in parents and trashed = false`,
 			fields: 'files(' + noteFields.join(',') + ')'
 		}, (err, resp) => {
 			if (err) {
@@ -278,12 +297,21 @@ function createNote (opts) {
 		if (files.length > 0) {
 			return Promise.reject(new Error('Note "' + opts.name + '" already exists.'));
 		}
-		return createFolder(opts);
-	}).then((resp) => {
-		return createFile(Object.assign({}, opts, {
-			name: 'index.md',
-			parent: resp.id
-		}));
+		// allow for create new note as just a file (without folder)
+		if (opts.useFile) {
+			return createFile(Object.assign({}, opts, {
+				name: opts.name + '.md',
+				parent: opts.rootDir
+			}));
+		} else {
+			return createFolder(opts)
+				.then((resp) => {
+					return createFile(Object.assign({}, opts, {
+						name: 'index.md',
+						parent: resp.id
+					}));
+				});
+		}
 	});
 }
 

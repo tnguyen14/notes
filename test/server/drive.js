@@ -74,6 +74,34 @@ tap.test('Drive API', (t) => {
 			t.end();
 		});
 	});
+	t.test('getDirsAndFiles', (t) => {
+		driveApi.getDirsAndFiles({
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
+			rootDir: 'rootdir'
+		});
+		var auth = driveApi.__get__('auth');
+		t.deepEqual(auth, {
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			}
+		});
+		t.ok(driveApi.__get__('drive').files.list.calledWith({
+			auth: {
+				credentials: {
+					access_token: '2233445566',
+					refresh_token: '12345'
+				}
+			},
+			q: '(mimeType = \'application/vnd.google-apps.folder\' or mimeType = \'text/x-markdown\') and \'rootdir\' in parents and trashed = false',
+			fields: 'files(createdTime,id,kind,lastModifyingUser,mimeType,modifiedByMeTime,modifiedTime,name)'
+		}));
+		t.end();
+	});
+
 	t.test('processFile - folder - stub getFolderChildren and getFileContent', (t) => {
 		var getFolderChildrenStub = sinon.stub().resolves([{
 			id: 'test-note-index-id',
@@ -490,6 +518,55 @@ tap.test('Drive API', (t) => {
 			t.end();
 		});
 	});
+	t.test('createNote - use file', (t) => {
+		var findByNameRevert = driveApi.__set__('findByName', sinon.stub().resolves([]));
+		var createStub = sinon.stub();
+		createStub.callsArgWith(1, null, {
+			kind: 'drive#file',
+			id: '0B3UJMNijnL12OVJZWXZLbGctVms',
+			name: 'Test',
+			mimeType: 'text/x-markdown'
+		});
+		var createRevert = driveApi.__set__('drive', {
+			files: {
+				list: sinon.spy(),
+				create: createStub
+			}
+		});
+		driveApi.createNote({
+			name: 'Test',
+			rootDir: 'notes-rootdir',
+			credentials: {
+				access_token: '2233445566',
+				refresh_token: '12345'
+			},
+			content: 'new note content',
+			useFile: true
+		}).then((resp) => {
+			var driveMock = driveApi.__get__('drive');
+			t.ok(driveMock.files.create.calledOnce);
+			t.ok(driveMock.files.create.calledWith({
+				auth: {
+					credentials: {
+						access_token: '2233445566',
+						refresh_token: '12345'
+					}
+				},
+				resource: {
+					name: 'Test.md',
+					parents: ['notes-rootdir']
+				},
+				media: {
+					body: 'new note content',
+					mimeType: 'text/x-markdown'
+				}
+			}));
+			findByNameRevert();
+			createRevert();
+			t.end();
+		});
+	});
+
 	t.test('createNote - already exists', (t) => {
 		var findByNameRevert = driveApi.__set__('findByName', sinon.stub().resolves([{
 			kind: 'drive#file',

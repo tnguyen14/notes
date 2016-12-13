@@ -96,7 +96,7 @@ app.patch('/me', isAuthenticated, (req, res) => {
 
 app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
-	api.getDirs({
+	api.getDirsAndFiles({
 		rootDir: driveConfig.rootDir,
 		credentials: {
 			access_token: req.user.accessToken,
@@ -153,6 +153,7 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 		name: req.body.name,
 		rootDir: driveConfig.rootDir,
 		content: req.body.content,
+		useFile: true,
 		credentials: {
 			access_token: req.user.accessToken,
 			refresh_token: req.user.refreshToken
