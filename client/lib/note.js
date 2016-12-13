@@ -276,6 +276,10 @@ function saveNote (type, n) {
 			note.id = resp.id;
 			note.userId = resp.userId;
 			delete note.new;
+			// trigger note:create event again to update page link
+			// not sure if triggering the same event is the right idea,
+			// or create a new event, and handle it the same way in router
+			_note.emit('note:create', note);
 		}
 		if (note.dirty && note.oldNote) {
 			delete note.dirty;
