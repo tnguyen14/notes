@@ -86,6 +86,7 @@ function getNotes (profile) {
 		})
 	]).then((res) => {
 		let [driveNotes, localNotes] = res;
+		let hasMatchingRemote = [];
 		notes[type] = driveNotes.map((driveNote) => {
 			let localNote = localNotes.find(n => n.id === driveNote.id);
 			if (!localNote) {
@@ -94,7 +95,7 @@ function getNotes (profile) {
 				list.renderNote(type, driveNote);
 				return driveNote;
 			}
-			localNote.hasMatchingRemote = true;
+			hasMatchingRemote.push(localNote.id);
 			if (localNote.name !== driveNote.name ||
 				localNote.content !== driveNote.content) {
 				// if 2 versions differ
@@ -124,7 +125,7 @@ function getNotes (profile) {
 		});
 
 		localNotes.forEach((localNote) => {
-			if (!localNote.hasMatchingRemote) {
+			if (!hasMatchingRemote.includes(localNote.id)) {
 				if (localNote.new) {
 					// if new note that has not been saved, put it first
 					// to make it active
