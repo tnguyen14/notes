@@ -23,12 +23,12 @@ const list = Object.assign(new EventEmitter(), {
 
 module.exports = list;
 
-function showLoader (type) {
-	loader.show(getUl(type));
+function showLoader () {
+	loader.show(listsContainer);
 }
 
-function hideLoader (type) {
-	loader.hide(getUl(type));
+function hideLoader () {
+	loader.hide(listsContainer);
 }
 
 function renderLabel (type, label) {

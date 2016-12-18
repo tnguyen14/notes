@@ -144,14 +144,14 @@ function getNotes (profile) {
 }
 
 function getDriveNotes () {
-	list.showLoader('drive');
+	list.showLoader();
 	return getJson(endPoints.drive, {
 		credentials: 'include'
 	}).then((response) => {
-		list.hideLoader('drive');
+		list.hideLoader();
 		return response;
 	}, (err) => {
-		list.hideLoader('drive');
+		list.hideLoader();
 		if (err.response.status === 401) {
 			return user.authorize('https://www.googleapis.com/auth/drive');
 		}

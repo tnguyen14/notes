@@ -233,6 +233,12 @@ button.grey:hover {
 		width: 20%;
 	}
 }
+.lists .loader.circle {
+	position: absolute;
+	top: .75rem;
+	right: 4rem;
+	width: 2em;
+}
 
 .list h3 {
 	font-size: 1.2em;
@@ -240,9 +246,6 @@ button.grey:hover {
 	font-variant: small-caps;
 	font-weight: 300;
 	transition: margin .2s ease-in-out;
-}
-.list .loader.circle {
-	width: 2em;
 }
 .list ul {
 	padding-left: 0;
