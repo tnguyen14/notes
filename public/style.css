@@ -83,7 +83,7 @@ button.grey:hover {
 	padding: 0;
 	position: absolute;
 	left: 0;
-	top: .2rem;
+	bottom: .8rem;
 	width: 2rem;
 	height: 2rem;
 	transition: left .2s ease-in-out;
@@ -91,15 +91,15 @@ button.grey:hover {
 }
 @media (min-width: 45em) {
 	.lists-toggle.collapse {
-		left: calc(30% - 2.5rem);
+		/* left: calc(30% - 2.5rem); */
 	}
 }
 @media (min-width: 75em) {
 	.lists-toggle {
-		left: .5rem;
+		/* left: .5rem; */
 	}
 	.lists-toggle.collapse {
-		left: calc(20% - 2.5rem);
+		/* left: calc(20% - 2.5rem); */
 	}
 }
 .lists-toggle .octicon {
@@ -116,49 +116,46 @@ button.grey:hover {
 	display: inline-block;
 }
 
-.menu {
-	position: absolute;
-	top: .5rem;
-	right: .5rem;
-	z-index: 1;
-}.menu .add {
+.add {
 	border-radius: 50%;
 	display: block;
-	float: right;
 	font-family: monospace;
 	font-size: 1.3em;
-	margin-bottom: 1rem;
-	margin-right: 1.5rem;
 	width: 2.5em;
 	height: 2.5em;
+	position: absolute;
+	right: .5rem;
+	bottom: .8rem;
 }
-.menu .add:focus {
+.add:focus {
 	outline: none;
 }
-.menu .add svg {
+.add svg {
 	width: 1rem;
 	height: 1.5rem;
 }
-.menu .profile {
+.profile {
 	cursor: pointer;
-	float: right;
 	text-align: center;
-	width: 3rem;
-	height: 3rem;
+	width: 2.5rem;
+	height: 2.5rem;
+	position: absolute;
+	top: .5rem;
+	right: .5rem;
 }
-.menu .profile .image {
+.profile .image {
 	background-color: var(--color-submarine);
 	border-radius: 50%;
 	color: var(--color-white-smoke);
 	display: inline-block;
 	font-size: 1.3em;
-	width: 3rem;
-	height: 3rem;
+	width: 100%;
+	height: auto;
 }
-.menu .profile span.image {
+.profile span.image {
 	padding-top: .5em;
 }
-.menu .profile .options {
+.profile .options {
 	background-color: white;
 	box-shadow: 0 3px 12px rgba(0, 0, 0, .15);
 	border: 1px solid rgba(0, 0, 0, .15);
@@ -167,10 +164,11 @@ button.grey:hover {
 	list-style: none;
 	padding: 0;
 	position: absolute;
-	bottom: -7.8rem;
-	right: 0;
+	bottom: -8.5rem;
+	right: -0.1rem;
+	z-index: 1;
 }
-.menu .profile .options::before {
+.profile .options::before {
 	content: '';
 	position: absolute;
 	border: 6px solid transparent;
@@ -178,7 +176,7 @@ button.grey:hover {
 	right: 16px;
 	top: -13px;
 }
-.menu .profile .options::after {
+.profile .options::after {
 	content: '';
 	position: absolute;
 	border: 5px solid transparent;
@@ -186,23 +184,23 @@ button.grey:hover {
 	right: 17px;
 	top: -10px;
 }
-.menu .profile.active .options {
+.profile.active .options {
 	display: block;
 }
-.menu .options li {
+.profile .options li {
 	border-bottom: 1px solid var(--color-white-smoke);
 }
-.menu .options .name {
+.profile .options .name {
 	background-color: var(--color-white-smoke);
 	padding: .5rem 0;
 }
-.menu .options a {
+.profile .options a {
 	color: black;
 	display: block;
 	padding: .8rem;
 	text-decoration: none;
 }
-.menu .options a:hover {
+.profile .options a:hover {
 	background-color: var(--color-white-smoke);
 }
 
@@ -238,20 +236,16 @@ button.grey:hover {
 
 .list h3 {
 	font-size: 1.2em;
-	margin: .5rem 0 .5rem 1.5rem;
+	margin: .8rem 0 0 0;
 	font-variant: small-caps;
 	font-weight: 300;
 	transition: margin .2s ease-in-out;
-}
-@media (min-width: 45em) {
-	.list h3 {
-		margin-left: 0;
-	}
 }
 .list .loader.circle {
 	width: 2em;
 }
 .list ul {
+	margin-top: .8rem;
 	padding-left: 0;
 }
 .list-item {

@@ -1,8 +1,12 @@
+const dialogPolyfill = require('dialog-polyfill');
+const EventEmitter = require('eventemitter3');
+const config = require('./config');
+const user = require('../lib/user');
 const loader = require('../lib/loader');
 
 const listsContainer = document.querySelector('.lists');
 
-module.exports = {
+const list = Object.assign(new EventEmitter(), {
 	showLoader,
 	hideLoader,
 	renderLabel,
@@ -12,8 +16,12 @@ module.exports = {
 	removeNote,
 	updateNoteName,
 	updateNoteStatus,
-	startListening
-};
+	startListening,
+	createNoteChoice,
+	setProfile
+});
+
+module.exports = list;
 
 function showLoader (type) {
 	loader.show(getUl(type));
@@ -119,8 +127,76 @@ function toggleLists () {
 	button.setAttribute('data-label-alt', currentLabel);
 }
 
+const addNoteChoiceDialogEl = document.querySelector('.add-note-choice');
+// polyfill dialog
+dialogPolyfill.registerDialog(addNoteChoiceDialogEl);
+
 function startListening () {
 	document.querySelector('.lists-toggle').addEventListener('click', (e) => {
 		toggleLists();
 	});
+	// add button
+	document.querySelector('.add').addEventListener('click', addNoteChoiceDialogEl.showModal.bind(addNoteChoiceDialogEl));
+	addNoteChoiceDialogEl.addEventListener('click', function (e) {
+		if (!e.target.classList.contains('add-option')) {
+			return;
+		}
+		addNoteChoiceDialogEl.close();
+		var type = e.target.getAttribute('data-type');
+		list.emit('note:add', type);
+	});
+}
+
+function createNoteChoice (label, type) {
+	var option = document.createElement('button');
+	option.innerHTML = label;
+	option.setAttribute('data-type', type);
+	option.classList.add('add-option');
+	addNoteChoiceDialogEl.appendChild(option);
+}
+
+function setProfile (profile) {
+	// profile image
+	var profileEl = document.querySelector('.profile');
+	var image;
+	if (profile.photos.length > 0) {
+		image = document.createElement('img');
+		image.src = profile.photos[0].value;
+	} else {
+		image = document.createElement('span');
+		image.innerText = profile.displayName[0].toUpperCase();
+	}
+	image.classList.add('image');
+	profileEl.appendChild(image);
+
+	// profile options
+	var options = document.createElement('ul');
+	options.classList.add('options');
+	var name = document.createElement('li');
+	name.innerText = profile.displayName;
+	name.classList.add('name');
+	options.appendChild(name);
+
+	var configurations = document.createElement('a');
+	configurations.innerText = 'Configurations';
+	configurations.setAttribute('href', 'config');
+	configurations.addEventListener('click', (e) => {
+		e.preventDefault();
+		config.open();
+	});
+	options.appendChild(document.createElement('li'))
+		.appendChild(configurations);
+
+	var logout = document.createElement('a');
+	logout.innerText = 'Log Out';
+	logout.setAttribute('href', user.logoutUrl);
+	options.appendChild(document.createElement('li'))
+		.appendChild(logout);
+	profileEl.appendChild(options);
+
+	profileEl.addEventListener('click', function (e) {
+		e.currentTarget.classList.toggle('active');
+	});
+
+	return profile;
 }

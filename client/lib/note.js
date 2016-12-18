@@ -10,7 +10,6 @@ const deleteJson = simpleFetch.deleteJson;
 const config = require('../components/config');
 const editor = require('../components/editor');
 const list = require('../components/list');
-const menu = require('../components/menu');
 const notify = require('./notify');
 const user = require('./user');
 
@@ -64,7 +63,7 @@ function getNotes (profile) {
 	let type = 'drive';
 
 	// listen inside this function to get access to profile ID
-	menu.on('note:add', (type) => {
+	list.on('note:add', (type) => {
 		createNote(type, profile.id);
 	});
 
@@ -72,7 +71,7 @@ function getNotes (profile) {
 		credentials: 'include'
 	}).then((config) => {
 		list.renderLabel(type, config.label);
-		menu.createNoteChoice(config.label, type);
+		list.createNoteChoice(config.label, type);
 	});
 	return Promise.all([
 		getDriveNotes(),
