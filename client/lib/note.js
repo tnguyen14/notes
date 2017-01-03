@@ -1,3 +1,4 @@
+/* @flow */
 const Promise = require('bluebird');
 const localforage = require('localforage');
 const moment = require('moment');
@@ -41,8 +42,13 @@ const NEWNOTE = {
 	new: true
 };
 
+const apiUrl = process.env.API_URL;
+if (!apiUrl) {
+	throw new Error('No API URL.');
+}
+
 const endPoints = {
-	drive: process.env.API_URL + '/drive'
+	drive: apiUrl + '/drive'
 };
 
 // event handlers registration
@@ -202,11 +208,12 @@ function saveNote (type, n) {
 			saveNote(type, n);
 		}, 500);
 	}
+
 	var note = findNoteById(n.id);
-	var oldNote = note;
-	if (!note) {
+	if (note == null) {
 		throw new Error('Unable to find note ' + n.id);
 	}
+	var oldNote = note;
 	if (note.dirty && note.oldNote) {
 		oldNote = note.oldNote;
 	}
@@ -262,6 +269,14 @@ function saveNote (type, n) {
 			type: 'green'
 		});
 		editor.unfreeze();
+
+		// checking for note again, due to a flow issue
+		// https://github.com/facebook/flow/issues/2986
+		// @TODO: to be removed
+		if (note == null) {
+			throw new Error('Note cannot be null or undefined ');
+		}
+
 		if (updated.name) {
 			list.updateNoteName(note.id, updated.name, resp.id);
 			note.name = updated.name;
@@ -291,6 +306,13 @@ function saveNote (type, n) {
 			timeout: 3000
 		});
 	}, (err) => {
+		// checking for note again, due to a flow issue
+		// https://github.com/facebook/flow/issues/2986
+		// @TODO: to be removed
+		if (note == null) {
+			throw new Error('Note cannot be null or undefined ');
+		}
+
 		savePending = false;
 		// save to local storage for later re-save
 
