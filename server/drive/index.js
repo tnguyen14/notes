@@ -1,16 +1,23 @@
-var Promise = require('bluebird');
-var pick = require('lodash.pick');
-var express = require('express');
-var bodyParser = require('body-parser');
-var app = express();
-var flatfile = require('flat-file-db');
-var db = flatfile.sync('./data/users.db');
-var debug = require('debug')('notes');
+/* @flow */
 
-var cookieSession = require('cookie-session');
-var api = require('./api');
+const Promise = require('bluebird');
+const pick = require('lodash.pick');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const flatfile = require('flat-file-db');
+const db = flatfile.sync('./data/users.db');
+const debug = require('debug')('notes');
 
-var needle = require('needle');
+const cookieSession = require('cookie-session');
+const api = require('./api');
+
+const needle = require('needle');
+
+const authUrl = process.env.AUTH_URL;
+if (!authUrl) {
+	throw new Error('No Auth URL.');
+}
 
 app.use(cookieSession({
 	name: process.env.COOKIE_NAME,
@@ -26,7 +33,7 @@ function isAuthenticated (req, res, next) {
 	var cookies = {};
 	cookies[req.sessionKey] = req.sessionCookies.get(req.sessionKey, req.sessionOptions);
 	cookies[req.sessionKey + '.sig'] = req.sessionCookies.get(req.sessionKey + '.sig');
-	needle.get(process.env.AUTH_URL + '/profile', {
+	needle.get(authUrl + '/profile', {
 		cookies: cookies
 	}, function (err, resp) {
 		if (err) {
@@ -73,13 +80,22 @@ function handleError (res, err) {
 	res.json(err);
 }
 
+function getCredentials (req) {
+	if (!req.user) {
+		throw new Error('No user found on request');
+	}
+	return {
+		access_token: req.user.accessToken,
+		refresh_token: req.user.refreshToken,
+		// (milliseconds since Unix Epoch time) for 15 days
+		expiry_date: (new Date()).getTime() + (1000 * 60 * 60 * 24 * 15)
+	};
+}
+
 app.get('/me', isAuthenticated, (req, res) => {
 	api.getDirs({
 		rootDir: 'root',
-		credentials: {
-			access_token: req.user.accessToken,
-			refresh_token: req.user.refreshToken
-		}
+		credentials: getCredentials(req)
 	}).then((rootDirs) => {
 		res.json(Object.assign({}, db.get(req.user.id), {
 			rootDirs: rootDirs
@@ -98,18 +114,12 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
 	api.getDirsAndFiles({
 		rootDir: driveConfig.rootDir,
-		credentials: {
-			access_token: req.user.accessToken,
-			refresh_token: req.user.refreshToken
-		}
+		credentials: getCredentials(req)
 	}).then((files) => {
 		Promise.all(files.map((file) => {
 			return api.processFile({
 				file: file,
-				credentials: {
-					access_token: req.user.accessToken,
-					refresh_token: req.user.refreshToken
-				}
+				credentials: getCredentials(req)
 			}).catch((err) => {
 				debug(err);
 				return;
@@ -138,10 +148,7 @@ app.put('/:id', isAuthenticated, function (req, res) {
 		fileId: req.params.id,
 		content: req.body.content,
 		name: req.body.name,
-		credentials: {
-			access_token: req.user.accessToken,
-			refresh_token: req.user.refreshToken
-		}
+		credentials: getCredentials(req)
 	}).then((resp) => {
 		res.json(resp);
 	}, handleError.bind(null, res));
@@ -154,10 +161,7 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 		rootDir: driveConfig.rootDir,
 		content: req.body.content,
 		useFile: true,
-		credentials: {
-			access_token: req.user.accessToken,
-			refresh_token: req.user.refreshToken
-		}
+		credentials: getCredentials(req)
 	}).then((resp) => {
 		res.json(Object.assign(resp, {
 			userId: req.user.id,
@@ -169,15 +173,12 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 app.delete('/:id', isAuthenticated, function (req, res) {
 	api.deleteNote({
 		fileId: req.params.id,
-		credentials: {
-			access_token: req.user.accessToken,
-			refresh_token: req.user.refreshToken
-		}
+		credentials: getCredentials(req)
 	}).then((resp) => {
 		res.json(resp);
 	}, handleError.bind(null, res));
 });
 
-module.exports = function (endpoint) {
+module.exports = function () {
 	return app;
 };

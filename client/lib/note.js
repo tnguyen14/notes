@@ -452,6 +452,7 @@ function removeLocalNote (note) {
 	let noteKey = getLocalNoteKey(note.type, note.userId, note.id);
 	return localforage.removeItem(noteKey);
 }
+
 // expose utility method (useful to clean up localforage stuff)
 window._localF = {
 	listAll: function () {
