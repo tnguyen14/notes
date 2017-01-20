@@ -1,3 +1,4 @@
+/* global Event */
 var EventEmitter = require('eventemitter3');
 var dialogPolyfill = require('dialog-polyfill');
 var md = require('markdown-it')({
@@ -177,6 +178,7 @@ function viewMode () {
 				noteText = noteText.replace(new RegExp('(-\\s?)\\[x\\](\\s?' + RegExp.escape(inputText) + ')'), '$1[ ]$2');
 			}
 			setContent(noteText);
+			textarea.dispatchEvent(new Event('input'));
 		});
 	});
 }
