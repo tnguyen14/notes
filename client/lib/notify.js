@@ -6,6 +6,7 @@ module.exports = notify;
 module.exports.clear = hideNotification;
 module.exports.error = error;
 module.exports.info = info;
+module.exports.success = success;
 
 notification.querySelector('.close')
 	.addEventListener('click', hideNotification);
@@ -72,5 +73,12 @@ function info (message) {
 	notify({
 		message: message,
 		type: 'blue'
+	});
+}
+
+function success (message) {
+	notify({
+		message: message,
+		type: 'green'
 	});
 }

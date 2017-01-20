@@ -272,10 +272,7 @@ function saveNote (type, n) {
 		credentials: 'include'
 	}).then((resp) => {
 		savePending = false;
-		notify({
-			message: 'All changes saved!',
-			type: 'green'
-		});
+		notify.success('All changes saved!');
 		editor.unfreeze();
 
 		// checking for note again, due to a flow issue
