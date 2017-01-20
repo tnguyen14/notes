@@ -29,7 +29,6 @@ var viewButton = document.querySelector('.view-button');
 var writeButton = document.querySelector('.write-button');
 var form = document.querySelector('form');
 var view = document.querySelector('.view-content .markdown-body');
-var save = container.querySelector('.save');
 var remove = container.querySelector('.remove');
 var deleteConfirm = document.querySelector('dialog.delete-confirm');
 
@@ -131,7 +130,6 @@ function startListening () {
 		});
 	});
 
-	save.addEventListener('click', triggerNoteSaveEvent);
 	remove.addEventListener('click', function () {
 		deleteConfirm.showModal();
 	});
@@ -152,8 +150,6 @@ function startListening () {
 		typingTimer = setTimeout(triggerNoteSaveEvent, doneTypingInterval);
 	});
 }
-//
-// let saveInterval;
 
 function writeMode () {
 	viewButton.classList.remove('selected');
