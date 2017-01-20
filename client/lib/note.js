@@ -213,7 +213,10 @@ function saveNote (type, n) {
 	if (note == null) {
 		throw new Error('Unable to find note ' + n.id);
 	}
+	// oldNote is the previous version to compare with
 	var oldNote = note;
+
+	// if there was already an old note, use that
 	if (note.dirty && note.oldNote) {
 		oldNote = note.oldNote;
 	}
@@ -233,7 +236,10 @@ function saveNote (type, n) {
 		return;
 	}
 
-	// request body object
+	note.dirty = true;
+	list.updateNoteStatus(note.id, note.dirty);
+
+	// updated is request body object
 	var updated = {};
 	var url = endPoints[type];
 	var method = postJson;
@@ -243,6 +249,7 @@ function saveNote (type, n) {
 	if (note.new) {
 		updated.name = n.title;
 	} else {
+		// if updating existing note, use PUT
 		url += '/' + encodeURIComponent(note.id);
 		method = putJson;
 		if (n.title !== oldNote.name) {
@@ -255,8 +262,9 @@ function saveNote (type, n) {
 		permanent: true
 	});
 	savePending = true;
-	note.dirty = true;
+	// storing reference of oldNote
 	note.oldNote = oldNote;
+
 	Object.assign(note, updated);
 
 	editor.freeze();
@@ -265,7 +273,7 @@ function saveNote (type, n) {
 	}).then((resp) => {
 		savePending = false;
 		notify({
-			message: 'Saved!',
+			message: 'All changes saved!',
 			type: 'green'
 		});
 		editor.unfreeze();
@@ -297,14 +305,6 @@ function saveNote (type, n) {
 		}
 		saveLocalNote(note);
 		list.updateNoteStatus(note.id);
-
-		// switch to view mode after save
-		editor.viewMode();
-		notify({
-			message: 'Saved!',
-			type: 'green',
-			timeout: 3000
-		});
 	}, (err) => {
 		// checking for note again, due to a flow issue
 		// https://github.com/facebook/flow/issues/2986

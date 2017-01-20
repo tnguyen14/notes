@@ -112,6 +112,14 @@ function updateMetadata (frontmatter) {
 	}
 }
 
+function triggerNoteSaveEvent () {
+	editor.emit('note:save', getType(), {
+		id: getId(),
+		title: getTitle(),
+		content: getContent()
+	});
+}
+
 function startListening () {
 	Array.prototype.forEach.call(container.querySelectorAll('.tabnav button'), function (button) {
 		button.addEventListener('click', function () {
@@ -123,13 +131,7 @@ function startListening () {
 		});
 	});
 
-	save.addEventListener('click', function () {
-		editor.emit('note:save', getType(), {
-			id: getId(),
-			title: getTitle(),
-			content: getContent()
-		});
-	});
+	save.addEventListener('click', triggerNoteSaveEvent);
 	remove.addEventListener('click', function () {
 		deleteConfirm.showModal();
 	});
@@ -140,6 +142,14 @@ function startListening () {
 	deleteConfirm.querySelector('.confirm').addEventListener('click', function () {
 		deleteConfirm.close();
 		editor.emit('note:remove', getType(), getId());
+	});
+
+	// autosave
+	var typingTimer;
+	var doneTypingInterval = 2000;
+	textarea.addEventListener('input', function () {
+		clearTimeout(typingTimer);
+		typingTimer = setTimeout(triggerNoteSaveEvent, doneTypingInterval);
 	});
 }
 //
