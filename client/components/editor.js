@@ -66,10 +66,6 @@ function setId (id) {
 	container.setAttribute('data-id', id || '');
 }
 
-function getType () {
-	return container.getAttribute('data-type');
-}
-
 function setType (type) {
 	container.setAttribute('data-type', type);
 }
@@ -112,7 +108,7 @@ function updateMetadata (frontmatter) {
 }
 
 function triggerNoteSaveEvent () {
-	editor.emit('note:save', getType(), {
+	editor.emit('note:save', {
 		id: getId(),
 		title: getTitle(),
 		content: getContent()
@@ -139,12 +135,12 @@ function startListening () {
 	});
 	deleteConfirm.querySelector('.confirm').addEventListener('click', function () {
 		deleteConfirm.close();
-		editor.emit('note:remove', getType(), getId());
+		editor.emit('note:remove', getId());
 	});
 
 	// autosave
-	var typingTimer;
-	var doneTypingInterval = 2000;
+	let typingTimer;
+	let doneTypingInterval = 2000;
 	textarea.addEventListener('input', function () {
 		clearTimeout(typingTimer);
 		typingTimer = setTimeout(triggerNoteSaveEvent, doneTypingInterval);
@@ -173,8 +169,8 @@ function viewMode () {
 	Array.prototype.forEach.call(view.querySelectorAll('input[type=checkbox].task-list-item-checkbox'), function (input) {
 		input.removeAttribute('disabled');
 		input.addEventListener('change', function (e) {
-			var inputText = input.parentNode.textContent.trim();
-			var noteText = getContent();
+			let inputText = input.parentNode.textContent.trim();
+			let noteText = getContent();
 			if (input.checked) {
 				noteText = noteText.replace(new RegExp('(-\\s?)\\[\\s\\](\\s?' + RegExp.escape(inputText) + ')'), '$1[x]$2');
 			} else {

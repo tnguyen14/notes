@@ -201,14 +201,17 @@ function setActiveNote (note, writeMode) {
 }
 
 let savePending = false;
-function saveNote (type, n) {
+function saveNote (n) {
 	if (savePending) {
 		// if in the middle of saving, wait 500ms before trying again
 		setTimeout(() => {
-			saveNote(type, n);
+			saveNote(n);
 		}, 500);
 	}
 
+	if (!n.id) {
+		throw new Error('Missing note ID.');
+	}
 	var note = findNoteById(n.id);
 	if (note == null) {
 		throw new Error('Unable to find note ' + n.id);
@@ -241,7 +244,7 @@ function saveNote (type, n) {
 
 	// updated is request body object
 	var updated = {};
-	var url = endPoints[type];
+	var url = endPoints[note.type];
 	var method = postJson;
 	if (n.content !== oldNote.content) {
 		updated.content = n.content;
@@ -328,17 +331,15 @@ function saveNote (type, n) {
 	});
 }
 
-function removeNote (type, id) {
+function removeNote (id) {
 	if (!id) {
-		return;
+		throw new Error('Note ID is missing.');
 	}
-	var noteIndex = notes[type].findIndex(function (_n) {
-		return _n.id === id;
-	});
-	if (noteIndex === -1) {
-		return;
+	var note = findNoteById(id);
+	if (!note) {
+		throw new Error('Could not find note by ID ' + id);
 	}
-	var note = notes[type][noteIndex];
+	let noteIndex = notes[note.type].indexOf(note);
 	notify({
 		message: 'Deleting note...',
 		type: 'blue',
@@ -349,46 +350,70 @@ function removeNote (type, id) {
 	if (note.new) {
 		deleteAction = Promise.resolve();
 	} else {
-		deleteAction = deleteJson(endPoints[type] + '/' +
+		deleteAction = deleteJson(endPoints[note.type] + '/' +
 			encodeURIComponent(note.id), {
 				credentials: 'include'
 			});
 	}
 	deleteAction.then(function () {
+		// checking for note again, due to a flow issue
+		// https://github.com/facebook/flow/issues/2986
+		// @TODO: to be removed
+		if (!note) {
+			throw new Error('No note found');
+		}
 		list.removeNote(note.id);
 		removeLocalNote(note);
-		notes[type].splice(noteIndex, 1);
+		notes[note.type].splice(noteIndex, 1);
 		notify({
 			message: 'Successfully deleted note.',
 			type: 'green',
 			timeout: 3000
 		});
 		// show the next note
-		_note.emit('note:activate', notes[type][0]);
+		_note.emit('note:activate', notes[note.type][0]);
 	});
 }
 
-/* find note by ID
- * @param {string} [id] note ID. If no ID is provided, return the first
- *                      note of default type
- * @param {string} [type] note type, default to 'drive'
+/* find note by property
+ * if no property value is proided, the first note of type 'drive' is returned.
+ * if no type is provided, the first note found with the property value across
+ * all types is returned.
+ * if no note is found, return undefined.
+ * @param {string} prop the property to check on
+ * @param {string} [propValue] value of property to check against
+ * @param {string} [type] note type
  */
-function findNoteById (id, type) {
-	// default to drive
-	let _type = type || 'drive';
-	if (!id) {
-		return notes[_type][0];
+function findNoteByProperty (prop, propValue, type) {
+	let _prop = prop || 'id';
+	// if no propValue is declared, return the first note of type 'drive'
+	if (!propValue) {
+		return notes['drive'][0];
 	}
-	return notes[_type].find((note) => {
-		return note.id === id;
-	});
+	if (type) {
+		return notes[type].find((note) => {
+			return note[_prop] === propValue;
+		});
+	}
+	// if no type is defined, loop through all types, return the first one found
+	let foundNote;
+	for (let _type of Object.keys(notes)) {
+		foundNote = notes[_type].find((note) => {
+			return note[_prop] === propValue;
+		});
+		if (foundNote) {
+			break;
+		}
+	}
+	return foundNote;
+}
+
+function findNoteById (id, type) {
+	return findNoteByProperty('id', id, type);
 }
 
 function findNoteByName (name, type) {
-	let _type = type || 'drive';
-	return notes[_type].find((note) => {
-		return note.name === name;
-	});
+	return findNoteByProperty('name', name, type);
 }
 
 function getLocalNoteKey (type, profileId, noteId) {
