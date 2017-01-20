@@ -140,7 +140,7 @@ function startListening () {
 
 	// autosave
 	let typingTimer;
-	let doneTypingInterval = 2000;
+	let doneTypingInterval = 5000;
 	textarea.addEventListener('input', function () {
 		clearTimeout(typingTimer);
 		typingTimer = setTimeout(triggerNoteSaveEvent, doneTypingInterval);
