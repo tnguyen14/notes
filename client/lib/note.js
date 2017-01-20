@@ -198,6 +198,10 @@ function setActiveNote (note, writeMode) {
 	} else {
 		editor.viewMode();
 	}
+	// if the note is dirty already, try to save it
+	if (note.dirty) {
+		saveNote(note);
+	}
 }
 
 let savePending = false;
