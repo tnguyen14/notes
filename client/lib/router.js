@@ -26,11 +26,6 @@ note.on('note:activate', (n) => {
 let routes = {
 	'/:id': function (params) {
 		var noteId = decodeURIComponent(params.id);
-		if (noteId[noteId.length - 1] === '#') {
-			// remove ending hash
-			// see https://github.com/krasimir/navigo/issues/61
-			noteId = noteId.slice(0, -1);
-		}
 		if (!noteId) {
 			return;
 		}
