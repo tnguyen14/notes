@@ -65,7 +65,7 @@ function open (cb) {
 			option.innerText = dir.name;
 			option.value = dir.id;
 			rootDirSelect.appendChild(option);
-			if (dir.name === config.rootDir) {
+			if (dir.id === config.rootDir) {
 				option.setAttribute('selected', 'selected');
 			}
 		});
