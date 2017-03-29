@@ -429,6 +429,7 @@ select {
 }
 
 .title-container .title {
+	background-color: transparent;
 	border: none;
 	border-radius: 3px;
 	color: var(--color-pelorous);
