@@ -79,11 +79,10 @@ button.grey:hover {
 
 .lists-toggle {
 	background-color: transparent;
-	border-radius: 50%;
 	color: var(--color-oslo-grey);
 	padding: 0;
 	position: absolute;
-	left: .3rem;
+	left: 0;
 	top: .5rem;
 	width: 2rem;
 	height: 2rem;
@@ -91,20 +90,14 @@ button.grey:hover {
 				background-color .2s ease;
 	z-index: 1;
 }
-.lists-toggle:hover {
-	background-color: var(--color-white-smoke);
-}
 @media (min-width: 45em) {
 	.lists-toggle.collapse {
-		/* left: calc(30% - 2.5rem); */
+		left: calc(30% - 2.5rem);
 	}
 }
 @media (min-width: 75em) {
-	.lists-toggle {
-		/* left: .5rem; */
-	}
 	.lists-toggle.collapse {
-		/* left: calc(20% - 2.5rem); */
+		left: calc(20% - 2.5rem);
 	}
 }
 .lists-toggle .octicon {
@@ -269,6 +262,7 @@ button.grey:hover {
 .list h3 {
 	font-size: 1.2em;
 	margin: .8rem 0 0 0;
+	min-height: 1.2em; /* keep the header space when no header is loaded */
 	font-variant: small-caps;
 	font-weight: 300;
 	transition: margin .2s ease-in-out;
@@ -466,7 +460,7 @@ select {
 	color: var(--color-pelorous);
 	font-size: 1.4em;
 	outline: none;
-	padding: .8rem 0;
+	padding: .2rem 0 .5rem .8rem;
 	width: 80%;
 }
 .title-container .title:hover {
