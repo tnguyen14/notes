@@ -7,6 +7,7 @@ module.exports.hide = removeLoader;
 
 /**
  * @param el {Node} the element to insert the loader after
+ * @param type {String} type of loader, default to 'circle'
  */
 function showLoader (el, type) {
 	var template = loaders[type || 'circle'];
@@ -21,6 +22,7 @@ function showLoader (el, type) {
 		loader = elToAttach.querySelector('.loader');
 	}
 	loader.classList.add('active');
+	el.classList.add('loading');
 	return loader;
 }
 
@@ -30,5 +32,6 @@ function removeLoader (el) {
 		return;
 	}
 	loader.classList.remove('active');
+	el.classList.remove('loading');
 	return loader;
 }

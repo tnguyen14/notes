@@ -79,15 +79,20 @@ button.grey:hover {
 
 .lists-toggle {
 	background-color: transparent;
+	border-radius: 50%;
 	color: var(--color-oslo-grey);
 	padding: 0;
 	position: absolute;
-	left: 0;
-	bottom: .8rem;
+	left: .3rem;
+	top: .5rem;
 	width: 2rem;
 	height: 2rem;
-	transition: left .2s ease-in-out;
+	transition: left .2s ease-in-out,
+				background-color .2s ease;
 	z-index: 1;
+}
+.lists-toggle:hover {
+	background-color: var(--color-white-smoke);
 }
 @media (min-width: 45em) {
 	.lists-toggle.collapse {
@@ -123,8 +128,9 @@ button.grey:hover {
 	font-size: 1.3em;
 	width: 2.5em;
 	height: 2.5em;
-	position: absolute;
-	right: .5rem;
+	position: -webkit-sticky;
+	position: sticky;
+	margin-left: 80%;
 	bottom: .8rem;
 }
 .add:focus {
@@ -134,6 +140,18 @@ button.grey:hover {
 	width: 1rem;
 	height: 1.5rem;
 }
+@media (min-width: 45em) {
+	.add {
+		margin-left: 75%; /* give it more breathing room as intermediary
+							 viewport makes the lists width the smallest */
+	}
+}
+@media (min-width: 75em) {
+	.add {
+		margin-left: 80%;
+	}
+}
+
 .profile {
 	cursor: pointer;
 	text-align: center;
@@ -207,7 +225,9 @@ button.grey:hover {
 .lists {
 	border-right: 1px solid var(--color-gainsboro);
 	width: 0;
+	height: 100%;
 	left: -100%;
+	overflow-y: auto;
 	padding-left: .5em;
 	position: relative;
 	transition: left .2s ease-in-out, width .2s ease-in-out .2s;
@@ -233,10 +253,16 @@ button.grey:hover {
 		width: 20%;
 	}
 }
+.list {
+	transition: filter .5s ease-in-out;
+}
+.lists.loading .list {
+	filter: opacity(60%);
+}
 .lists .loader.circle {
 	position: absolute;
-	top: .75rem;
-	right: 4rem;
+	top: .5rem;
+	left: calc(50% - 1em);
 	width: 2em;
 }
 
@@ -246,6 +272,11 @@ button.grey:hover {
 	font-variant: small-caps;
 	font-weight: 300;
 	transition: margin .2s ease-in-out;
+	text-align: center;
+}
+@media (min-width: 75em) {
+	.list h3 {
+	}
 }
 .list ul {
 	padding-left: 0;
