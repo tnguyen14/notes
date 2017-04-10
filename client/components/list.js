@@ -58,12 +58,6 @@ function renderNote (type, note, noteIdToInsertBefore) {
 		getUl(type).appendChild(li);
 	}
 	updateNoteStatus(note.id, note.dirty);
-	li.addEventListener('click', () => {
-		// for small viewport, if clicking on note, show the content container
-		if (window.matchMedia('(max-width: 45em)').matches) {
-			toggleLists();
-		}
-	});
 }
 
 function setActiveNote (noteId) {
@@ -72,6 +66,10 @@ function setActiveNote (noteId) {
 		l.classList.remove('selected');
 	});
 	li.classList.add('selected');
+	// for small viewport, if clicking on note, show the content container
+	if (window.matchMedia('(max-width: 45em)').matches) {
+		toggleLists();
+	}
 }
 
 function removeNote (noteId) {
