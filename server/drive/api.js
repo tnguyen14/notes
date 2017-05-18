@@ -14,6 +14,7 @@ var noteFields = [
 	'id',
 	'kind',
 	'lastModifyingUser',
+	'md5Checksum',
 	'mimeType',
 	'modifiedByMeTime',
 	'modifiedTime',
@@ -139,8 +140,8 @@ function getMarkdownFilesOfFolders (opts) {
 	});
 }
 
-function pickFileProperties ({name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
-	return {name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
+function pickFileProperties ({name, id, createdTime, md5Checksum, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
+	return {name, id, createdTime, md5Checksum, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
 }
 
 function updateNote (opts) {

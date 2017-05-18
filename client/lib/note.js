@@ -102,16 +102,22 @@ function getNotes (profile) {
 			}
 			hasMatchingRemote.push(localNote.id);
 			if (localNote.name !== driveNote.name ||
-				localNote.content !== driveNote.content) {
+				localNote.md5Checksum !== driveNote.md5Checksum) {
 				// if 2 versions differ
 				// if local version is newer than remote version,
 				// store drive version as old note, use local version
 				if (moment(driveNote.modifiedTime).isBefore(
 						localNote.modifiedTime)) {
-					Object.assign(localNote, {
-						oldNote: driveNote
+					// get remote note content to add to oldNote
+					getJson(endPoints.drive + '/' + driveNote.id, {
+						credentials: 'include'
+					}).then((resp) => {
+						driveNote.content = resp.content;
+						Object.assign(localNote, {
+							oldNote: driveNote
+						});
+						saveLocalNote(localNote);
 					});
-					saveLocalNote(localNote);
 					return localNote;
 				}
 
@@ -119,14 +125,20 @@ function getNotes (profile) {
 				if (localNote.dirty) {
 					// @TODO resolve conflict somehow?
 				}
-				// if remote version is newer, use remote version
-				saveLocalNote(driveNote);
-				// @TODO why set name here?
+				// if remote version is newer, get the newer content
+				getJson(endPoints.drive + '/' + driveNote.id, {
+					credentials: 'include'
+				}).then((resp) => {
+					// @TODO if this is an active note that has been rendered,
+					// the new content will not be reflected
+					driveNote.content = resp.content;
+					saveLocalNote(driveNote);
+				});
 				list.updateNoteName(driveNote.id, driveNote.name);
+				return driveNote;
 			} else {
-				saveLocalNote(localNote);
+				return localNote;
 			}
-			return driveNote;
 		});
 
 		localNotes.forEach((localNote) => {
@@ -190,10 +202,10 @@ function createNote (type, profileId) {
 	_note.emit('note:create', note);
 }
 
-function setActiveNote (note, writeMode) {
+function setActiveNote (note) {
 	list.setActiveNote(note.id);
 	editor.setNote(note);
-	if (writeMode) {
+	if (note.new) {
 		editor.writeMode();
 	} else {
 		editor.viewMode();
@@ -209,7 +221,7 @@ function setActiveNote (note, writeMode) {
 			editor.setContent(content);
 			saveLocalNote(note);
 			// toggle mode again
-			if (writeMode) {
+			if (note.new) {
 				editor.writeMode();
 			} else {
 				editor.viewMode();
