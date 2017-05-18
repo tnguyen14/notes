@@ -193,6 +193,11 @@ function createNote (type, profileId) {
 function setActiveNote (note, writeMode) {
 	list.setActiveNote(note.id);
 	editor.setNote(note);
+	if (writeMode) {
+		editor.writeMode();
+	} else {
+		editor.viewMode();
+	}
 	editor.showLoader();
 	getJson(endPoints[note.type] + '/' + note.id, {
 		credentials: 'include'
@@ -203,6 +208,12 @@ function setActiveNote (note, writeMode) {
 			note.content = content;
 			editor.setContent(content);
 			saveLocalNote(note);
+			// toggle mode again
+			if (writeMode) {
+				editor.writeMode();
+			} else {
+				editor.viewMode();
+			}
 		}
 		if (note.content !== content) {
 			// if the note is dirty already, try to save it
@@ -214,11 +225,6 @@ function setActiveNote (note, writeMode) {
 			}
 		}
 		editor.hideLoader();
-		if (writeMode) {
-			editor.writeMode();
-		} else {
-			editor.viewMode();
-		}
 	}, (err) => {
 		if (err.response.status === 401) {
 			return user.authorize('http://www.googleapis.com/auth/drive');
