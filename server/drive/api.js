@@ -1,4 +1,3 @@
-var path = require('path');
 var google = require('googleapis');
 var drive = google.drive('v3');
 var OAuth2 = google.auth.OAuth2;
@@ -24,8 +23,10 @@ var noteFields = [
 module.exports = {
 	getDirs,
 	getDirsAndFiles,
+	// getFolderChildren is not used for now, but might be useful later
+	getFolderChildren,
 	getMarkdownFilesOfFolders,
-	processFile,
+	getFileContent,
 	updateNote,
 	createNote,
 	deleteNote,
@@ -71,7 +72,7 @@ function getDirsAndFiles (opts) {
 
 function getFileContent (opts) {
 	if (!opts.fileId) {
-		return;
+		return Promise.reject(new Error('No file ID was given.'));
 	}
 	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
@@ -140,55 +141,6 @@ function getMarkdownFilesOfFolders (opts) {
 
 function pickFileProperties ({name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
 	return {name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
-}
-
-/* @TODO: remove processFile */
-/**
- * @param {Object} file
- * @param {String} file.id eg. '0B8Jsod-g6nz2ZWRzRjNqdzZVRE0a'
- * @param {String} file.name
- * @param {String} file.mimeType 'application/vnd.google-apps.folder' or
- * 'text/x-markdown'
- */
-function processFile (opts) {
-	var file = opts.file;
-	switch (file.mimeType) {
-		case mimeTypes.md:
-			let ext = path.extname(file.name);
-			return getFileContent({
-				fileId: file.id,
-				credentials: opts.credentials
-			}).then((content) => {
-				return Object.assign({}, pickFileProperties(file), {
-					name: path.basename(file.name, ext),
-					content: content
-				});
-			});
-		case mimeTypes.folder:
-			let indexMd;
-			return getFolderChildren({
-				folderId: file.id,
-				credentials: opts.credentials
-			}).then((files) => {
-				indexMd = files.find((f) => {
-					return f.name === 'index.md';
-				});
-				if (!indexMd) {
-					return Promise.reject(new Error('Unable to find ' + file.name + '/index.md'));
-				}
-				return indexMd;
-			}).then((indexMdFile) => {
-				return getFileContent({
-					fileId: indexMdFile.id,
-					credentials: opts.credentials
-				}).then((content) => {
-					return Object.assign({}, pickFileProperties(indexMdFile), {
-						name: file.name,
-						content: content
-					});
-				});
-			});
-	}
 }
 
 function updateNote (opts) {

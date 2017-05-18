@@ -170,6 +170,19 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	}, handleError.bind(null, res));
 });
 
+// get file contents
+// @TODO: should this return the file metadata as well?
+app.get('/:id', isAuthenticated, function (req, res) {
+	api.getFileConent({
+		fileId: req.params.id,
+		credentials: getCredentials(req)
+	}).then((resp) => {
+		res.json({
+			content: resp
+		});
+	}, handleError.bind(null, res));
+});
+
 app.put('/:id', isAuthenticated, function (req, res) {
 	api.updateNote({
 		fileId: req.params.id,
