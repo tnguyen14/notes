@@ -193,15 +193,44 @@ function createNote (type, profileId) {
 function setActiveNote (note, writeMode) {
 	list.setActiveNote(note.id);
 	editor.setNote(note);
-	if (writeMode) {
-		editor.writeMode();
-	} else {
-		editor.viewMode();
-	}
-	// if the note is dirty already, try to save it
-	if (note.dirty) {
-		saveNote(note);
-	}
+	editor.showLoader();
+	getJson(endPoints[note.type] + '/' + note.id, {
+		credentials: 'include'
+	}).then((resp) => {
+		let content = resp.content;
+		// if the same content, nothing to do
+		if (!note.content) {
+			note.content = content;
+			editor.setContent(content);
+			saveLocalNote(note);
+		}
+		if (note.content !== content) {
+			// if the note is dirty already, try to save it
+			if (note.dirty) {
+				saveNote(note);
+			} else {
+				// @TODO what would this case be?
+				console.log('Please report this!');
+			}
+		}
+		editor.hideLoader();
+		if (writeMode) {
+			editor.writeMode();
+		} else {
+			editor.viewMode();
+		}
+	}, (err) => {
+		if (err.response.status === 401) {
+			return user.authorize('http://www.googleapis.com/auth/drive');
+		}
+		err.response.json().then((error) => {
+			notify({
+				type: 'red',
+				message: 'Error retrieving note: ' + error.message,
+				permanent: true
+			});
+		});
+	});
 }
 
 let savePending = false;

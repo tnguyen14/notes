@@ -8,16 +8,21 @@ var md = require('markdown-it')({
 	.use(require('markdown-it-front-matter'), updateMetadata);
 var yaml = require('js-yaml');
 
+const loader = require('../lib/loader');
+
 const editor = Object.assign(new EventEmitter(), {
 	getTitle,
 	getContent,
 	setNote,
 	setId,
+	setContent,
 	startListening,
 	viewMode,
 	writeMode,
 	freeze,
-	unfreeze
+	unfreeze,
+	showLoader,
+	hideLoader
 });
 
 module.exports = editor;
@@ -106,6 +111,14 @@ function updateMetadata (frontmatter) {
 	} else {
 		container.classList.remove('has-tags');
 	}
+}
+
+function showLoader () {
+	loader.show(container);
+}
+
+function hideLoader () {
+	loader.hide(container);
 }
 
 function triggerNoteSaveEvent () {
