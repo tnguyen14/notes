@@ -22,12 +22,15 @@ var noteFields = [
 ];
 
 module.exports = {
-	getDirs: getDirs,
-	getDirsAndFiles: getDirsAndFiles,
-	processFile: processFile,
-	updateNote: updateNote,
-	createNote: createNote,
-	deleteNote: deleteNote
+	getDirs,
+	getDirsAndFiles,
+	getMarkdownFilesOfFolders,
+	processFile,
+	updateNote,
+	createNote,
+	deleteNote,
+	mimeTypes,
+	pickFileProperties
 };
 
 function getDirs (opts) {
@@ -108,6 +111,38 @@ function getFolderChildren (opts) {
 	});
 }
 
+// get all the markdown files that are in all of the folders
+function getMarkdownFilesOfFolders (opts) {
+	if (!opts.folders) {
+		return;
+	}
+	auth.credentials = opts.credentials;
+	let foldersQuery = opts.folders.map((folder) => {
+		return `'${folder}' in parents`;
+	}).join(' or ');
+	debug(foldersQuery);
+	return new Promise((resolve, reject) => {
+		drive.files.list({
+			auth: auth,
+			q: `mimeType = '${mimeTypes.md}' and (${foldersQuery})`,
+			// add the parents field
+			fields: `files(${noteFields.join(',')},parents)`
+		}, (err, resp) => {
+			if (err) {
+				debug(err);
+				reject(err);
+				return;
+			}
+			resolve(resp.files);
+		});
+	});
+}
+
+function pickFileProperties ({name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
+	return {name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
+}
+
+/* @TODO: remove processFile */
 /**
  * @param {Object} file
  * @param {String} file.id eg. '0B8Jsod-g6nz2ZWRzRjNqdzZVRE0a'
@@ -116,9 +151,6 @@ function getFolderChildren (opts) {
  * 'text/x-markdown'
  */
 function processFile (opts) {
-	function pickFileProperties ({name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
-		return {name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
-	}
 	var file = opts.file;
 	switch (file.mimeType) {
 		case mimeTypes.md:

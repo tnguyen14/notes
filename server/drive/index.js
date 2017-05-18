@@ -1,6 +1,5 @@
 /* @flow */
 
-const Promise = require('bluebird');
 const pick = require('lodash.pick');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,6 +7,7 @@ const app = express();
 const flatfile = require('flat-file-db');
 const db = flatfile.sync('./data/users.db');
 const debug = require('debug')('notes');
+const path = require('path');
 
 const cookieSession = require('cookie-session');
 const api = require('./api');
@@ -110,26 +110,53 @@ app.patch('/me', isAuthenticated, (req, res) => {
 	res.status(200).json(db.get(req.user.id));
 });
 
+/*
+ * Get all markdown files and dirs under rot dir
+ * For each direct markdown file, add to `notes`
+ * For each directory, combine into a list of directories to process
+ * Then get all markdown files that are children of all those directories
+ * For each index.md file, add its properties and its parent's name to `notes`
+ */
 app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
 	api.getDirsAndFiles({
 		rootDir: driveConfig.rootDir,
 		credentials: getCredentials(req)
 	}).then((files) => {
-		Promise.all(files.map((file) => {
-			return api.processFile({
-				file: file,
-				credentials: getCredentials(req)
-			}).catch((err) => {
-				debug(err);
-				return;
+		let notes = [];
+		let folders = [];
+		files.forEach((file) => {
+			let ext = path.extname(file.name);
+			if (file.mimeType === api.mimeTypes.md) {
+				notes.push(Object.assign({}, api.pickFileProperties(file), {
+					name: path.basename(file.name, ext)
+				}));
+			} else if (file.mimeType === api.mimeTypes.folder) {
+				folders.push(file);
+			}
+		});
+		api.getMarkdownFilesOfFolders({
+			credentials: getCredentials(req),
+			folders: folders.map((folder) => folder.id)
+		}).then((secondaryFiles) => {
+			// only care about index.md files for now
+			secondaryFiles.forEach((secondaryFile) => {
+				if (secondaryFile.name !== 'index.md') {
+					return;
+				}
+				let parentFolder = folders.find((f) => {
+					return f.id === secondaryFile.parents[0];
+				});
+				notes.push(Object.assign({}, api.pickFileProperties(secondaryFile), {
+					name: parentFolder.name
+				}));
 			});
-		})).then((notes) => {
 			res.json(notes.filter((n) => n).map((n) => {
-				// add userId and type to each note
-				n.userId = req.user.id;
-				n.type = 'drive';
-				return n;
+				return Object.assign({}, n, {
+					// add userId and type to each note
+					userId: req.user.id,
+					type: 'drive'
+				});
 			}));
 		}, (err) => {
 			if (err) {
