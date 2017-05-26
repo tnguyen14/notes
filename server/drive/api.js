@@ -26,7 +26,7 @@ module.exports = {
 	getDirsAndFiles,
 	// getFolderChildren is not used for now, but might be useful later
 	getFolderChildren,
-	getMarkdownFilesOfFolders,
+	getMarkdownFilesInFolders,
 	getFileContent,
 	updateNote,
 	createNote,
@@ -114,7 +114,7 @@ function getFolderChildren (opts) {
 }
 
 // get all the markdown files that are in all of the folders
-function getMarkdownFilesOfFolders (opts) {
+function getMarkdownFilesInFolders (opts) {
 	if (!opts.folders) {
 		return;
 	}

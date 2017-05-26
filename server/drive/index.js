@@ -135,7 +135,7 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 				folders.push(file);
 			}
 		});
-		api.getMarkdownFilesOfFolders({
+		api.getMarkdownFilesInFolders({
 			credentials: getCredentials(req),
 			folders: folders.map((folder) => folder.id)
 		}).then((secondaryFiles) => {
