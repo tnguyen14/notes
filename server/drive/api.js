@@ -1,4 +1,3 @@
-var path = require('path');
 var google = require('googleapis');
 var drive = google.drive('v3');
 var OAuth2 = google.auth.OAuth2;
@@ -15,6 +14,7 @@ var noteFields = [
 	'id',
 	'kind',
 	'lastModifyingUser',
+	'md5Checksum',
 	'mimeType',
 	'modifiedByMeTime',
 	'modifiedTime',
@@ -22,12 +22,17 @@ var noteFields = [
 ];
 
 module.exports = {
-	getDirs: getDirs,
-	getDirsAndFiles: getDirsAndFiles,
-	processFile: processFile,
-	updateNote: updateNote,
-	createNote: createNote,
-	deleteNote: deleteNote
+	getDirs,
+	getDirsAndFiles,
+	// getFolderChildren is not used for now, but might be useful later
+	getFolderChildren,
+	getMarkdownFilesInFolders,
+	getFileContent,
+	updateNote,
+	createNote,
+	deleteNote,
+	mimeTypes,
+	pickFileProperties
 };
 
 function getDirs (opts) {
@@ -68,7 +73,7 @@ function getDirsAndFiles (opts) {
 
 function getFileContent (opts) {
 	if (!opts.fileId) {
-		return;
+		return Promise.reject(new Error('No file ID was given.'));
 	}
 	auth.credentials = opts.credentials;
 	return new Promise((resolve, reject) => {
@@ -108,55 +113,35 @@ function getFolderChildren (opts) {
 	});
 }
 
-/**
- * @param {Object} file
- * @param {String} file.id eg. '0B8Jsod-g6nz2ZWRzRjNqdzZVRE0a'
- * @param {String} file.name
- * @param {String} file.mimeType 'application/vnd.google-apps.folder' or
- * 'text/x-markdown'
- */
-function processFile (opts) {
-	function pickFileProperties ({name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
-		return {name, id, createdTime, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
+// get all the markdown files that are in all of the folders
+function getMarkdownFilesInFolders (opts) {
+	if (!opts.folders) {
+		return;
 	}
-	var file = opts.file;
-	switch (file.mimeType) {
-		case mimeTypes.md:
-			let ext = path.extname(file.name);
-			return getFileContent({
-				fileId: file.id,
-				credentials: opts.credentials
-			}).then((content) => {
-				return Object.assign({}, pickFileProperties(file), {
-					name: path.basename(file.name, ext),
-					content: content
-				});
-			});
-		case mimeTypes.folder:
-			let indexMd;
-			return getFolderChildren({
-				folderId: file.id,
-				credentials: opts.credentials
-			}).then((files) => {
-				indexMd = files.find((f) => {
-					return f.name === 'index.md';
-				});
-				if (!indexMd) {
-					return Promise.reject(new Error('Unable to find ' + file.name + '/index.md'));
-				}
-				return indexMd;
-			}).then((indexMdFile) => {
-				return getFileContent({
-					fileId: indexMdFile.id,
-					credentials: opts.credentials
-				}).then((content) => {
-					return Object.assign({}, pickFileProperties(indexMdFile), {
-						name: file.name,
-						content: content
-					});
-				});
-			});
-	}
+	auth.credentials = opts.credentials;
+	let foldersQuery = opts.folders.map((folder) => {
+		return `'${folder}' in parents`;
+	}).join(' or ');
+	debug(foldersQuery);
+	return new Promise((resolve, reject) => {
+		drive.files.list({
+			auth: auth,
+			q: `mimeType = '${mimeTypes.md}' and (${foldersQuery})`,
+			// add the parents field
+			fields: `files(${noteFields.join(',')},parents)`
+		}, (err, resp) => {
+			if (err) {
+				debug(err);
+				reject(err);
+				return;
+			}
+			resolve(resp.files);
+		});
+	});
+}
+
+function pickFileProperties ({name, id, createdTime, md5Checksum, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}}) {
+	return {name, id, createdTime, md5Checksum, modifiedTime, modifiedByMeTime, lastModifyingUser: {me}};
 }
 
 function updateNote (opts) {

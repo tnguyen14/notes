@@ -346,6 +346,12 @@ button.grey:hover {
 		width: 80%;
 	}
 }
+.editor-container .loader.circle {
+	position: absolute;
+	top: 4rem; /* move it down to be on top of .content-container only */
+	left: calc(50% - 1em);
+	width: 2em;
+}
 
 .notification {
 	border-radius: 3px;
@@ -536,6 +542,9 @@ select {
 	/* reduce padding top by .2rem so no need for height adjustment
 	 * when has tags */
 	padding-top: .4rem;
+}
+.editor-container.loading .content-container {
+	filter: opacity(60%);
 }
 @media (min-width: 45em) {
 	.content-container {

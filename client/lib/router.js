@@ -38,7 +38,7 @@ let routes = {
 			return;
 		}
 		if (n) {
-			note.setActiveNote(n, n.new);
+			note.setActiveNote(n);
 		}
 	},
 	// wild card is necessary so that '/' route is matched, thus stored as

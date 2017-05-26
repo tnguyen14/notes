@@ -23,7 +23,7 @@ function getProfile () {
 			} else {
 				notify({
 					type: 'red',
-					message: 'Unable to get user profile. ' + err.message,
+					message: 'Unable to connect to the auth service: ' + err.message,
 					permanent: true
 				});
 			}

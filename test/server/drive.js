@@ -1,8 +1,18 @@
-var tap = require('tap');
-var rewire = require('rewire');
-var sinon = require('sinon');
+const tap = require('tap');
+const rewire = require('rewire');
+const sinon = require('sinon');
 require('sinon-as-promised');
-var driveApi = rewire('../../server/drive/api');
+let driveApi = rewire('../../server/drive/api');
+
+const credentials = {
+	access_token: '2233445566',
+	refresh_token: '12345'
+};
+
+function checkAuthBeingSet (t) {
+	let auth = driveApi.__get__('auth');
+	t.deepEqual(auth, {credentials});
+}
 
 tap.test('Drive API', (t) => {
 	var authRevert, driveRevert;
@@ -29,28 +39,16 @@ tap.test('Drive API', (t) => {
 	});
 	t.test('getDirs', (t) => {
 		driveApi.getDirs({
-			credentials: {
-				access_token: '2233445566',
-				refresh_token: '12345'
-			},
+			credentials,
 			rootDir: 'rootdir'
 		});
-		var auth = driveApi.__get__('auth');
-		t.deepEqual(auth, {
-			credentials: {
-				access_token: '2233445566',
-				refresh_token: '12345'
-			}
-		});
+		checkAuthBeingSet(t);
 		t.ok(driveApi.__get__('drive').files.list.calledWith({
 			auth: {
-				credentials: {
-					access_token: '2233445566',
-					refresh_token: '12345'
-				}
+				credentials
 			},
 			q: 'mimeType = \'application/vnd.google-apps.folder\' and \'rootdir\' in parents and trashed = false',
-			fields: 'files(createdTime,id,kind,lastModifyingUser,mimeType,modifiedByMeTime,modifiedTime,name)'
+			fields: 'files(createdTime,id,kind,lastModifyingUser,md5Checksum,mimeType,modifiedByMeTime,modifiedTime,name)'
 		}));
 		t.end();
 	});
@@ -61,6 +59,7 @@ tap.test('Drive API', (t) => {
 				list: listStub
 			}
 		});
+		// call the callback, which is at index 1, with error
 		listStub.callsArgWith(1, new Error('Oops'));
 		driveApi.getDirs({
 			rootDir: 'badrootdir'
@@ -76,180 +75,109 @@ tap.test('Drive API', (t) => {
 	});
 	t.test('getDirsAndFiles', (t) => {
 		driveApi.getDirsAndFiles({
-			credentials: {
-				access_token: '2233445566',
-				refresh_token: '12345'
-			},
+			credentials,
 			rootDir: 'rootdir'
 		});
-		var auth = driveApi.__get__('auth');
-		t.deepEqual(auth, {
-			credentials: {
-				access_token: '2233445566',
-				refresh_token: '12345'
-			}
-		});
-		t.ok(driveApi.__get__('drive').files.list.calledWith({
+		checkAuthBeingSet(t);
+		t.deepEqual(driveApi.__get__('drive').files.list.getCall(0).args[0], {
 			auth: {
 				credentials: {
 					access_token: '2233445566',
 					refresh_token: '12345'
 				}
 			},
-			q: '(mimeType = \'application/vnd.google-apps.folder\' or mimeType = \'text/x-markdown\') and \'rootdir\' in parents and trashed = false',
-			fields: 'files(createdTime,id,kind,lastModifyingUser,mimeType,modifiedByMeTime,modifiedTime,name)'
+			q: '(mimeType = \'application/vnd.google-apps.folder\' or ' +
+'mimeType = \'text/x-markdown\') and \'rootdir\' in parents and trashed = false',
+			fields: 'files(createdTime,id,kind,lastModifyingUser,md5Checksum,' +
+'mimeType,modifiedByMeTime,modifiedTime,name)'
+		});
+		t.end();
+	});
+
+	t.test('getFileContent - no fileId', (t) => {
+		driveApi.getFileContent({})
+			.then(() => {
+				t.ok(false, 'this should not happen');
+				t.end();
+			}, (err) => {
+				t.equal(err.message, 'No file ID was given.');
+				t.end();
+			});
+	});
+
+	t.test('getFileContent', (t) => {
+		driveApi.getFileContent({
+			credentials,
+			fileId: 'fileId'
+		});
+		console.log({auth: {credentials}});
+		checkAuthBeingSet(t);
+		t.ok(driveApi.__get__('drive').files.get.calledWith({
+			auth: {
+				credentials
+			},
+			fileId: 'fileId',
+			alt: 'media'
 		}));
 		t.end();
 	});
 
-	t.test('processFile - folder - stub getFolderChildren and getFileContent', (t) => {
-		var getFolderChildrenStub = sinon.stub().resolves([{
-			id: 'test-note-index-id',
-			name: 'index.md',
-			kind: 'drive#file',
-			mimeType: 'text/x-markdown',
-			createdTime: '2016-09-15T02:01:27.674Z',
-			modifiedTime: '2016-10-13T01:48:18.170Z',
-			modifiedByMeTime: '2016-10-13T01:48:18.170Z',
-			lastModifyingUser: {
-				kind: 'drive#user',
-				displayName: 'Test D. User',
-				photoLink: 'https://lh3.googleusercontent.com/asd/fd/photo.jpg',
-				me: true,
-				permissionId: '04428089804842140789',
-				emailAddress: 'testuser@email.com'
-			}
-		}]);
-		var getFolderChildrenRevert = driveApi.__set__('getFolderChildren', getFolderChildrenStub);
-		var getFileContentStub = sinon.stub().resolves('## Note content');
-		var getFileContentRevert = driveApi.__set__('getFileContent', getFileContentStub);
-		driveApi.processFile({
-			file: {
-				mimeType: 'application/vnd.google-apps.folder',
-				id: 'test-note-dir-id',
-				name: 'Test',
-				kind: 'drive#file'
-			},
-			credentials: {
-				access_token: '2233445566',
-				refresh_token: '12345'
-			}
-		}).then((resp) => {
-			t.ok(getFolderChildrenStub.calledOnce);
-			t.ok(getFolderChildrenStub.calledWith({
-				folderId: 'test-note-dir-id',
-				credentials: {
-					access_token: '2233445566',
-					refresh_token: '12345'
-				}
-			}));
-			t.ok(getFileContentStub.calledOnce);
-			t.ok(getFileContentStub.calledWith({
-				fileId: 'test-note-index-id',
-				credentials: {
-					access_token: '2233445566',
-					refresh_token: '12345'
-				}
-			}));
-			t.deepEqual(resp, {
-				name: 'Test',
-				id: 'test-note-index-id',
-				content: '## Note content',
-				createdTime: '2016-09-15T02:01:27.674Z',
-				modifiedTime: '2016-10-13T01:48:18.170Z',
-				modifiedByMeTime: '2016-10-13T01:48:18.170Z',
-				lastModifyingUser: {
-					me: true
-				}
-			});
-			getFolderChildrenRevert();
-			getFileContentRevert();
-			t.end();
-		});
-	});
-	t.test('processFile - folder - stub drive apis', (t) => {
-		var listStub = sinon.stub();
-		var getStub = sinon.stub();
-		listStub.callsArgWith(1, null, {
-			files: [{
-				id: 'test-note-index-id',
-				name: 'index.md',
-				kind: 'drive#file',
-				mimeType: 'text/x-markdown',
-				createdTime: '2016-07-17T23:58:41.712Z',
-				modifiedTime: '2016-10-11T18:25:20.634Z',
-				modifiedByMeTime: '2016-10-11T18:25:20.634Z',
-				lastModifyingUser: {
-					kind: 'drive#user',
-					displayName: 'Test D. User',
-					me: true,
-					photoLink: 'https://lh3.googleusercontent.com/asd/fd/photo.jpg',
-					permissionId: '04428089804842140789',
-					emailAddress: 'testuser@email.com'
-				}
-			}]
-		});
-		getStub.callsArgWith(1, null, '## Note content');
-		var driveRevert = driveApi.__set__('drive', {
+	t.test('getFileContent - error', (t) => {
+		let getRevert = driveApi.__set__('drive', {
 			files: {
-				get: getStub,
-				list: listStub
+				get: sinon.stub().callsArgWith(1, new Error('Oops'))
 			}
 		});
-		driveApi.processFile({
-			file: {
-				mimeType: 'application/vnd.google-apps.folder',
-				id: 'test-note-dir-id',
-				name: 'Test',
-				kind: 'drive#file'
-			},
-			credentials: {
-				access_token: '2233445566',
-				refresh_token: '12345'
-			}
-		}).then((resp) => {
-			t.ok(listStub.calledOnce);
-			t.ok(listStub.calledWith({
-				auth: {
-					credentials: {
-						access_token: '2233445566',
-						refresh_token: '12345'
-					}
-				},
-				q: '\'test-note-dir-id\' in parents',
-				fields: 'files(createdTime,id,kind,lastModifyingUser,mimeType,modifiedByMeTime,modifiedTime,name)'
-			}));
-			t.ok(getStub.calledOnce);
-			t.ok(getStub.calledWith({
-				auth: {
-					credentials: {
-						access_token: '2233445566',
-						refresh_token: '12345'
-					}
-				},
-				fileId: 'test-note-index-id',
-				alt: 'media'
-			}));
-			t.deepEqual(resp, {
-				name: 'Test',
-				id: 'test-note-index-id',
-				content: '## Note content',
-				createdTime: '2016-07-17T23:58:41.712Z',
-				modifiedTime: '2016-10-11T18:25:20.634Z',
-				modifiedByMeTime: '2016-10-11T18:25:20.634Z',
-				lastModifyingUser: {
-					me: true
-				}
-			});
-			driveRevert();
+		driveApi.getFileContent({
+			fileId: 'fileId'
+		}).then(() => {
+			t.ok(false, 'this should not happen');
+			getRevert();
 			t.end();
 		}, (err) => {
-			console.error(err);
-			t.ok(false);
-			driveRevert();
+			t.equal(err.message, 'Oops');
+			getRevert();
 			t.end();
 		});
 	});
+
+	t.test('getMarkdownFilesInFolders', (t) => {
+		driveApi.getMarkdownFilesInFolders({
+			credentials,
+			folders: ['folder-1', 'folder-2', 'folder-3']
+		});
+		checkAuthBeingSet(t);
+		t.deepEqual(driveApi.__get__('drive').files.list.getCall(0).args[0], {
+			auth: {
+				credentials
+			},
+			q: 'mimeType = \'text/x-markdown\' and (\'folder-1\' in parents ' +
+'or \'folder-2\' in parents or \'folder-3\' in parents)',
+			fields: 'files(createdTime,id,kind,lastModifyingUser,md5Checksum,' +
+'mimeType,modifiedByMeTime,modifiedTime,name,parents)'
+		});
+		t.end();
+	});
+
+	t.test('getMarkdownFilesInFolders - error', (t) => {
+		let listRevert = driveApi.__set__('drive', {
+			files: {
+				list: sinon.stub().callsArgWith(1, new Error('Oops'))
+			}
+		});
+		driveApi.getMarkdownFilesInFolders({
+			folders: ['folder-1', 'folder-2']
+		}).then(() => {
+			t.ok(false, 'this should not happen');
+			listRevert();
+			t.end();
+		}, (err) => {
+			t.equal(err.message, 'Oops');
+			listRevert();
+			t.end();
+		});
+	});
+
 	t.test('updateNote', (t) => {
 		driveApi.updateNote({
 			credentials: {
