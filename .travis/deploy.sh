@@ -6,5 +6,9 @@ chmod 600 .travis/muffin
 echo -e "Host $DEPLOY_HOST\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 eval "$(ssh-agent -s)" # start the ssh agent
 ssh-add .travis/muffin
+# debug
+pwd
+ls -al .
+echo "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_URI"
 git remote add deploy $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_URI
 git push deploy master
