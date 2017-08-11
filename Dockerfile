@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:6.3
+FROM mhart/alpine-node:6.11
 
 RUN addgroup -S app && adduser -S -g app app 
 
