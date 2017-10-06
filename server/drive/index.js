@@ -8,6 +8,7 @@ const flatfile = require('flat-file-db');
 const db = flatfile.sync('./data/users.db');
 const debug = require('debug')('notes');
 const path = require('path');
+const refresh = require('passport-oauth2-refresh');
 
 const cookieSession = require('cookie-session');
 const api = require('./api');
@@ -27,7 +28,7 @@ app.use(cookieSession({
 
 app.use(bodyParser.json());
 
-/* call the AUTH_URL to see if user is authenticated */
+// call the AUTH_URL to see if user is authenticated
 function isAuthenticated (req, res, next) {
 	// pass along cookies from the client-side
 	var cookies = {};
@@ -65,6 +66,34 @@ function hasRootDir (req, res, next) {
 	return next();
 }
 
+function makeApiRequest (req, method, opts) {
+	if (!req.user) {
+		return Promise.reject(new Error('No user found on request'));
+	}
+	let credentials = {
+		access_token: req.user.accessToken,
+		refresh_token: req.user.refreshToken
+	};
+	return api[method](Object.assign({}, {credentials}, opts))
+		.then(null, (err) => {
+			if (err.code !== 401) {
+				throw err;
+			}
+			return new Promise((resolve, reject) => {
+				refresh.requestNewAccessToken('google', credentials.access_token, (error, accessToken) => {
+					if (error || !accessToken) {
+						// if fail to get new access token, just return
+						// the original 401 eror
+						return reject(err);
+					}
+					req.user.accessToken = accessToken;
+					// retry the api request
+					resolve(api[method](Object.assign({}, {credentials, opts})));
+				});
+			});
+		});
+}
+
 function handleError (res, err) {
 	// google drive 401 error
 	if (err.code === 401) {
@@ -80,22 +109,9 @@ function handleError (res, err) {
 	res.json(err);
 }
 
-function getCredentials (req) {
-	if (!req.user) {
-		throw new Error('No user found on request');
-	}
-	return {
-		access_token: req.user.accessToken,
-		refresh_token: req.user.refreshToken,
-		// (milliseconds since Unix Epoch time) for 15 days
-		expiry_date: (new Date()).getTime() + (1000 * 60 * 60 * 24 * 15)
-	};
-}
-
 app.get('/me', isAuthenticated, (req, res) => {
-	api.getDirs({
-		rootDir: 'root',
-		credentials: getCredentials(req)
+	makeApiRequest(req, 'getDirs', {
+		rootDir: 'root'
 	}).then((rootDirs) => {
 		res.json(Object.assign({}, db.get(req.user.id), {
 			rootDirs: rootDirs
@@ -110,7 +126,7 @@ app.patch('/me', isAuthenticated, (req, res) => {
 	res.status(200).json(db.get(req.user.id));
 });
 
-/*
+/**
  * Get all markdown files and dirs under rot dir
  * For each direct markdown file, add to `notes`
  * For each directory, combine into a list of directories to process
@@ -119,9 +135,8 @@ app.patch('/me', isAuthenticated, (req, res) => {
  */
 app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 	var driveConfig = db.get(req.user.id);
-	api.getDirsAndFiles({
-		rootDir: driveConfig.rootDir,
-		credentials: getCredentials(req)
+	makeApiRequest(req, 'getDirsAndFiles', {
+		rootDir: driveConfig.rootDir
 	}).then((files) => {
 		let notes = [];
 		let folders = [];
@@ -135,8 +150,7 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 				folders.push(file);
 			}
 		});
-		api.getMarkdownFilesInFolders({
-			credentials: getCredentials(req),
+		makeApiRequest(req, 'getMarkdownFilesInFolders', {
 			folders: folders.map((folder) => folder.id)
 		}).then((secondaryFiles) => {
 			// only care about index.md files for now
@@ -147,6 +161,9 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 				let parentFolder = folders.find((f) => {
 					return f.id === secondaryFile.parents[0];
 				});
+				if (!parentFolder) {
+					throw new Error(`Unable to find parent for ${secondaryFile.id}`);
+				}
 				notes.push(Object.assign({}, api.pickFileProperties(secondaryFile), {
 					name: parentFolder.name
 				}));
@@ -173,9 +190,8 @@ app.get('/', isAuthenticated, hasRootDir, (req, res) => {
 // get file contents
 // @TODO: should this return the file metadata as well?
 app.get('/:id', isAuthenticated, function (req, res) {
-	api.getFileContent({
-		fileId: req.params.id,
-		credentials: getCredentials(req)
+	makeApiRequest(req, 'getFileContent', {
+		fileId: req.params.id
 	}).then((resp) => {
 		res.json({
 			content: resp
@@ -184,11 +200,10 @@ app.get('/:id', isAuthenticated, function (req, res) {
 });
 
 app.put('/:id', isAuthenticated, function (req, res) {
-	api.updateNote({
+	makeApiRequest(req, 'updateNote', {
 		fileId: req.params.id,
 		content: req.body.content,
-		name: req.body.name,
-		credentials: getCredentials(req)
+		name: req.body.name
 	}).then((resp) => {
 		res.json(resp);
 	}, handleError.bind(null, res));
@@ -196,12 +211,11 @@ app.put('/:id', isAuthenticated, function (req, res) {
 
 app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 	var driveConfig = db.get(req.user.id);
-	api.createNote({
+	makeApiRequest(req, 'createNote', {
 		name: req.body.name,
 		rootDir: driveConfig.rootDir,
 		content: req.body.content,
-		useFile: true,
-		credentials: getCredentials(req)
+		useFile: true
 	}).then((resp) => {
 		res.json(Object.assign(resp, {
 			userId: req.user.id,
@@ -211,9 +225,8 @@ app.post('/', isAuthenticated, hasRootDir, function (req, res) {
 });
 
 app.delete('/:id', isAuthenticated, function (req, res) {
-	api.deleteNote({
-		fileId: req.params.id,
-		credentials: getCredentials(req)
+	makeApiRequest(req, 'deleteNote', {
+		fileId: req.params.id
 	}).then((resp) => {
 		res.json(resp);
 	}, handleError.bind(null, res));
