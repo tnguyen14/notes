@@ -171,7 +171,7 @@ function getDriveNotes () {
 	}, (err) => {
 		list.hideLoader();
 		if (err.response.status === 401) {
-			return user.authorize('https://www.googleapis.com/auth/drive');
+			return user.authorize();
 		}
 		err.response.json().then((error) => {
 			notify({
@@ -239,7 +239,7 @@ function setActiveNote (note) {
 		editor.hideLoader();
 	}, (err) => {
 		if (err.response.status === 401) {
-			return user.authorize('http://www.googleapis.com/auth/drive');
+			return user.authorize();
 		}
 		err.response.json().then((error) => {
 			notify({
@@ -375,7 +375,7 @@ function saveNote (n) {
 		saveLocalNote(note);
 		list.updateNoteStatus(note.id, note.dirty);
 		if (err.response.status === 401) {
-			user.authorize('https://www.googleapis.com/auth/drive');
+			user.authorize();
 			return;
 		}
 		notify.error(err);

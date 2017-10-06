@@ -36,18 +36,15 @@ signInButton.addEventListener('click', function (e) {
 	authorize();
 });
 
-function authorize (scopes, redirect) {
+function authorize (redirect) {
 	// default scope is just profile
 	var scope = ['profile', 'https://www.googleapis.com/auth/drive'];
-	if (scopes) {
-		scope = scope.concat(scopes);
-	}
 	var redirectUrl = redirect || window.location.href;
 	notify({
 		type: 'blue',
 		message: 'Logging in Google Drive...',
 		permanent: true
 	});
-	window.location = process.env.AUTH_URL + '/login/google' + '?scope=' + encodeURIComponent(scope.join(' ')) + '&redirect=' + encodeURIComponent(redirectUrl);
+	window.location = `${process.env.AUTH_URL}/login/google?scope=${encodeURIComponent(scope.join(' '))}&redirect=${encodeURIComponent(redirectUrl)}`;
 }
 
