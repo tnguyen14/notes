@@ -47,4 +47,3 @@ function authorize (redirect) {
 	});
 	window.location = `${process.env.AUTH_URL}/login/google?scope=${encodeURIComponent(scope.join(' '))}&redirect=${encodeURIComponent(redirectUrl)}`;
 }
-
